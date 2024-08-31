@@ -6,11 +6,15 @@
     <title>AP Music Theory Student Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Cormorant+Garamond:wght@300&display=swap" rel="stylesheet">
     <style>
-        body {
+       @font-face {
+            font-family: 'Zapfino';
+            src: url('fonts/Zapfino.ttf') format('truetype');
+        }
+       
+       body {
             background-color: rgb(45, 70, 119);
             height: 100%;
-
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Andika', sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -18,7 +22,7 @@
         }
 
         body, html {
-            margin-top: 4vh;
+            margin-top: 2vh;
             background-position-y: 15px;
             background-size: 25vh;
         }
@@ -108,6 +112,15 @@
         h2 {
             font-size: 2vw;
             font-weight: 300;
+            text-align: center;
+            margin-top: 0;
+            letter-spacing: 2px;
+        }
+        h3 {
+            font-family: 'Zapfino';
+            font-size: 6vw;
+            font-weight: 300;
+            text-align: center;
             margin-top: 0;
             letter-spacing: 2px;
         }
@@ -240,6 +253,116 @@
                 font-size: 2.5vh; /* Cap font size for large screens */
             }
         }
+
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .link-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .link-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .link-content {
+            padding: 20px;
+        }
+
+        .link-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .link-description {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .link-url {
+            display: inline-block;
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .link-url:hover {
+            color: #2980b9;
+        }
+
+        .external-links {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+
+        .external-links li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .external-links li:last-child {
+            margin-bottom: 0;
+        }
+
+        .external-link-icon {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+        }
+
+        .external-link-content {
+            flex-grow: 1;
+        }
+
+        .external-link-title {
+            font-weight: bold;
+            color: #2c3e50;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .external-link-title:hover {
+            color: #3498db;
+        }
+
+        .external-link-description {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -272,19 +395,93 @@
         <h2>Unlock Your Musical Potential</h2>
     </div>
     
-    morre 
 
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
+    <h1> </h1>
 
-    moremo
-    re<p></p>moremoremo
-    re<p></p>moremoremo
-    re<p></p>moremoremo
-    re<p></p>moremoremo
-    re<p></p>moremoremo
-    re<p></p>moremoremo
-    re<p></p>moremoremo
-    re<p></p>moremoremo
-    re<p></p>more
+    <h3 class="Subtitle">Tools</h3>
+
+    <div class="container">
+
+<div class="container">
+
+        <div class="links-grid">
+            <div class="link-card">
+                <img src="https://via.placeholder.com/300x200.png?text=Resource+1" alt="Resource 1" class="link-image">
+                <div class="link-content">
+                    <h2 class="link-title">Resource 1</h2>
+                    <p class="link-description">A brief description of Resource 1 and its benefits.</p>
+                    <a href="https://example.com/resource1" class="link-url" target="_blank">Visit Resource 1</a>
+                </div>
+            </div>
+            <div class="link-card">
+                <img src="https://via.placeholder.com/300x200.png?text=Resource+2" alt="Resource 2" class="link-image">
+                <div class="link-content">
+                    <h2 class="link-title">Resource 2</h2>
+                    <p class="link-description">A brief description of Resource 2 and what it offers.</p>
+                    <a href="https://example.com/resource2" class="link-url" target="_blank">Visit Resource 2</a>
+                </div>
+            </div>
+            <div class="link-card">
+                <img src="https://via.placeholder.com/300x200.png?text=Resource+3" alt="Resource 3" class="link-image">
+                <div class="link-content">
+                    <h2 class="link-title">Resource 3</h2>
+                    <p class="link-description">A brief description of Resource 3 and its unique features.</p>
+                    <a href="https://example.com/resource3" class="link-url" target="_blank">Visit Resource 3</a>
+                </div>
+            </div>
+            <div class="link-card">
+                <img src="https://via.placeholder.com/300x200.png?text=Resource+3" alt="Resource 3" class="link-image">
+                <div class="link-content">
+                    <h2 class="link-title">Resource 3</h2>
+                    <p class="link-description">A brief description of Resource 3 and its unique features.</p>
+                    <a href="https://example.com/resource3" class="link-url" target="_blank">Visit Resource 3</a>
+                </div>
+            </div>
+    </div>
+
+    <h1> </h1>
+    <h3>External Links</h3>
+        <div class="external-links">
+            <ul>
+                <li>
+                    <img src="https://via.placeholder.com/30x30.png?text=Icon" alt="Site 3 Icon" class="external-link-icon">
+                    <div class="external-link-content">
+                        <a href="https://apclassroom.collegeboard.org/" class="external-link-title" target="_blank">AP Classroom</a>
+                        <p class="external-link-description">The official website of Collegeboard. </p>
+                    </div>
+                </li>
+                <li>
+                    <img src="https://via.placeholder.com/30x30.png?text=Icon" alt="Site 1 Icon" class="external-link-icon">
+                    <div class="external-link-content">
+                        <a href="https://www.musictheory.net/exercises" class="external-link-title" target="_blank">MusicTheory.net</a>
+                        <p class="external-link-description">Practice your music literacy and aural skills here.</p>
+                    </div>
+                </li>
+                <li>
+                    <img src="https://via.placeholder.com/30x30.png?text=Icon" alt="Site 2 Icon" class="external-link-icon">
+                    <div class="external-link-content">
+                        <a href="https://teoria.com/en/exercises/" class="external-link-title" target="_blank">Teoria.com</a>
+                        <p class="external-link-description">Great practice for sight reading and harmonic / melodic dictation.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
 
     <div class="logocontainer">        
         <img src="BASIS logo/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
