@@ -118,7 +118,7 @@
         }
         h3 {
             font-family: 'Zapfino';
-            font-size: 6vw;
+            font-size: 5vw;
             font-weight: 300;
             text-align: center;
             margin-top: 0;
@@ -228,6 +228,12 @@
             color: white;
             font-size: 12px;
         }
+
+        .offscreen {
+            position: absolute; 
+            top: 100%;
+
+}
         
         @media (min-width: 800px) {
             h1 {
@@ -305,6 +311,7 @@
             font-size: 0.9rem;
             color: #7f8c8d;
             margin-bottom: 15px;
+            text-align: center;
         }
 
         .link-url {
@@ -320,49 +327,62 @@
         }
 
         .external-links {
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-        }
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
 
+.external-links li {
+    margin-bottom: 50px;
+}
 
-        .external-links li {
-            display: flex;
-            align-items: center;
-            margin-bottom: 50px;
-        }
+.external-links li:last-child {
+    margin-bottom: 0;
+}
 
-        .external-links li:last-child {
-            margin-bottom: 0;
-        }
+.external-link-wrapper {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
 
-        .external-link-icon {
-            width: 50px;
-            height: 50px;
-            margin-right: 15px;
-        }
+.external-link-wrapper:hover {
+    transform: scale(1.01);
+}
 
-        .external-link-content {
-            flex-grow: 1;
-        }
+.external-link-icon {
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
+}
 
-        .external-link-title {
-            font-weight: bold;
-            color: #2c3e50;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
+.external-link-icon2 {
+    width: 60px;
+    height: 60px;
+    margin-right: 15px;
+    margin-left:-10px
+}
 
-        .external-link-title:hover {
-            color: #3498db;
-        }
+.external-link-content {
+    flex-grow: 1;
+}
 
-        .external-link-description {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            margin-top: 5px;
-        }
+.external-link-title {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.external-link-wrapper:hover .external-link-title {
+    color: #3498db;
+}
+
+.external-link-description {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
     </style>
 </head>
 <body>
@@ -397,90 +417,92 @@
     
 
     <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
-    <h1> </h1>
 
-    <h3 class="Subtitle">Tools</h3>
 
-    <div class="container">
+
+
+    
+
 
 <div class="container">
 
         <div class="links-grid">
-            <div class="link-card">
-                <img src="https://via.placeholder.com/300x200.png?text=Resource+1" alt="Resource 1" class="link-image">
-                <div class="link-content">
-                    <h2 class="link-title">Resource 1</h2>
-                    <p class="link-description">A brief description of Resource 1 and its benefits.</p>
-                    <a href="https://example.com/resource1" class="link-url" target="_blank">Visit Resource 1</a>
+            <a href="" target="_blank" style="text-decoration: none; color: inherit;">
+                <div class="link-card">
+                    <img src="https://i.icanvas.com/list-hero/music-notes-MA400.jpg" alt="Resource 1" class="link-image">
+                    <div class="link-content">
+                        <h2 class="link-title">AP Music Theory Units</h2>
+                        <p class="link-description">An overview of all the units, topics covered, and relevant vocabulary.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="link-card">
-                <img src="https://via.placeholder.com/300x200.png?text=Resource+2" alt="Resource 2" class="link-image">
-                <div class="link-content">
-                    <h2 class="link-title">Resource 2</h2>
-                    <p class="link-description">A brief description of Resource 2 and what it offers.</p>
-                    <a href="https://example.com/resource2" class="link-url" target="_blank">Visit Resource 2</a>
+
+                <h3> </h3>
+                <h3 class="Subtitle"><p> ⠀</p>Tools</h3>
+
+
+            <a href="" target="_blank" style="text-decoration: none; color: inherit;">
+                <div class="link-card">
+                    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/images/BIPH-Music-Flashcards.png" alt="Resource 1" class="link-image">
+                    <div class="link-content">
+                        <h2 class="link-title">Music Theory Flash Cards</h2>
+                        <p class="link-description">From vocabulary to harmony and everything in between.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="link-card">
-                <img src="https://via.placeholder.com/300x200.png?text=Resource+3" alt="Resource 3" class="link-image">
-                <div class="link-content">
-                    <h2 class="link-title">Resource 3</h2>
-                    <p class="link-description">A brief description of Resource 3 and its unique features.</p>
-                    <a href="https://example.com/resource3" class="link-url" target="_blank">Visit Resource 3</a>
+            </a>
+            </a>
+            <a href="https://biphmusic.github.io/MusicTheoryDice/" target="_blank" style="text-decoration: none; color: inherit;">
+                <div class="link-card">
+                    <img src="https://github.com/BIPHMusic/biphmusic.github.io/blob/main/images/Musical-Dice.png?raw=true" alt="Resource 2" class="link-image">
+                    <div class="link-content">
+                        <h2 class="link-title">Music Theory Dice Simulator</h2>
+                        <p class="link-description">Cue up random notes, chords, keys, scale degrees, solfege, the choice is yours.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="link-card">
-                <img src="https://via.placeholder.com/300x200.png?text=Resource+3" alt="Resource 3" class="link-image">
-                <div class="link-content">
-                    <h2 class="link-title">Resource 3</h2>
-                    <p class="link-description">A brief description of Resource 3 and its unique features.</p>
-                    <a href="https://example.com/resource3" class="link-url" target="_blank">Visit Resource 3</a>
+            </a>
+            <a href="https://biphmusic.github.io/WebPiano/" target="_blank" style="text-decoration: none; color: inherit;">
+                <div class="link-card">
+                    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/images/WebPiano.png" alt="Resource 3" class="link-image">
+                    <div class="link-content">
+                        <h2 class="link-title">Web Piano 1.0</h2>
+                        <p class="link-description">Use this online keyboard as a visual aid, to practice scales, or to just to play.</p>
+                    </div>
                 </div>
-            </div>
+            </a>
     </div>
 
     <h1> </h1>
     <h3>External Links</h3>
-        <div class="external-links">
-            <ul>
-                <li>
-                    <img src="https://via.placeholder.com/30x30.png?text=Icon" alt="Site 3 Icon" class="external-link-icon">
+    <div class="external-links">
+        <ul>
+            <li>
+                <a href="https://www.musictheory.net/exercises" class="external-link-wrapper" target="_blank">
+                    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/icons/MusicTheoryNetIcon.png" alt="Site 1 Icon" class="external-link-icon">
                     <div class="external-link-content">
-                        <a href="https://apclassroom.collegeboard.org/" class="external-link-title" target="_blank">AP Classroom</a>
-                        <p class="external-link-description">The official website of Collegeboard. </p>
-                    </div>
-                </li>
-                <li>
-                    <img src="https://via.placeholder.com/30x30.png?text=Icon" alt="Site 1 Icon" class="external-link-icon">
-                    <div class="external-link-content">
-                        <a href="https://www.musictheory.net/exercises" class="external-link-title" target="_blank">MusicTheory.net</a>
+                        <span class="external-link-title">MusicTheory.net</span>
                         <p class="external-link-description">Practice your music literacy and aural skills here.</p>
                     </div>
-                </li>
-                <li>
-                    <img src="https://via.placeholder.com/30x30.png?text=Icon" alt="Site 2 Icon" class="external-link-icon">
+                </a>
+            </li>
+            <li>
+                <a href="https://teoria.com/en/exercises/" class="external-link-wrapper" target="_blank">
+                    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/icons/TeoriaComIcon.png" alt="Site 2 Icon" class="external-link-icon2">
                     <div class="external-link-content">
-                        <a href="https://teoria.com/en/exercises/" class="external-link-title" target="_blank">Teoria.com</a>
+                        <span class="external-link-title">Teoria.com</span>
                         <p class="external-link-description">Great practice for sight reading and harmonic / melodic dictation.</p>
                     </div>
-                </li>
-            </ul>
-        </div>
+                </a>
+            </li>
+            <li>
+                <a href="https://apclassroom.collegeboard.org/" class="external-link-wrapper" target="_blank">
+                    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/icons/APClassroomIcon.png" alt="Site 3 Icon" class="external-link-icon2">
+                    <div class="external-link-content">
+                        <span class="external-link-title">AP Classroom</span>
+                        <p class="external-link-description">The official website of Collegeboard.</p>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
 
 
     <div class="logocontainer">        
