@@ -117,13 +117,13 @@
             letter-spacing: 2px;
         }
         h3 {
-            font-family: 'Zapfino';
-            font-size: 5vw;
-            font-weight: 300;
-            text-align: center;
-            margin-top: 0;
-            letter-spacing: 2px;
-        }
+    font-family: 'Zapfino';
+    font-size: clamp(1.5rem, 5vw, 2.5rem); /* Min: 1rem, Preferred: 5vw, Max: 3rem */
+    font-weight: 300;
+    text-align: center;
+    margin-top: 0;
+    letter-spacing: 2px;
+}
         .hamburger-menu {
             position: absolute;
             margin-left: 7px;
@@ -426,7 +426,7 @@
 <div class="container">
 
         <div class="links-grid">
-            <a href="" target="_blank" style="text-decoration: none; color: inherit;">
+            <a href="https://biphmusic.github.io/APUnits/" target="_blank" style="text-decoration: none; color: inherit;">
                 <div class="link-card">
                     <img src="https://i.icanvas.com/list-hero/music-notes-MA400.jpg" alt="Resource 1" class="link-image">
                     <div class="link-content">
@@ -436,7 +436,7 @@
                 </div>
             </a>
 
-            <a href="" target="_blank" style="text-decoration: none; color: inherit;">
+            <a href="https://biphmusic.github.io/FlashCards/" target="_blank" style="text-decoration: none; color: inherit;">
                 <div class="link-card">
                     <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/images/BIPH-Music-Flashcards.png" alt="Resource 1" class="link-image">
                     <div class="link-content">
@@ -455,7 +455,7 @@
                     </div>
                 </div>
             </a>
-            
+
             <a href="https://biphmusic.github.io/WebPiano/" target="_blank" style="text-decoration: none; color: inherit;">
                 <div class="link-card">
                     <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/images/WebPiano.png" alt="Resource 3" class="link-image">
