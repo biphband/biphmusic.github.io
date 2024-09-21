@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Cards</title>
+    <link rel="icon" href="/icons/BGicon.png">
+    <style>
+        @font-face {
+            font-family: 'Zapfino';
+            src: url('fonts/Zapfino.ttf') format('truetype');
+        }
+
+        body {
+            background-color: rgb(45, 70, 119);
+            font-family: 'Andika', sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+            background-image: url('BASIS logo/Full Logo White on Transparent.png');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: right bottom;
+            background-size: 25vh;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1); 
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        .Title {
+            font-family: sans-serif;
+            color: white;
+            font-size: 200%;
+            text-align: center;
+            text-decoration: none;
+            min-width: fit-content;
+            white-space: nowrap;
+        }
+
+        .Subtitle {
+            font-family: 'Zapfino', sans-serif;
+            color: white;
+            margin-top: -0.7em;
+            font-size: 4.5vw;
+            text-align: center;
+            text-decoration: none;
+            min-width: fit-content;
+            white-space: nowrap;
+        }
+
+        .dropdown {
+            position: fixed;
+            top: 155px;
+            left: 50%;
+            transform: translate(-50%, 200%);
+            z-index: 999;
+            text-align: right;
+        }
+
+        .english {
+            border: solid 0px white;
+            text-align: center;
+            font-size: 100%;
+            margin-top: 5em;
+            width: 90%;
+            transform: translateX(5%);
+            font-family: 'Andika', sans-serif;
+            color: white;
+            z-index: -1;
+        }
+
+        .term-container {
+            position: fixed;
+            margin-top: 0px;
+            left: 10%;
+            background-color: rgba(15, 22, 33, 0.441);
+            border-radius: 10px;
+            width: 80%;
+            font-family: 'Andika', sans-serif;
+            font-size: 500%;
+            color: rgba(225, 226, 227, 0);
+            z-index: -2;
+        }
+
+        .term {
+            position: fixed;
+            margin-top: -30px;
+            left: 10%;
+            text-align: center;
+            width: 80%;
+            height: 92px;
+            font-family: 'Andika', sans-serif;
+            font-size: 250%;
+            color: white;
+            z-index: -1;
+        }
+
+        .button-container {
+            position: fixed;
+            text-align: center;
+            margin-top: -28em;
+            width: 100%;
+            z-index: 0;
+            bottom: 0px;
+        }
+
+        .pinyinbutton {
+            position: fixed;
+            top: -1880px;
+            height: 3000px;
+            width: 100vw;
+            color: rgba(255, 255, 255, 0.485);
+            background-color: transparent;
+            border: none;
+            z-index: 1;
+            transform: translateX(-0.59%) translateY(20.5%);
+        }
+
+        .definitionButton,
+        .nextButton {
+            position: fixed;
+            top: -258px;
+            height: 1500px;
+            width: 150vw;
+            color: rgba(255, 255, 255, 0.485);
+            background-color: transparent;
+            border: none;
+            z-index: 1;
+            transform: translateX(-33.5%);
+        }
+
+        .BGLogo img {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -100;
+        }
+
+        .autoProgressContainer {
+            text-align: center;
+            position: absolute;
+            width: 80%;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .autoProgressButton {
+            margin-bottom: 0.5em;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .slider {
+            width: 80%;
+            margin: auto;
+            direction: rtl;
+            position: relative;
+            display: block;
+            z-index: 1;
+        }
+
+        .slider::-webkit-slider-runnable-track {
+            background-color: rgb(255, 255, 255);
+            height: 4px;
+            width: 80%;
+            position: absolute;
+            top: 18px;
+            left: 10%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+            position: relative;
+            z-index: 1;
+            top: -5px;
+        }
+
+        #result {
+            font-size: 48px;
+            margin: -60px 0;
+            min-height: 60px;
+            text-align: center;
+            background-color: rgba(15, 22, 33, 0.441);
+            border-radius: 10px;
+            padding: 10px 20px;
+            width: 60%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease-out;
+        }
+
+        .roll-dice-button {
+            font-size: 1.2rem;
+            padding: 12px 24px;
+            background-color: var(--dice-color, #4575a0);
+            margin-top: 80px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .roll-dice-button:hover {
+            filter: brightness(1.1);
+        }
+
+        .roll-dice-button:active {
+            filter: brightness(0.9);
+        }
+
+        .subtle-pulse {
+            animation: subtlePulse 0.2s ease-out;
+        }
+
+        @keyframes subtlePulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+
+        .hamburger-menu {
+            position: absolute;
+            margin-left: 7px;
+            top: 20px;
+            left: 13px;
+            z-index: 1000;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 20;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s linear;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-items {
+            position: absolute;
+            top: 25px;
+            left: -250px;
+            background: linear-gradient(135deg, rgba(48, 67, 104, 0.8), rgba(20, 31, 53, 0.8));
+            width: 250px;
+            height: 90vh;
+            padding-top: 20px;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-items.show {
+            left: 0;
+            opacity: 1;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .menu-items.show a {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-items a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-items a:nth-child(1) { transition-delay: 0.1s; }
+.menu-items a:nth-child(2) { transition-delay: 0.2s; }
+.menu-items a:nth-child(3) { transition-delay: 0.3s; }
+.menu-items a:nth-child(4) { transition-delay: 0.4s; }
+.menu-items a:nth-child(5) { transition-delay: 0.5s; }
+.menu-items a:nth-child(6) { transition-delay: 0.6s; }
+.menu-items a:nth-child(7) { transition-delay: 0.7s; }
+.menu-items a:nth-child(8) { transition-delay: 0.8s; }
+.menu-items a:nth-child(9) { transition-delay: 0.9s; }
+.menu-items a:nth-child(10) { transition-delay: 1.0s; }
+
+        .menu-title {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+
+</style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+  <body onload="getRandomWord()">
+    <h1 class="Title">BIPH Music</h1>
+    <h1 class="Subtitle">Flash Cards</h1>
+
+
+        <div class="dropdown">
+          <select id="unitSelector" onchange="filterTerms()" style="margin-top: -20px;">
+            <option value="Cumulative">Cumulative</option>
+            <option value="Unit1">Unit 1</option>
+            <option value="Unit2">Unit 2</option>
+          </select>
+        </div>
+
+
+        <div class="hamburger-menu">
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="menu-items" id="menu-items">
+                <div class="menu-title">BIPH Music</div>
+                <a href="https://biphmusic.github.io/">Home</a>
+                <a href="https://biphmusic.github.io/units/">AP Units</a>
+                <a href="https://biphmusic.github.io/flashcards/">Flash Cards</a>
+                <a href="https://biphmusic.github.io/dice/">Dice Simulator</a>
+                <a href="https://biphmusic.github.io/piano/">Web Piano</a>
+                <a href="https://biphmusic.github.io/wordwall/">Word Wall</a>
+                <a href="mailto:garrison.tubbs-biph@basischina.com">Contact</a>
+                
+                <div class="menu-footer">© Garrison Tubbs 2024</div>
+            </div>
+        </div>
+
+
+    <div>
+        <h3 class="english"></h3>
+    </div>
+
+    <div>
+        <h3 class="pinyin"></h3>
+    </div>
+
+    <div> <h3 class="term-container">A</h3></div>
+    <div>
+      <h3 class="term"></h3>
+    </div>
+
+    <div class="button-container">
+
+      
+        <div class="definitionButton">
+          <button class="pinyinbutton"></button>
+          <button class="definitionButton">Click anywhere to Reveal the Definition</button>
+        </div>
+      
+        <div class="nextButton">
+          <button class="nextButton">Click anywhere to Go to the next word</button>
+        </div>
+      </div>
+
+<div class="BGLogo">
+<img src="https://i.postimg.cc/FKjG7zKB/BG-5percent.png" alt="Background logo">
+</div>
+
+<div class="autoProgressContainer">
+<button class="autoProgressButton">Auto-progress</button>
+<input type="range" min="1000" max="3000" value="1500" class="slider" id="progressSpeed" style="display: none;">
+</div>
+
+
+<script src="../terms.js"></script>
+<script>
+var vocab; // Declare vocab variable
+
+function getVocab() {
+    let vocabSelect = document.querySelector('select');
+    if (vocabSelect.value == 'Unit1') {
+        vocab = unit1; // Use unit1 from Terms.js
+        getRandomWord();
+    } else if (vocabSelect.value == 'Unit2') {
+        vocab = unit2; // Use unit2 from Terms.js
+        getRandomWord();
+    } else if (vocabSelect.value == 'Cumulative') {
+        vocab = terms; // Use terms from Terms.js
+    }
+}
+
+getVocab()
+
+let listlength = Object.keys(vocab).length;
+let theword = Math.floor(Math.random() * listlength);
+
+
+const term = document.querySelector('.term');
+const pinyin = document.querySelector('.pinyin');
+const english = document.querySelector('.english');
+const pinyinButton = document.querySelector('.button-container .pinyinbutton');
+const definitionButton = document.querySelector('.button-container .definitionButton');
+const nextButton = document.querySelector('.button-container .nextButton');
+
+function getRandomWord() {
+    listlength = Object.keys(vocab).length;
+    theword = Math.floor(Math.random() * listlength);
+    term.innerHTML = `<h3>${vocab[theword]}</h3>`;
+    
+    // Find the definition from the terms variable
+    const definitionEntry = terms.find(entry => entry.Term === vocab[theword]);
+    english.innerHTML = `<h3>${definitionEntry ? definitionEntry.Definition : 'Definition not found'}</h3>`;
+    
+    term.style.visibility='hidden';
+    pinyin.style.visibility='hidden';
+    pinyinButton.style.display = 'none'; 
+    definitionButton.style.display='block';
+    nextButton.style.display='none';
+}
+
+ 
+definitionButton.addEventListener('click', () => {
+    term.style.visibility = 'visible';
+    definitionButton.style.display='none'
+    nextButton.style.display='block';
+})
+
+nextButton.addEventListener('click', () => {
+    pinyin.style.visibility = 'hidden';
+    english.style.visibility = 'hidden';
+    nextButton.style.display='none';
+    definitionButton.style.display = 'block';  
+    english.style.visibility = 'visible';
+    getRandomWord();
+});
+
+
+document.addEventListener('keydown', (e) => {
+        if (e.keyCode == 32) { 
+            e.preventDefault(); 
+            autoProgress = !autoProgress;
+            progressSpeedSlider.style.display = autoProgress ? 'block' : 'none';
+            if (autoProgress) {
+                autoProgressInterval = setInterval(() => {
+                    if (pinyinButton.style.display == 'block') {
+                        pinyinButton.click();
+                    } else if (definitionButton.style.display == 'block') {
+                        definitionButton.click();
+                    } else if (nextButton.style.display == 'block') {
+                        nextButton.click();
+                    }
+                }, progressSpeedSlider.value);
+                autoProgressButton.textContent = "Stop";
+            } else {
+                clearInterval(autoProgressInterval);
+                autoProgressButton.textContent = "Auto-progress";
+            }
+        } else if (e.key == 'Enter') { 
+            if (pinyinButton.style.display == 'block') {
+                pinyinButton.click();
+            } else if (definitionButton.style.display == 'block') {
+                definitionButton.click();
+            } else if (nextButton.style.display == 'block') {
+                nextButton.click();
+            }
+        } else if (e.keyCode == 39) { // check for left arrow key
+                e.preventDefault(); 
+                progressSpeedSlider.value = Math.max(500, parseInt(progressSpeedSlider.value) - 250); // decrease speed by 250
+                if (autoProgress) { // restart auto-progress interval with new speed
+                    clearInterval(autoProgressInterval);
+                    autoProgressInterval = setInterval(() => {
+                        if (pinyinButton.style.display == 'block') {
+                            pinyinButton.click();
+                        } else if (definitionButton.style.display == 'block') {
+                            definitionButton.click();
+                        } else if (nextButton.style.display == 'block') {
+                            nextButton.click();
+                        }
+                    }, progressSpeedSlider.value);
+                }
+            } else if (e.keyCode == 37) { // check for right arrow key
+                e.preventDefault(); 
+                progressSpeedSlider.value = Math.min(3000, parseInt(progressSpeedSlider.value) + 250); // increase speed by 250
+                if (autoProgress) { // restart auto-progress interval with new speed
+                    clearInterval(autoProgressInterval);
+                    autoProgressInterval = setInterval(() => {
+                        if (pinyinButton.style.display == 'block') {
+                            pinyinButton.click();
+                        } else if (definitionButton.style.display == 'block') {
+                            definitionButton.click();
+                        } else if (nextButton.style.display == 'block') {
+                            nextButton.click();
+                        }
+                    }, progressSpeedSlider.value);
+                }
+            }
+        });
+
+         
+
+const autoProgressButton = document.querySelector('.autoProgressButton');
+const progressSpeedSlider = document.getElementById('progressSpeed');
+let autoProgress = false;
+let autoProgressInterval;
+
+autoProgressButton.addEventListener('click', () => {
+        autoProgress = !autoProgress;
+        progressSpeedSlider.style.display = autoProgress ? 'block' : 'none';
+        if (autoProgress) {
+            autoProgressInterval = setInterval(() => {
+                if (pinyinButton.style.display == 'block') {
+                    pinyinButton.click();
+                } else if (definitionButton.style.display == 'block') {
+                    definitionButton.click();
+                } else if (nextButton.style.display == 'block') {
+                    nextButton.click();
+                }
+            }, progressSpeedSlider.value);
+            autoProgressButton.textContent = "Stop";
+        } else {
+            clearInterval(autoProgressInterval);
+            autoProgressButton.textContent = "Auto-progress";
+        }
+    });
+
+progressSpeedSlider.addEventListener('input', () => {
+    if (autoProgress) {
+        clearInterval(autoProgressInterval);
+        autoProgressInterval = setInterval(() => {
+            if (pinyinButton.style.display == 'block') {
+                pinyinButton.click();
+            } else if (definitionButton.style.display == 'block') {
+                definitionButton.click();
+            } else if (nextButton.style.display == 'block') {
+                nextButton.click();
+            }
+        }, progressSpeedSlider.value);
+    }
+});
+ 
+getRandomWord();
+
+
+// Hamburger menu functionality
+const menuToggle = document.querySelector('.menu-toggle');
+    const menuItems = document.querySelector('.menu-items');
+    
+    menuToggle.addEventListener('click', () => {
+        menuToggle.classList.toggle('open');
+        menuItems.classList.toggle('show');
+    });
+    
+    // Close the menu when clicking outside
+    document.addEventListener('click', (event) => {
+        // Check if the click was outside the menu and the toggle button
+        if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+            menuToggle.classList.remove('open');
+            menuItems.classList.remove('show');
+        }
+    });
+
+    function filterTerms() {
+        const selectedUnit = document.getElementById('unitSelector').value;
+        let filteredTerms;
+
+        if (selectedUnit === 'Cumulative') {
+            filteredTerms = terms; // Use all terms
+        } else {
+            // Get the corresponding unit terms
+            filteredTerms = selectedUnit === 'Unit1' ? unit1 : unit2;
+        }
+
+        // Update the vocab variable with the filtered terms
+        vocab = filteredTerms;
+
+        // Reset the display
+        getRandomWord(); // Call to get a random word from the new vocab
+    }
+
+    // Set the dropdown to always select the last item
+    document.getElementById('unitSelector').value = 'Unit2'; // Change to the last option
+    filterTerms(); // Call to filter terms based on the default selection
+</script>
+
+
+</body>
+</html>
