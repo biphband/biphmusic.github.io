@@ -100,12 +100,15 @@
         .Subtitle {
             font-family: 'Zapfino', sans-serif;
             color: white;
-            margin-top: -0.7em;
-            font-size: 4.5vw;
+            margin-top: -1em;
+            font-size: 45px;
+            max-width: 10%;
             text-align: center;
             text-decoration: none;
             min-width: fit-content;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .dropdown {
@@ -389,6 +392,33 @@
             font-size: 12px;
         }
 
+        .title {
+            font-size: 2rem; /* Adjust as needed */
+            margin-bottom: 10px; /* Space between elements */
+        }
+
+        .subtitle {
+            font-size: 1.5rem; /* Adjust as needed */
+            margin-bottom: 10px; /* Space between elements */
+        }
+
+        .dropdown {
+            margin-bottom: 10px; /* Space between elements */
+        }
+
+        .click-anywhere {
+            margin-bottom: 20px; /* Space before the next section */
+        }
+
+
+
+        /* Anchoring containers */
+        .definition-container,
+        .terms-container {
+            position: relative; /* Anchored in place */
+            margin-top: 20px; /* Consistent distance underneath "click here" */
+        }
+
 </style>
 </head>
 <body>
@@ -479,7 +509,7 @@ function getVocab() {
         vocab = unit2; // Use unit2 from Terms.js
         getRandomWord();
     } else if (vocabSelect.value == 'Cumulative') {
-        vocab = terms; // Use terms from Terms.js
+        vocab = cumulative; // Use cumulative from Terms.js
     }
 }
 
@@ -501,8 +531,8 @@ function getRandomWord() {
     theword = Math.floor(Math.random() * listlength);
     term.innerHTML = `<h3>${vocab[theword]}</h3>`;
     
-    // Find the definition from the terms variable
-    const definitionEntry = terms.find(entry => entry.Term === vocab[theword]);
+    // Find the definition from the theglossary variable
+    const definitionEntry = theglossary.find(entry => entry.Term === vocab[theword]);
     english.innerHTML = `<h3>${definitionEntry ? definitionEntry.Definition : 'Definition not found'}</h3>`;
     
     term.style.visibility='hidden';
@@ -658,7 +688,7 @@ const menuToggle = document.querySelector('.menu-toggle');
         let filteredTerms;
 
         if (selectedUnit === 'Cumulative') {
-            filteredTerms = terms; // Use all terms
+            filteredTerms = cumulative; // Use cumulative from Terms.js
         } else {
             // Get the corresponding unit terms
             filteredTerms = selectedUnit === 'Unit1' ? unit1 : unit2;
