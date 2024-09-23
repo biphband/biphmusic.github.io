@@ -203,12 +203,14 @@ padding-left: 10%;
             
             // Wait a short time to allow the download to start before opening the email client
             setTimeout(() => {
-                const emailSubject = `Audio Recording from ${nameInput.value}`;
-                const emailBody = `Audio recording attached.`;
-                const mailtoLink = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-                window.location.href = mailtoLink;
-            }, 1000); // Wait for 1 second
-        };
+    const emailSubject = `Audio Recording from ${nameInput.value}`;
+    const senderName = nameInput.value; // Assuming this is where the sender's name comes from
+    const emailBody = `Audio recording attached.\n\nSincerely,\n${senderName}`;
+    const recipientEmail = 'garrison.tubbs-biph@basischina.com';
+    const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    window.location.href = mailtoLink;
+}, 1000); // Wait for 1 second
+        }
 
         function drawWaveform() {
             const canvas = document.getElementById('waveform');
