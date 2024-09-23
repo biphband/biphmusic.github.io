@@ -138,79 +138,91 @@ padding-left: 10%;
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const dateSubtitle = document.getElementById('dateSubtitle');
-            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-            const today = new Date().toLocaleDateString('en-US', options);
-            dateSubtitle.textContent = today;
-        });
+    const dateSubtitle = document.getElementById('dateSubtitle');
+    const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+    const today = new Date().toLocaleDateString('en-US', options);
+    dateSubtitle.textContent = today;
+});
 
-        let mediaRecorder;
-        let audioChunks = [];
-        let audioContext;
-        let analyser;
-        let microphone;
-        const recordButton = document.getElementById('recordButton');
-        const submitButton = document.getElementById('submitButton');
-        const nameInput = document.getElementById('nameInput');
-        const waveform = document.getElementById('waveform');
-        const downloadLink = document.getElementById('downloadLink');
-        let animationId;
-        let recordingStartTime;
+// Array of allowed names
+const allowedNames = [
+    "Ben Chen", "Howard Ding", "Terry He", "Alice Li", "Vincent Mu",
+    "Tiger Pan", "Chris Peng", "Lucy Sheng", "Diego Su", "Hailey Wang",
+    "Eileen Xu", "Angelina Yan", "Serena Zeng", "Catherine Zhang",
+    "Andrew Zhao", "Jennifer Zhou", "Ben", "Howard", "Terry", "Alice",
+    "Vincent", "Tiger", "Chris", "Lucy", "Diego", "Hailey", "Eileen",
+    "Angelina", "Serena", "Catherine", "Andrew", "Jennifer"
+];
 
-        nameInput.addEventListener('input', () => {
-            recordButton.disabled = nameInput.value.trim() === '';
-        });
+let mediaRecorder;
+let audioChunks = [];
+let audioContext;
+let analyser;
+let microphone;
+const recordButton = document.getElementById('recordButton');
+const submitButton = document.getElementById('submitButton');
+const nameInput = document.getElementById('nameInput');
+const waveform = document.getElementById('waveform');
+const downloadLink = document.getElementById('downloadLink');
+let animationId;
+let recordingStartTime;
 
-        recordButton.onclick = async () => {
-            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                microphone = audioContext.createMediaStreamSource(stream);
-                microphone.connect(analyser);
-                analyser.fftSize = 256;
+nameInput.addEventListener('input', () => {
+    // Check if the entered name is in the allowed names
+    recordButton.disabled = !allowedNames.includes(nameInput.value.trim());
+});
 
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = (event) => {
-                    audioChunks.push(event.data);
-                };
-                mediaRecorder.onstop = () => {
-                    submitButton.style.display = 'block';
-                    waveform.style.display = 'none';
-                    convertToMp3();
-                };
-                audioChunks = [];
-                mediaRecorder.start();
-                recordingStartTime = new Date();
-                recordButton.style.backgroundColor = '#32CD32';
-                waveform.style.display = 'block';
-                drawWaveform();
-            } else {
-                mediaRecorder.stop();
-                recordButton.style.backgroundColor = '#f44336';
-                cancelAnimationFrame(animationId);
-            }
+
+recordButton.onclick = async () => {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        microphone = audioContext.createMediaStreamSource(stream);
+        microphone.connect(analyser);
+        analyser.fftSize = 256;
+
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
         };
+        mediaRecorder.onstop = () => {
+            submitButton.style.display = 'block';
+            waveform.style.display = 'none';
+            convertToMp3();
+        };
+        audioChunks = [];
+        mediaRecorder.start();
+        recordingStartTime = new Date();
+        recordButton.style.backgroundColor = '#32CD32';
+        waveform.style.display = 'block';
+        drawWaveform();
+    } else {
+        mediaRecorder.stop();
+        recordButton.style.backgroundColor = '#f44336';
+        cancelAnimationFrame(animationId);
+    }
+};
 
-        submitButton.onclick = () => {
-            if (nameInput.value.trim() === '') {
-                alert('Please enter your name before submitting.');
-                return;
-            }
-            
-            // Trigger the download
-            downloadLink.click();
-            
-            // Wait a short time to allow the download to start before opening the email client
-            setTimeout(() => {
-    const emailSubject = `Audio Recording from ${nameInput.value}`;
-    const senderName = nameInput.value; // Assuming this is the sender's name
-    const emailBody = `Hi Mr. Tubbs!\n\nI've attached my sight singing below.\n\nThanks so much,\n${senderName}`;
-    const recipientEmail = 'garrison.tubbs-biph@basischina.com';
-    const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-    window.location.href = mailtoLink;
-}, 1000); // Wait for 1 second
-        }
+submitButton.onclick = () => {
+    if (nameInput.value.trim() === '') {
+        alert('Please enter your name before submitting.');
+        return;
+    }
+    
+    // Trigger the download
+    downloadLink.click();
+    
+    // Wait a short time to allow the download to start before opening the email client
+    setTimeout(() => {
+        const emailSubject = `Audio Recording from ${nameInput.value}`;
+        const senderName = nameInput.value; // Assuming this is the sender's name
+        const emailBody = `Hi Mr. Tubbs!\n\nI've attached my sight singing below.\n\nThanks so much,\n${senderName}`;
+        const recipientEmail = 'garrison.tubbs-biph@basischina.com';
+        const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+        window.location.href = mailtoLink;
+    }, 1000); // Wait for 1 second
+};
 
         function drawWaveform() {
             const canvas = document.getElementById('waveform');
