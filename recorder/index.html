@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recording App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #2c2c2c;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        img {
+            display: block;
+            width: 70%;
+            height: auto;
+            margin: 20px auto;
+        }
+        input, button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 14px;
+            background-color: #3c3c3c;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+        }
+        #nameInput {
+            width: 300px;
+            max-width: 100%;
+        }
+        #submitButton {
+            width: 150px;
+            max-width: 100%;
+            background-color: #4CAF50;
+            cursor: pointer;
+        }
+        #recordButton {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #f44336;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #recordIcon {
+            width: 20px;
+            height: 20px;
+            background-color: #ffffff;
+            border-radius: 50%;
+        }
+        #waveform {
+            width: 100%;
+            height: 60px;
+            background-color: #3c3c3c;
+            margin: 10px auto;
+            display: none;
+        }
+        #downloadLink {
+            display: none;
+            margin: 10px auto;
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        #downloadLink:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Audio Recording App</h1>
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='150' viewBox='0 0 300 150'%3E%3Crect width='100%25' height='100%25' fill='%23444444'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%23ffffff'%3EPlaceholder Image%3C/text%3E%3C/svg%3E" alt="Placeholder Image">
+        <input type="text" id="nameInput" placeholder="Enter your name (required)" required>
+        <button id="recordButton"><div id="recordIcon"></div></button>
+        <canvas id="waveform"></canvas>
+        <button id="submitButton" disabled>Submit</button>
+        <a id="downloadLink" style="display: none;">Download Recording</a>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        const recordButton = document.getElementById('recordButton');
+        const submitButton = document.getElementById('submitButton');
+        const nameInput = document.getElementById('nameInput');
+        const waveform = document.getElementById('waveform');
+        const downloadLink = document.getElementById('downloadLink');
+        let animationId;
+
+        recordButton.onclick = async () => {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                mediaRecorder.onstop = () => {
+                    submitButton.disabled = false;
+                    waveform.style.display = 'none';
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    downloadLink.href = audioUrl;
+                    downloadLink.download = 'recording.webm';
+                    downloadLink.style.display = 'block';
+                };
+                mediaRecorder.start();
+                recordButton.style.backgroundColor = '#32CD32';
+                waveform.style.display = 'block';
+                drawWaveform();
+            } else {
+                mediaRecorder.stop();
+                recordButton.style.backgroundColor = '#f44336';
+                cancelAnimationFrame(animationId);
+            }
+        };
+
+        submitButton.onclick = () => {
+            if (nameInput.value.trim() === '') {
+                alert('Please enter your name before submitting.');
+                return;
+            }
+            const emailSubject = `Audio Recording from ${nameInput.value}`;
+            const emailBody = `Audio recording attached.`;
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+            window.location.href = mailtoLink;
+        };
+
+        function drawWaveform() {
+            const canvas = document.getElementById('waveform');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.fillStyle = '#3c3c3c';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.beginPath();
+
+            const sliceWidth = width / 100;
+            let x = 0;
+
+            for (let i = 0; i < 100; i++) {
+                const v = Math.random();
+                const y = v * height;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+
+                x += sliceWidth;
+            }
+
+            ctx.lineTo(width, height / 2);
+            ctx.stroke();
+
+            animationId = requestAnimationFrame(drawWaveform);
+        }
+    </script>
+</body>
+</html>
