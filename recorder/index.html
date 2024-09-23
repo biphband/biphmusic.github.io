@@ -16,6 +16,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            overflow: hidden;
         }
         .container {
             max-width: 800px;
@@ -95,7 +96,7 @@
     <div class="container">
         <h1>Sight Singing Submission</h1>
         <h2 id="dateSubtitle"></h2> <!-- Subtitle for the date -->
-        <img src="examples/1.jpg" alt="Placeholder Image">
+        <img src="examples/2.jpg" alt="Placeholder Image">
         <input type="text" id="nameInput" placeholder="Enter your name (required)" required>
         <button id="recordButton"><div id="recordIcon"></div></button>
         <canvas id="waveform"></canvas>
@@ -156,16 +157,22 @@
         };
 
         submitButton.onclick = () => {
-            if (nameInput.value.trim() === '') {
-                alert('Please enter your name before submitting.');
-                return;
-            }
-            downloadLink.click();
+        if (nameInput.value.trim() === '') {
+            alert('Please enter your name before submitting.');
+            return;
+        }
+        
+        // Trigger the download
+        downloadLink.click();
+        
+        // Wait a short time to allow the download to start before opening the email client
+        setTimeout(() => {
             const emailSubject = `Audio Recording from ${nameInput.value}`;
             const emailBody = `Audio recording attached.`;
             const mailtoLink = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
             window.location.href = mailtoLink;
-        };
+        }, 1000); // Wait for 1 second
+    };
 
         function drawWaveform() {
             const canvas = document.getElementById('waveform');
