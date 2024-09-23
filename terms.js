@@ -119,7 +119,16 @@ const cumulative = [
     "Major 3",
     "Perfect 4",
     "Tritone",
-    "Perfect 5"
+    "Perfect 5",
+    "Minor 6",
+    "Major 6",
+"Minor 7",
+"Major 7",
+"Perfect Octave",
+"Soprano",
+"Alto",
+"Tenor",
+"Bass"
 ];
 
         const theglossary = [
@@ -216,5 +225,14 @@ const cumulative = [
             {"Term": "Major 3", "Definition": "Four half steps between the pitches, 'Mario'"},
             {"Term": "Perfect 4", "Definition": "Five half steps between the pitches, 'Here comes the bride,' '起来'"},
             {"Term": "Tritone", "Definition": "Six half steps between the pitches, 'The Simpsons'"},
-            {"Term": "Perfect 5", "Definition": "Seven half steps between the pitches, 'Star Wars'"}
+            {"Term": "Perfect 5", "Definition": "Seven half steps between the pitches, 'Star Wars'"},
+            {"Term": "Minor 6", "Definition": "Eight half steps between the pitches, 'Romance,' 'Bad Romance'"},
+            {"Term": "Major 6", "Definition": "Nine half steps between the pitches, 'NBC,' 'Not At All'"},
+            {"Term": "Minor 7", "Definition": "Ten half steps between the pitches, 'Winnie the Pooh'"},
+            {"Term": "Major 7", "Definition": "Eleven half steps between the pitches, 'Pure Imagination'"},
+            {"Term": "Perfect Octave", "Definition": "Twelve half steps between the pitches, space of 8 notes"},
+            {"Term": "Soprano", "Definition": "The upper female voice"},
+            {"Term": "Alto", "Definition": "The lower female voice"},
+            {"Term": "Tenor", "Definition": "The upper male voice"},
+            {"Term": "Bass", "Definition": "The lower male voice"}
         ];
