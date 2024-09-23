@@ -98,9 +98,9 @@ padding-left: 10%;
             background-color: #ffffff;
             border-radius: 50%;
         }
-        #waveform {
+        #visualizer {
             width: 100%;
-            height: 60px;
+            height: 200px;
             background-color: #3c3c3c;
             margin: 10px auto;
             display: none;
@@ -123,7 +123,7 @@ padding-left: 10%;
         <img src="examples/2.jpg" alt="Placeholder Image">
         <input type="text" id="nameInput" placeholder="Enter your name (required)" required>
         <button id="recordButton" disabled><div id="recordIcon"></div></button>
-        <canvas id="waveform"></canvas>
+        <canvas id="visualizer"></canvas>
         <button id="submitButton" style="display: none;">Submit</button>
         <a id="downloadLink">Download Recording</a>
     </div>
@@ -162,7 +162,7 @@ let microphone;
 const recordButton = document.getElementById('recordButton');
 const submitButton = document.getElementById('submitButton');
 const nameInput = document.getElementById('nameInput');
-const waveform = document.getElementById('waveform');
+const visualizer = document.getElementById('visualizer');
 const downloadLink = document.getElementById('downloadLink');
 let animationId;
 let recordingStartTime;
@@ -188,15 +188,15 @@ recordButton.onclick = async () => {
         };
         mediaRecorder.onstop = () => {
             submitButton.style.display = 'block';
-            waveform.style.display = 'none';
+            visualizer.style.display = 'none';
             convertToMp3();
         };
         audioChunks = [];
         mediaRecorder.start();
         recordingStartTime = new Date();
         recordButton.style.backgroundColor = '#32CD32';
-        waveform.style.display = 'block';
-        drawWaveform();
+        visualizer.style.display = 'block';
+        drawVisualization();
     } else {
         mediaRecorder.stop();
         recordButton.style.backgroundColor = '#f44336';
@@ -221,46 +221,34 @@ submitButton.onclick = () => {
         const recipientEmail = 'garrison.tubbs-biph@basischina.com';
         const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
         window.location.href = mailtoLink;
-    }, 1000); // Wait for 1 second
+    }, 1500); // Wait for 1 second
 };
 
-        function drawWaveform() {
-            const canvas = document.getElementById('waveform');
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
+function drawVisualization() {
+    const canvas = visualizer;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
 
-            ctx.fillStyle = '#3c3c3c';
-            ctx.fillRect(0, 0, width, height);
+    analyser.getByteFrequencyData(dataArray);
 
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#ffffff';
-            ctx.beginPath();
+    ctx.fillStyle = '#3c3c3c';
+    ctx.fillRect(0, 0, width, height);
 
-            let x = width;
+    const barWidth = width / bufferLength * 2.5;
+    let x = 0;
 
-            analyser.getByteTimeDomainData(dataArray);
+    for (let i = 0; i < bufferLength; i++) {
+        const barHeight = dataArray[i] / 2;
+        ctx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+        ctx.fillRect(x, height - barHeight, barWidth, barHeight);
+        x += barWidth + 1;
+    }
 
-            ctx.moveTo(x, height / 2);
-
-            for (let i = 0; i < bufferLength; i++) {
-                const v = dataArray[i] / 128.0;
-                const y = v * height / 2;
-
-                ctx.lineTo(x, y);
-
-                x -= width / bufferLength;
-            }
-
-            ctx.lineTo(0, height / 2);
-            ctx.stroke();
-
-            ctx.drawImage(canvas, -1, 0);
-
-            animationId = requestAnimationFrame(drawWaveform);
-        }
+    animationId = requestAnimationFrame(drawVisualization);
+}
 
         function convertToMp3() {
             const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
