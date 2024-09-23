@@ -24,6 +24,7 @@
             text-align: center;
         }
         h1 {
+            margin-top: -50px;
             margin-bottom: 20px;
         }
         h2 {
@@ -55,6 +56,7 @@
             max-width: 100%;
             background-color: #4CAF50;
             cursor: pointer;
+            display: none;
         }
         #recordButton {
             width: 60px;
@@ -67,6 +69,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+        #recordButton:disabled {
+            background-color: #888;
+            cursor: not-allowed;
         }
         #recordIcon {
             width: 20px;
@@ -95,22 +101,22 @@
 <body>
     <div class="container">
         <h1>Sight Singing Submission</h1>
-        <h2 id="dateSubtitle"></h2> <!-- Subtitle for the date -->
+        <h2 id="dateSubtitle"></h2>
         <img src="examples/2.jpg" alt="Placeholder Image">
         <input type="text" id="nameInput" placeholder="Enter your name (required)" required>
-        <button id="recordButton"><div id="recordIcon"></div></button>
+        <button id="recordButton" disabled><div id="recordIcon"></div></button>
         <canvas id="waveform"></canvas>
-        <button id="submitButton" disabled>Submit</button>
+        <button id="submitButton" style="display: none;">Submit</button>
         <a id="downloadLink">Download Recording</a>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-    const dateSubtitle = document.getElementById('dateSubtitle');
-    const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-    const today = new Date().toLocaleDateString('en-US', options);
-    dateSubtitle.textContent = today;
-});
+            const dateSubtitle = document.getElementById('dateSubtitle');
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            const today = new Date().toLocaleDateString('en-US', options);
+            dateSubtitle.textContent = today;
+        });
 
         let mediaRecorder;
         let audioChunks = [];
@@ -124,6 +130,10 @@
         const downloadLink = document.getElementById('downloadLink');
         let animationId;
         let recordingStartTime;
+
+        nameInput.addEventListener('input', () => {
+            recordButton.disabled = nameInput.value.trim() === '';
+        });
 
         recordButton.onclick = async () => {
             if (!mediaRecorder || mediaRecorder.state === 'inactive') {
@@ -139,7 +149,7 @@
                     audioChunks.push(event.data);
                 };
                 mediaRecorder.onstop = () => {
-                    submitButton.disabled = false;
+                    submitButton.style.display = 'block';
                     waveform.style.display = 'none';
                     convertToMp3();
                 };
@@ -157,22 +167,22 @@
         };
 
         submitButton.onclick = () => {
-        if (nameInput.value.trim() === '') {
-            alert('Please enter your name before submitting.');
-            return;
-        }
-        
-        // Trigger the download
-        downloadLink.click();
-        
-        // Wait a short time to allow the download to start before opening the email client
-        setTimeout(() => {
-            const emailSubject = `Audio Recording from ${nameInput.value}`;
-            const emailBody = `Audio recording attached.`;
-            const mailtoLink = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-            window.location.href = mailtoLink;
-        }, 1000); // Wait for 1 second
-    };
+            if (nameInput.value.trim() === '') {
+                alert('Please enter your name before submitting.');
+                return;
+            }
+            
+            // Trigger the download
+            downloadLink.click();
+            
+            // Wait a short time to allow the download to start before opening the email client
+            setTimeout(() => {
+                const emailSubject = `Audio Recording from ${nameInput.value}`;
+                const emailBody = `Audio recording attached.`;
+                const mailtoLink = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+                window.location.href = mailtoLink;
+            }, 1000); // Wait for 1 second
+        };
 
         function drawWaveform() {
             const canvas = document.getElementById('waveform');
@@ -214,38 +224,40 @@
 
         function convertToMp3() {
             const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const reader = new FileReader();
+            const fileReader = new FileReader();
 
-            reader.onload = function(event) {
-                const buffer = event.target.result;
-                const wav = lamejs.WavHeader.readHeader(new DataView(buffer));
-                const samples = new Int16Array(buffer, wav.dataOffset, wav.dataLen / 2);
-                const mp3enc = new lamejs.Mp3Encoder(wav.channels, wav.sampleRate, 128);
-                const mp3Data = [];
+            fileReader.onload = function(event) {
+                const arrayBuffer = event.target.result;
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+                    const channelData = audioBuffer.getChannelData(0);
+                    const mp3encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, 128);
+                    const mp3Data = [];
 
-                const sampleBlockSize = 1152;
-                for (let i = 0; i < samples.length; i += sampleBlockSize) {
-                    const sampleChunk = samples.subarray(i, i + sampleBlockSize);
-                    const mp3buf = mp3enc.encodeBuffer(sampleChunk);
+                    const sampleBlockSize = 1152;
+                    for (let i = 0; i < channelData.length; i += sampleBlockSize) {
+                        const sampleChunk = channelData.subarray(i, i + sampleBlockSize);
+                        const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
+                        if (mp3buf.length > 0) {
+                            mp3Data.push(mp3buf);
+                        }
+                    }
+
+                    const mp3buf = mp3encoder.flush();
                     if (mp3buf.length > 0) {
                         mp3Data.push(mp3buf);
                     }
-                }
 
-                const mp3buf = mp3enc.flush();
-                if (mp3buf.length > 0) {
-                    mp3Data.push(mp3buf);
-                }
-
-                const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
-                const fileName = generateFileName();
-                downloadLink.href = URL.createObjectURL(mp3Blob);
-                downloadLink.download = fileName;
-                downloadLink.style.display = 'block';
+                    const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                    const fileName = generateFileName();
+                    downloadLink.href = URL.createObjectURL(mp3Blob);
+                    downloadLink.download = fileName;
+                    downloadLink.style.display = 'block';
+                });
             };
 
-            reader.readAsArrayBuffer(audioBlob);
+            fileReader.readAsArrayBuffer(audioBlob);
         }
 
         function generateFileName() {
