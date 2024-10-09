@@ -435,6 +435,7 @@
             <option value="Cumulative">Cumulative</option>
             <option value="Unit1">Unit 1</option>
             <option value="Unit2">Unit 2</option>
+            <option value="oct11">Test on October 11</option>
           </select>
         </div>
 
@@ -503,13 +504,16 @@ var vocab; // Declare vocab variable
 function getVocab() {
     let vocabSelect = document.querySelector('select');
     if (vocabSelect.value == 'Unit1') {
-        vocab = unit1; // Use unit1 from Terms.js
+        vocab = unit1;
         getRandomWord();
     } else if (vocabSelect.value == 'Unit2') {
-        vocab = unit2; // Use unit2 from Terms.js
+        vocab = unit2; 
+        getRandomWord();
+    } else if (vocabSelect.value == 'oct11') {
+        vocab = oct11; 
         getRandomWord();
     } else if (vocabSelect.value == 'Cumulative') {
-        vocab = cumulative; // Use cumulative from Terms.js
+        vocab = cumulative;
     }
 }
 
@@ -702,7 +706,7 @@ const menuToggle = document.querySelector('.menu-toggle');
     }
 
     // Set the dropdown to always select the last item
-    document.getElementById('unitSelector').value = 'Unit2'; // Change to the last option
+    document.getElementById('unitSelector').value = 'oct11'; // Change to the last option
     filterTerms(); // Call to filter terms based on the default selection
 </script>
 
