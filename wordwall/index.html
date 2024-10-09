@@ -428,7 +428,7 @@
         <option value="Cumulative">Cumulative</option>
         <option value="Unit1">Unit 1</option>
         <option value="Unit2">Unit 2</option>
-
+        <option value="oct11">Test on October 11</option>
     </select>
 
     <button class="hidden-mode-toggle" onclick="toggleHiddenMode()">
@@ -572,18 +572,21 @@
         }
 
         function filterTerms() {
-            const selectedUnit = document.getElementById('unitSelector').value;
-            let filteredTerms;
+    const selectedUnit = document.getElementById('unitSelector').value;
+    let filteredTerms;
 
-            if (selectedUnit === 'Cumulative') {
-                filteredTerms = theglossary; // Update reference from terms to theglossary
-            } else {
-                const unitTerms = eval(selectedUnit.toLowerCase());
-                filteredTerms = theglossary.filter(term => unitTerms.includes(term.Term)); // Update reference from terms to theglossary
-            }
+    if (selectedUnit === 'Cumulative') {
+        filteredTerms = theglossary; // Reference to the entire glossary
+    } else if (selectedUnit === 'oct11') {
+        const unitTerms = oct11; // Use the oct11 variable, assuming it has an array of term names
+        filteredTerms = theglossary.filter(term => unitTerms.includes(term.Term)); // Filter based on oct11 terms
+    } else {
+        const unitTerms = eval(selectedUnit.toLowerCase()); // Get terms for other units
+        filteredTerms = theglossary.filter(term => unitTerms.includes(term.Term)); // Filter the glossary
+    }
 
-            const glossary = document.getElementById('glossary');
-            glossary.innerHTML = '';
+    const glossary = document.getElementById('glossary');
+    glossary.innerHTML = '';
 
             // Combine removed cards based on the current mode
             const removedCards = hiddenMode ? removedCardsStandard : removedCardsHidden;
