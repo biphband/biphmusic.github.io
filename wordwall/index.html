@@ -428,7 +428,8 @@
         <option value="Cumulative">Cumulative</option>
         <option value="Unit1">Unit 1</option>
         <option value="Unit2">Unit 2</option>
-        <option value="oct11">Test on October 11</option>
+        <option value="Unit2">Unit 3</option>
+        <option value="oct25">Test on October 25</option>
     </select>
 
     <button class="hidden-mode-toggle" onclick="toggleHiddenMode()">
@@ -577,9 +578,9 @@
 
     if (selectedUnit === 'Cumulative') {
         filteredTerms = theglossary; // Reference to the entire glossary
-    } else if (selectedUnit === 'oct11') {
-        const unitTerms = oct11; // Use the oct11 variable, assuming it has an array of term names
-        filteredTerms = theglossary.filter(term => unitTerms.includes(term.Term)); // Filter based on oct11 terms
+    } else if (selectedUnit === 'oct25') {
+        const unitTerms = oct25; 
+        filteredTerms = theglossary.filter(term => unitTerms.includes(term.Term)); 
     } else {
         const unitTerms = eval(selectedUnit.toLowerCase()); // Get terms for other units
         filteredTerms = theglossary.filter(term => unitTerms.includes(term.Term)); // Filter the glossary
