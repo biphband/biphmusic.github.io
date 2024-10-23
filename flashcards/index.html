@@ -342,7 +342,8 @@ input:checked + .slider:before {
         <option value="Cumulative">Cumulative</option>
         <option value="Unit1">Unit 1</option>
         <option value="Unit2">Unit 2</option>
-        <option value="oct11">Test on October 11</option>
+        <option value="Unit3">Unit 3</option>
+        <option value="oct25">Test on October 25</option>
       </select>
     </div>
 
@@ -418,8 +419,11 @@ input:checked + .slider:before {
         } else if (vocabSelect.value == 'Unit2') {
             vocab = unit2; 
             getRandomWord();
-        } else if (vocabSelect.value == 'oct11') {
-            vocab = oct11; 
+        } else if (vocabSelect.value == 'Unit3') {
+            vocab = unit3; 
+            getRandomWord();
+        } else if (vocabSelect.value == 'oct25') {
+            vocab = oct25; 
             getRandomWord();
         } else if (vocabSelect.value == 'Cumulative') {
             vocab = cumulative;
@@ -563,8 +567,8 @@ input:checked + .slider:before {
 
         if (selectedUnit === 'Cumulative') {
             filteredTerms = cumulative;
-        } else if (selectedUnit === 'oct11') {
-            filteredTerms = oct11;
+        } else if (selectedUnit === 'oct25') {
+            filteredTerms = oct25;
         } else {
             // Get the corresponding unit terms
             filteredTerms = selectedUnit === 'Unit1' ? unit1 : unit2;
@@ -578,7 +582,7 @@ input:checked + .slider:before {
     }
 
     // Set the dropdown to always select the last item
-    document.getElementById('unitSelector').value = 'oct11'; // Change to the last option
+    document.getElementById('unitSelector').value = 'oct25'; // Change to the last option
     filterTerms(); // Call to filter terms based on the default selection
 
     getRandomWord();
