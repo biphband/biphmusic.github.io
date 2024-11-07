@@ -153,6 +153,29 @@
             border-radius: 4px;
             cursor: pointer;
         }
+        .time-restriction {
+            font-size: 24px;
+            color: #ffffff;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .countdown-timer {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        .recording-notice {
+            color: #ff9800;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .partner-info {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #4cafaa;
+        }
     </style>
 </head>
 <body>
@@ -160,23 +183,37 @@
         <h1>Daily Sight Singing Practice</h1>
         <h2 id="dateSubtitle"></h2>
         <input type="text" id="nameInput" placeholder="Enter your name (required)" required>
+        
+        <div id="timeRestriction" class="time-restriction"></div>
+        
         <div class="image-container">
             <img src="examples/1.jpg" alt="Sight Singing Exercise" id="exerciseImage">
             <button id="viewButton" disabled>View sight singing exercise</button>
         </div>
-        <div id="countdown" style="display: none;"></div>
+        
+        <div id="countdown" class="countdown-timer" style="display: none;"></div>
+        
+        <div id="recordingNotice" class="recording-notice" style="display: none;">
+            You may record at any time, but only may record once.
+        </div>
+        
         <button id="recordButton" disabled><div id="recordIcon"></div></button>
         <canvas id="visualizer"></canvas>
         <audio id="audioPlayback" controls></audio>
+        
+        <div id="partnerInfo" class="partner-info" style="display: none;"></div>
+        
         <button id="downloadButton">Download Recording</button>
     </div>
 
     <div class="reminders">
-    <h2><br>Some Reminders:</h2><h3>
-        <p>• Observe the key signature, first and last notes
-        <p>• Look for accidentals
-        <p>• Sing the scale before you start</p>
-        <p>• Aim for accurate rhythms and consistency of tempo</p></h3>
+        <h2><br>Some Reminders:</h2>
+        <h3>
+            <p>• Observe the key signature, first and last notes</p>
+            <p>• Look for accidentals</p>
+            <p>• Sing the scale before you start</p>
+            <p>• Aim for accurate rhythms and consistency of tempo</p>
+        </h3>
     </div>
 
     <script>
@@ -245,25 +282,121 @@ document.addEventListener('DOMContentLoaded', () => {
             recordButton.disabled = false;
         };
 
-        function startCountdown() {
-            let timeLeft = 75;
-            countdownElement.style.display = 'block';
-
-            countdownTimer = setInterval(() => {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                countdownElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-                if (timeLeft <= 0) {
-                    clearInterval(countdownTimer);
-                    countdownElement.style.display = 'none';
-                    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-                        recordButton.click();
-                    }
-                }
-                timeLeft--;
-            }, 1000);
+        function isTimeToView() {
+            const now = new Date();
+            const startTime = new Date(now);
+            startTime.setHours(10, 45, 0, 0);
+            const endTime = new Date(now);
+            endTime.setHours(11, 0, 0, 0);
+            return now >= startTime && now < endTime;
         }
+
+        function formatTimeRemaining(targetDate) {
+    const now = new Date();
+    let diff = targetDate - now;
+    
+    // Handle negative differences
+    if (diff < 0) return "0m 0s";
+    
+    // Convert to positive number
+    diff = Math.max(0, diff);
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    if (hours === 0) {
+        return `${minutes}m ${seconds}s`;
+    }
+    return `${hours}h ${minutes}m ${seconds}s`;
+}
+
+
+    function updateTimeRestriction() {
+    const now = new Date();
+    const todayStart = new Date(now);
+    todayStart.setHours(10, 45, 0, 0);
+    const todayEnd = new Date(now);
+    todayEnd.setHours(10, 48, 0, 0);
+    const finalEnd = new Date(now);
+    finalEnd.setHours(11, 0, 0, 0);
+
+    const tomorrowStart = new Date(now);
+    tomorrowStart.setDate(now.getDate() + 1);
+    tomorrowStart.setHours(10, 45, 0, 0);
+
+    const timeRestrictionDiv = document.getElementById('timeRestriction');
+    const recordingNotice = document.getElementById('recordingNotice');
+
+    // Reset record button state and text color
+    recordButton.disabled = true;
+    timeRestrictionDiv.style.color = '#ffffff'; // Default white
+
+    if (now >= finalEnd) {
+        timeRestrictionDiv.textContent = `Tomorrow's Sight Singing example goes live in: ${formatTimeRemaining(tomorrowStart)}`;
+        viewButton.disabled = true;
+        recordingNotice.style.display = 'none';
+    } else if (now >= todayEnd && now < finalEnd) {
+    timeRestrictionDiv.innerHTML = `The recording portion of today's sight singing exercise is finished. <p>
+    Please bring your recording in for peer review!`;
+    viewButton.disabled = true;
+    recordingNotice.style.display = 'none';
+    exerciseImage.classList.remove('revealed'); // Blur the image again
+    } else if (now < todayStart) {
+        timeRestrictionDiv.textContent = `Sight Reading Example goes live in ${formatTimeRemaining(todayStart)}`;
+        viewButton.disabled = true;
+        recordingNotice.style.display = 'none';
+    } else {
+        // Between 10:45am and 10:48am
+        const timeRemaining = todayEnd - now;
+        const secondsRemaining = timeRemaining / 1000;
+        
+        timeRestrictionDiv.textContent = `Time remaining: ${formatTimeRemaining(todayEnd)}`;
+     
+        
+        if (secondsRemaining <= 45) { // Last 45 seconds
+    timeRestrictionDiv.style.color = '#ff0000';
+} else if (secondsRemaining <= 75) { // 1m 15s to 45s
+    const progress = (secondsRemaining - 45) / 30; // 0 to 1
+    const red = 255;
+    const green = Math.floor(165 * progress);
+    timeRestrictionDiv.style.color = `rgb(${red}, ${green}, 0)`;
+} else if (secondsRemaining <= 120) { // 2m to 1m 15s
+    const progress = (secondsRemaining - 75) / 45; // 0 to 1
+    const red = 255;
+    const green = Math.floor(165 + (90 * progress));
+    timeRestrictionDiv.style.color = `rgb(${red}, ${green}, 0)`;
+} else if (secondsRemaining <= 180) { // 3m to 2m
+    const progress = (secondsRemaining - 120) / 60; // 0 to 1
+    // Transition from white (255,255,255) to yellow (255,255,0)
+    const blue = Math.floor(255 * progress);
+    timeRestrictionDiv.style.color = `rgb(255, 255, ${blue})`;
+} else {
+    timeRestrictionDiv.style.color = '#ffffff'; // White when above 3m
+}
+        
+        recordingNotice.style.display = 'block';
+        // Only enable record button if name is valid
+        const normalizedInput = nameInput.value.trim().toLowerCase();
+        const isNameAllowed = allowedNames.some(name => name.toLowerCase() === normalizedInput);
+        recordButton.disabled = !isNameAllowed;
+        viewButton.disabled = !isNameAllowed;
+    }
+    
+    setTimeout(updateTimeRestriction, 1000);
+}
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Previous DOMContentLoaded content
+            
+            updateTimeRestriction();
+
+            nameInput.addEventListener('input', () => {
+                const normalizedInput = nameInput.value.trim().toLowerCase();
+                const isNameAllowed = allowedNames.some(name => name.toLowerCase() === normalizedInput);
+                viewButton.disabled = !isNameAllowed || !isTimeToView();
+            });
 
         recordButton.onclick = async () => {
             if (!mediaRecorder || mediaRecorder.state === 'inactive') {
@@ -376,11 +509,13 @@ document.addEventListener('DOMContentLoaded', () => {
             fileReader.readAsArrayBuffer(audioBlob);
         }
 
+
         function generateFileName() {
             const name = nameInput.value.trim().replace(/[^a-z0-9]/gi, '_');
             const date = recordingStartTime.toISOString().slice(0, 19).replace('T', '_').replace(/:/g, '-');
             return `${name}_${date}.mp3`;
         }
+    }); 
     </script>
 </body>
 </html>
