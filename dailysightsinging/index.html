@@ -194,7 +194,7 @@
         <div id="countdown" class="countdown-timer" style="display: none;"></div>
         
         <div id="recordingNotice" class="recording-notice" style="display: none;">
-            You may record at any time, but only may record once.
+            You may start recording at any time, but only may record once.
         </div>
         
         <button id="recordButton" disabled><div id="recordIcon"></div></button>
@@ -312,18 +312,18 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
 
-function updateTimeRestriction() {
+    function updateTimeRestriction() {
     const now = new Date();
     const todayStart = new Date(now);
-    todayStart.setHours(11, 30, 0, 0);
+    todayStart.setHours(10, 45, 0, 0);
     const todayEnd = new Date(now);
-    todayEnd.setHours(11, 35, 0, 0);
+    todayEnd.setHours(10, 48, 0, 0);
     const finalEnd = new Date(now);
-    finalEnd.setHours(11, 45, 0, 0);
+    finalEnd.setHours(11, 0, 0, 0);
 
     const tomorrowStart = new Date(now);
     tomorrowStart.setDate(now.getDate() + 1);
-    tomorrowStart.setHours(11, 30, 0, 0);
+    tomorrowStart.setHours(10, 45, 0, 0);
 
     const timeRestrictionDiv = document.getElementById('timeRestriction');
     const recordingNotice = document.getElementById('recordingNotice');
@@ -337,42 +337,43 @@ function updateTimeRestriction() {
         viewButton.disabled = true;
         recordingNotice.style.display = 'none';
     } else if (now >= todayEnd && now < finalEnd) {
-        timeRestrictionDiv.innerHTML = `The recording portion of today's sight singing exercise is finished. <p>
-        Please bring your recording in for peer review!`;
-        viewButton.disabled = true;
-        recordingNotice.style.display = 'none';
-        exerciseImage.classList.remove('revealed'); // Blur the image again
+    timeRestrictionDiv.innerHTML = `The recording portion of today's sight singing exercise is finished. <p>
+    Please bring your recording in for peer review!`;
+    viewButton.disabled = true;
+    recordingNotice.style.display = 'none';
+    exerciseImage.classList.remove('revealed'); // Blur the image again
     } else if (now < todayStart) {
         timeRestrictionDiv.textContent = `Sight Reading Example goes live in ${formatTimeRemaining(todayStart)}`;
         viewButton.disabled = true;
         recordingNotice.style.display = 'none';
     } else {
-        // Between 11:30am and 11:35am
+        // Between 10:45am and 10:48am
         const timeRemaining = todayEnd - now;
         const secondsRemaining = timeRemaining / 1000;
         
         timeRestrictionDiv.textContent = `Time remaining: ${formatTimeRemaining(todayEnd)}`;
      
+        
         if (secondsRemaining <= 45) { // Last 45 seconds
-            timeRestrictionDiv.style.color = '#ff0000';
-        } else if (secondsRemaining <= 75) { // 1m 15s to 45s
-            const progress = (secondsRemaining - 45) / 30; // 0 to 1
-            const red = 255;
-            const green = Math.floor(165 * progress);
-            timeRestrictionDiv.style.color = `rgb(${red}, ${green}, 0)`;
-        } else if (secondsRemaining <= 120) { // 2m to 1m 15s
-            const progress = (secondsRemaining - 75) / 45; // 0 to 1
-            const red = 255;
-            const green = Math.floor(165 + (90 * progress));
-            timeRestrictionDiv.style.color = `rgb(${red}, ${green}, 0)`;
-        } else if (secondsRemaining <= 180) { // 3m to 2m
-            const progress = (secondsRemaining - 120) / 60; // 0 to 1
-            // Transition from white (255,255,255) to yellow (255,255,0)
-            const blue = Math.floor(255 * progress);
-            timeRestrictionDiv.style.color = `rgb(255, 255, ${blue})`;
-        } else {
-            timeRestrictionDiv.style.color = '#ffffff'; // White when above 3m
-        }
+    timeRestrictionDiv.style.color = '#ff0000';
+} else if (secondsRemaining <= 75) { // 1m 15s to 45s
+    const progress = (secondsRemaining - 45) / 30; // 0 to 1
+    const red = 255;
+    const green = Math.floor(165 * progress);
+    timeRestrictionDiv.style.color = `rgb(${red}, ${green}, 0)`;
+} else if (secondsRemaining <= 120) { // 2m to 1m 15s
+    const progress = (secondsRemaining - 75) / 45; // 0 to 1
+    const red = 255;
+    const green = Math.floor(165 + (90 * progress));
+    timeRestrictionDiv.style.color = `rgb(${red}, ${green}, 0)`;
+} else if (secondsRemaining <= 180) { // 3m to 2m
+    const progress = (secondsRemaining - 120) / 60; // 0 to 1
+    // Transition from white (255,255,255) to yellow (255,255,0)
+    const blue = Math.floor(255 * progress);
+    timeRestrictionDiv.style.color = `rgb(255, 255, ${blue})`;
+} else {
+    timeRestrictionDiv.style.color = '#ffffff'; // White when above 3m
+}
         
         recordingNotice.style.display = 'block';
         // Only enable record button if name is valid
