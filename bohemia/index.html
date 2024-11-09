@@ -273,10 +273,14 @@
             }
         });
 
-        // Add event listener for Escape key to close modal
+        // Add event listener for Escape key to close modal and clear search input
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modal.style.display === 'block') {
-                closeModal();
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                displaySongs(songs);
+                if (modal.style.display === 'block') {
+                    closeModal();
+                }
             }
         });
 
