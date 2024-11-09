@@ -31,6 +31,7 @@
         .search-container {
             position: relative;
             margin-bottom: 30px;
+            width: 100%;
         }
 
         #searchInput {
@@ -146,6 +147,16 @@
             margin-bottom: 15px;
             padding: 20px;
         }
+
+        .clear-button {
+            position: absolute; /* Position the button absolutely */
+            right: 15px; /* Adjust as needed for spacing */
+            top: 50%; /* Center vertically */
+            transform: translateY(-50%); /* Adjust for perfect centering */
+            cursor: pointer; /* Change cursor to pointer */
+            color: #999; /* Color of the clear button */
+            font-size: 18px; /* Size of the clear button */
+        }
     </style>
 </head>
 <body>
@@ -153,6 +164,7 @@
         <h1>Bohemia Sheet Music</h1>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search by title, artist, or lyrics...">
+            <span id="clearSearch" class="clear-button">&times;</span>
         </div>
         <ul id="songList"></ul>
     </div>
@@ -202,6 +214,10 @@
             const imagePath = `sheets/${encodeURIComponent(`${song.title} - ${song.artist}.jpeg`)}`;
             sheetMusicImage.src = imagePath;
             modal.style.display = 'block';
+            
+            // Reset search input when opening modal
+            searchInput.value = '';
+            displaySongs(songs);
             
             // Push state when opening modal
             history.pushState({ modal: true }, '', '#sheet-music');
@@ -262,6 +278,12 @@
             if (e.key === 'Escape' && modal.style.display === 'block') {
                 closeModal();
             }
+        });
+
+        const clearSearchButton = document.getElementById('clearSearch');
+        clearSearchButton.addEventListener('click', () => {
+            searchInput.value = '';
+            displaySongs(songs);
         });
 
         displaySongs(songs);
