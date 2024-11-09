@@ -257,6 +257,13 @@
             }
         });
 
+        // Add event listener for Escape key to close modal
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display === 'block') {
+                closeModal();
+            }
+        });
+
         displaySongs(songs);
     </script>
 </body>
