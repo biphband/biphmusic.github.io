@@ -98,6 +98,9 @@
         }
 
         .modal-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
             width: 100%;
             height: auto;
@@ -126,6 +129,7 @@
 
         #sheetMusicImage {
             width: 100%;
+            max-width: 800px;
             height: auto;
             display: block; /* Changed from none */
         }
@@ -162,79 +166,96 @@
     </div>
     <script src="songs.js"></script>
     <script>
-       const searchInput = document.getElementById('searchInput');
-const songList = document.getElementById('songList');
-const sheetMusicImage = document.getElementById('sheetMusicImage');
-const modal = document.getElementById('sheetMusicModal');
-const modalTitle = document.getElementById('modalTitle');
-const closeButton = document.querySelector('.close-button');
+ const searchInput = document.getElementById('searchInput');
+        const songList = document.getElementById('songList');
+        const sheetMusicImage = document.getElementById('sheetMusicImage');
+        const modal = document.getElementById('sheetMusicModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const closeButton = document.querySelector('.close-button');
 
-// Use the songs directly from songsData
-let songs = songsData;
-displaySongs(songs);
+        let songs = songsData;
+        displaySongs(songs);
 
-function displaySongs(songsToDisplay) {
-    songList.innerHTML = '';
-    if (songsToDisplay.length === 0) {
-        songList.innerHTML = '<li class="song-item">No songs found</li>';
-        return;
-    }
-    
-    songsToDisplay.forEach(song => {
-        const li = document.createElement('li');
-        li.className = 'song-item';
-        
-        const titleArtist = document.createElement('div');
-        titleArtist.className = 'song-title';
-        titleArtist.textContent = `${song.title} - ${song.artist}`;
-        
-        li.appendChild(titleArtist);
-        li.addEventListener('click', () => showSheetMusic(song));
-        songList.appendChild(li);
-    });
-}
+        function displaySongs(songsToDisplay) {
+            songList.innerHTML = '';
+            if (songsToDisplay.length === 0) {
+                songList.innerHTML = '<li class="song-item">No songs found</li>';
+                return;
+            }
+            
+            songsToDisplay.forEach(song => {
+                const li = document.createElement('li');
+                li.className = 'song-item';
+                
+                const titleArtist = document.createElement('div');
+                titleArtist.className = 'song-title';
+                titleArtist.textContent = `${song.title} - ${song.artist}`;
+                
+                li.appendChild(titleArtist);
+                li.addEventListener('click', () => showSheetMusic(song));
+                songList.appendChild(li);
+            });
+        }
 
-function showSheetMusic(song) {
-    modalTitle.textContent = `${song.title} - ${song.artist}`;
-    const imagePath = `sheets/${encodeURIComponent(`${song.title} - ${song.artist}.jpeg`)}`;
-    sheetMusicImage.src = imagePath;
-    modal.style.display = 'block';
-    
-    sheetMusicImage.onerror = function() {
-        modalTitle.textContent = 'Error loading sheet music';
-    };
-}
+        function showSheetMusic(song) {
+            modalTitle.textContent = `${song.title} - ${song.artist}`;
+            const imagePath = `sheets/${encodeURIComponent(`${song.title} - ${song.artist}.jpeg`)}`;
+            sheetMusicImage.src = imagePath;
+            modal.style.display = 'block';
+            
+            // Push state when opening modal
+            history.pushState({ modal: true }, '', '#sheet-music');
+            
+            sheetMusicImage.onerror = function() {
+                modalTitle.textContent = 'Error loading sheet music';
+            };
+        }
 
-searchInput.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.trim();
-    const filteredSongs = filterSongs(searchTerm);
-    displaySongs(filteredSongs);
-});
+        function closeModal() {
+            modal.style.display = 'none';
+            // Remove the hash from URL without triggering history event
+            if (window.location.hash === '#sheet-music') {
+                history.pushState('', document.title, window.location.pathname);
+            }
+        }
 
-function filterSongs(searchTerm) {
-    if (!searchTerm) return songs;
-    
-    const searchLower = searchTerm.toLowerCase();
-    return songs.filter(song => {
-        const titleMatch = song.title.toLowerCase().includes(searchLower);
-        const artistMatch = song.artist.toLowerCase().includes(searchLower);
-        const lyricsMatch = Array.isArray(song.lyrics) 
-            ? song.lyrics.some(line => line.toLowerCase().includes(searchLower))
-            : false;
-        
-        return titleMatch || artistMatch || lyricsMatch;
-    });
-}
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.trim();
+            const filteredSongs = filterSongs(searchTerm);
+            displaySongs(filteredSongs);
+        });
 
-closeButton.addEventListener('click', () => {
-    modal.style.display = 'none';
-});
+        function filterSongs(searchTerm) {
+            if (!searchTerm) return songs;
+            
+            const searchLower = searchTerm.toLowerCase();
+            return songs.filter(song => {
+                const titleMatch = song.title.toLowerCase().includes(searchLower);
+                const artistMatch = song.artist.toLowerCase().includes(searchLower);
+                const lyricsMatch = Array.isArray(song.lyrics) 
+                    ? song.lyrics.some(line => line.toLowerCase().includes(searchLower))
+                    : false;
+                
+                return titleMatch || artistMatch || lyricsMatch;
+            });
+        }
 
-window.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        modal.style.display = 'none';
-    }
-});
+        closeButton.addEventListener('click', () => {
+            closeModal();
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Handle back button and gesture navigation
+        window.addEventListener('popstate', (e) => {
+            if (modal.style.display === 'block') {
+                closeModal();
+            }
+        });
 
         displaySongs(songs);
     </script>

@@ -179,7 +179,7 @@ const songsData = [
     },
     {
         "title": "Have You Ever Seen the Rain",
-        "artist": "Creedence Clearwater Revival",
+        "artist": "Credence Clearwater Revival (CCR)",
         "lyrics": [
             "Someone told me long ago",
             "There's a calm before the storm",
