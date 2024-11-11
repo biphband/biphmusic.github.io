@@ -24,113 +24,101 @@
             max-width: 800px;
             width: 100%;
             text-align: center;
-            margin-bottom: 10px; 
         }
 
         .reminders {
-            width: 400px; 
+            width: 400px;
             border-radius: 10px;
-            border:solid;
-            border-color: #6ec5d9a5;
+            border: solid #6ec5d9a5;
             background-color: rgba(49, 129, 125, 0.543);
-            padding-bottom: 20px;
-            padding-right: 10%;
-            padding-left: 10%;
+            padding: 0 10% 20px;
             margin-left: -10px;
         }
-        h1 {
-            margin-top: -50px;
-            margin-bottom: 20px;
-        }
-        h2 {
-            font-size: large;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+
+        h1 { margin: -70px 0 20px; }
+        h2 { font-size: large; margin-bottom: 20px; }
         h3 {
             font-size: medium;
             margin-bottom: 20px;
             font-weight: 100;
             text-align: left;
         }
+
         .image-container {
             position: relative;
             top: 20px;
             width: 90%;
             margin: 20px auto;
         }
+
         img {
-            display: block;
             width: 100%;
             height: auto;
             margin-bottom: 50px;
             filter: blur(10px);
             transition: filter 0.5s ease;
         }
-        img.revealed {
-            filter: blur(0);
-        }
+
+        img.revealed { filter: blur(0); }
+
         #viewButton {
             position: absolute;
-            top: 40%;
+            top: 30%;
             left: 50%;
             transform: translate(-50%, -50%);
             padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 10px;
-            border:solid;
-            border-color: #6ec5d9a5;
             background-color: #4cafaa;
             color: #ffffff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
+
         #viewButton:disabled {
             background-color: #888;
             cursor: not-allowed;
         }
 
-        #countdown {
-            font-size: 24px;
-            margin: 20px 0;
-        }
         input, button {
-            display: block;
             margin: 10px auto;
             padding: 10px;
-            font-size: 14px;
             background-color: #b4b4b4;
             color: #2f2f2f;
             border: none;
             border-radius: 4px;
         }
-        #nameInput {
-            width: 300px;
-            max-width: 100%;
-        }
+
+        #nameInput { width: 300px; }
+
         #recordButton {
             width: 60px;
             height: 60px;
+            margin-top: -10px;
+            margin-bottom: 35px;
             border-radius: 50%;
-            background-color: #f44336;
-            border: none;
+            background-color: #888888; /* Default gray color */
+            cursor: not-allowed; /* Show not-allowed cursor when disabled */
+        }
+
+        #recordButton:not(:disabled) {
+            background-color: #f44336; /* Red color when enabled */
             cursor: pointer;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
-        #recordButton:disabled {
-            background-color: #888;
-            cursor: not-allowed;
-        }
+
         #recordIcon {
             width: 20px;
             height: 20px;
             background-color: #ffffff;
             border-radius: 50%;
+            margin: auto;
         }
+
+        #recordIcon.recording {
+            width: 14px;
+            height: 14px;
+            border-radius: 0;
+        }
+
         #visualizer {
             width: 100%;
             height: 200px;
@@ -138,29 +126,21 @@
             margin: 10px auto;
             display: none;
         }
-        #audioPlayback {
-            display: none;
-            margin: 20px auto;
-            width: 100%;
-        }
+
+        #audioPlayback { 
+            display: none; 
+            margin-top: -10px;
+            margin-bottom: 25px;
+            width: 100%; }
+
         #downloadButton {
             display: none;
-            margin: 10px auto;
             background-color: #4c8baf;
             color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .time-restriction {
-            font-size: 24px;
-            color: #ffffff;
-            margin: 20px 0;
-            text-align: center;
+            margin-bottom: 50px;
         }
 
-        .countdown-timer {
+        .time-restriction {
             font-size: 24px;
             margin: 20px 0;
         }
@@ -168,13 +148,9 @@
         .recording-notice {
             color: #ff9800;
             font-size: 16px;
-            margin: 10px 0;
-        }
-
-        .partner-info {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #4cafaa;
+            margin-top: -15px;
+            margin-bottom: 35px;
+            display: none;
         }
     </style>
 </head>
@@ -191,18 +167,14 @@
             <button id="viewButton" disabled>View sight singing exercise</button>
         </div>
         
-        <div id="countdown" class="countdown-timer" style="display: none;"></div>
-        
-        <div id="recordingNotice" class="recording-notice" style="display: none;">
+        <div id="countdown" style="display: none;"></div>
+        <div id="recordingNotice" class="recording-notice">
             You may start recording at any time, but only may record once.
         </div>
         
         <button id="recordButton" disabled><div id="recordIcon"></div></button>
         <canvas id="visualizer"></canvas>
         <audio id="audioPlayback" controls></audio>
-        
-        <div id="partnerInfo" class="partner-info" style="display: none;"></div>
-        
         <button id="downloadButton">Download Recording</button>
     </div>
 
@@ -280,6 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
             viewButton.style.display = 'none';
             startCountdown();
             recordButton.disabled = false;
+            recordButton.style.backgroundColor = '#f44336'; // Enable red color
+            recordButton.style.cursor = 'pointer';
         };
 
         function isTimeToView() {
@@ -336,16 +310,17 @@ document.addEventListener('DOMContentLoaded', () => {
         timeRestrictionDiv.textContent = `Tomorrow's Sight Singing example goes live in: ${formatTimeRemaining(tomorrowStart)}`;
         viewButton.disabled = true;
         recordingNotice.style.display = 'none';
+        recordButton.disabled = true;
+        recordButton.style.backgroundColor = '#888888';
+        recordButton.style.cursor = 'not-allowed';
     } else if (now >= todayEnd && now < finalEnd) {
-    timeRestrictionDiv.innerHTML = `The recording portion of today's sight singing exercise is finished. <p>
-    Please bring your recording in for peer review!`;
-    viewButton.disabled = true;
-    recordingNotice.style.display = 'none';
-    exerciseImage.classList.remove('revealed'); // Blur the image again
-    } else if (now < todayStart) {
-        timeRestrictionDiv.textContent = `Sight Reading Example goes live in ${formatTimeRemaining(todayStart)}`;
+        timeRestrictionDiv.innerHTML = `Please bring your recording in for peer review!`;
         viewButton.disabled = true;
         recordingNotice.style.display = 'none';
+        exerciseImage.classList.remove('revealed');
+        recordButton.disabled = true;
+        recordButton.style.backgroundColor = '#888888';
+        recordButton.style.cursor = 'not-allowed';
     } else {
         // Between 10:45am and 10:48am
         const timeRemaining = todayEnd - now;
@@ -398,41 +373,97 @@ document.addEventListener('DOMContentLoaded', () => {
                 viewButton.disabled = !isNameAllowed || !isTimeToView();
             });
 
-        recordButton.onclick = async () => {
-            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                microphone = audioContext.createMediaStreamSource(stream);
-                microphone.connect(analyser);
-                analyser.fftSize = 256;
+            let isRecording = false;
+let recordingTimeout;
+let hasRecordedToday = false;
+let recordingStartTime;
 
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = (event) => {
-                    audioChunks.push(event.data);
-                };
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    audioPlayback.src = URL.createObjectURL(audioBlob);
-                    audioPlayback.style.display = 'block';
-                    downloadButton.style.display = 'block';
-                    visualizer.style.display = 'none';
-                    convertToMp3();
-                };
-                audioChunks = [];
-                mediaRecorder.start();
-                recordingStartTime = new Date();
-                recordButton.style.backgroundColor = '#32CD32';
-                visualizer.style.display = 'block';
-                drawVisualization();
-                clearInterval(countdownTimer);
-                countdownElement.style.display = 'none';
-            } else {
+recordButton.onclick = async () => {
+    // Check if already recorded today
+    if (hasRecordedToday) {
+        return;
+    }
+
+    if (!isRecording) {
+        // Start recording
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        microphone = audioContext.createMediaStreamSource(stream);
+        microphone.connect(analyser);
+        analyser.fftSize = 256;
+
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            audioPlayback.src = URL.createObjectURL(audioBlob);
+            audioPlayback.style.display = 'block';
+            downloadButton.style.display = 'block';
+            visualizer.style.display = 'none';
+            recordButton.style.backgroundColor = '#888888';
+            recordButton.style.cursor = 'not-allowed';
+            recordButton.disabled = true;
+            convertToMp3();
+            
+            // Reset recording state and disable further recording
+            isRecording = false;
+            hasRecordedToday = true;
+            document.getElementById('recordIcon').classList.remove('recording');
+            recordButton.style.backgroundColor = '#888888'; // Gray out the button
+            recordButton.disabled = true; // Disable the button
+            if (recordingTimeout) {
+                clearTimeout(recordingTimeout);
+            }
+
+            // Update recording notice
+            const recordingNotice = document.getElementById('recordingNotice');
+            recordingNotice.textContent = 'Recording complete.';
+            recordingNotice.style.color = '#4CAF50'; // Change to green to indicate completion
+        };
+        audioChunks = [];
+        mediaRecorder.start();
+        recordingStartTime = Date.now();
+        recordButton.style.backgroundColor = '#32CD32';
+        visualizer.style.display = 'block';
+        drawVisualization();
+        clearInterval(countdownTimer);
+        countdownElement.style.display = 'none';
+        
+        // Update recording state
+        isRecording = true;
+        document.getElementById('recordIcon').classList.add('recording');
+
+        // Set timeout for end of recording period
+        const now = new Date();
+        const todayEnd = new Date(now);
+        todayEnd.setHours(10, 48, 0, 0);
+        const timeUntilEnd = todayEnd - now;
+        if (timeUntilEnd > 0) {
+            recordingTimeout = setTimeout(() => {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+            }, timeUntilEnd);
+        }
+    } else {
+        // Stop recording only if 5 seconds have elapsed
+        const recordingDuration = Date.now() - recordingStartTime;
+        if (recordingDuration >= 5000) { // 5000 milliseconds = 5 seconds
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
-                recordButton.style.backgroundColor = '#f44336';
                 cancelAnimationFrame(animationId);
             }
-        };
+        } else {
+            // Optionally notify the user that they need to wait
+            const recordingNotice = document.getElementById('recordingNotice');
+            recordingNotice.textContent = 'You may start recording at any time, but only may record once.';
+            recordingNotice.style.color = '#ff9800'; // Orange color for warning
+        }
+    }
+};
 
         function drawVisualization() {
             const canvas = visualizer;
