@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base href="https://hax0rgurl.github.io/cybercitymusic/" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cyberpunk City Music Visualizer - Endless Flight</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: Orbitron, sans-serif;
+        background-color: #000;
+        color: #0ff;
+      }
+      #canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 3;
+      }
+      .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background-color: #fff;
+        border-radius: 50%;
+        z-index: 2;
+      }
+      #moon {
+        position: absolute;
+        top: 50px;
+        left: 20%;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #fff;
+        box-shadow: 0 0 20px #fff;
+        z-index: 2;
+      }
+      #shooting-stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 40%;
+        pointer-events: none;
+        z-index: 4;
+      }
+      .shooting-star {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background-color: #fff;
+        border-radius: 50%;
+      }
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      @keyframes shoot {
+        from {
+          transform: translateX(0) translateY(0);
+        }
+        to {
+          transform: translateX(100vw) translateY(150px);
+        }
+      }
+      #menu-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1001;
+        background: 0 0;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+      #menu-toggle .bar {
+        display: block;
+        width: 25px;
+        height: 3px;
+        margin: 5px auto;
+        background-color: #0ff;
+        transition: all 0.3s ease-in-out;
+      }
+      #menu-toggle.open .bar:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+      }
+      #menu-toggle.open .bar:nth-child(2) {
+        opacity: 0;
+      }
+      #menu-toggle.open .bar:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+      }
+      #menu {
+        position: fixed;
+        top: 0;
+        right: -300px;
+        width: 300px;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        transition: right 0.3s ease;
+        padding: 20px;
+        box-sizing: border-box;
+        overflow-y: auto;
+        z-index: 1000;
+      }
+      #menu.open {
+        right: 0;
+      }
+      #menu h2 {
+        color: #0ff;
+        border-bottom: 1px solid #0ff;
+        padding-bottom: 10px;
+      }
+      #menu button,
+      #menu input[type="file"] {
+        display: block;
+        width: 100%;
+        background: #0ff;
+        color: #000;
+        border: none;
+        padding: 10px;
+        margin: 10px 0;
+        font-family: Orbitron, sans-serif;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      #menu button:hover,
+      #menu input[type="file"]:hover {
+        background: #f0f;
+      }
+      #info {
+        color: #0ff;
+        margin-top: 20px;
+        font-size: 14px;
+      }
+      #gradient-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 50%);
+        z-index: 2;
+      }
+      #audioFile {
+        display: inline-block;
+        width: auto;
+        max-width: 240px;
+        padding: 10px;
+        border: 2px solid #0ff;
+        background: transparent;
+        color: #0ff;
+      }
+    </style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div id="stars"></div>
+    <div id="moon"></div>
+    <div id="shooting-stars"></div>
+    <div id="gradient-overlay"></div>
+    <button id="menu-toggle">
+      <span class="bar"></span><span class="bar"></span
+      ><span class="bar"></span>
+    </button>
+    <div id="menu">
+      <h2>Controls</h2>
+      <input type="file" id="audioFile" accept="audio/*" />
+      <button id="generateCity" style="display: none;"></button>
+      <div id="audioControls" style="display: flex; gap: 10px;">
+        <button id="playBtn" style="width: 40px; height: 40px; background-color: #0ff; border: none; cursor: pointer; font-size: 18px;">▶︎</button>
+        <button id="pauseBtn" style="width: 40px; height: 40px; background-color: #0ff; border: none; cursor: pointer; font-size: 12px; text-align: right;">▐▐ </button>
+        <button id="stopBtn" style="width: 40px; height: 40px; background-color: #0ff; border: none; cursor: pointer; font-size: 18px;">◼️</button>
+      </div>
+      <button id="fullscreenBtn">Fullscreen</button>
+    </div>
+    <script>
+      const scene = new THREE.Scene(),
+        camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          2e4
+        );
+      camera.position.set(0, 100, 0), camera.lookAt(0, 100, -1);
+      const renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById("canvas"),
+        antialias: !0,
+        alpha: true,
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight),
+        renderer.setClearColor(0, 0);
+      const buildings = [],
+        lights = [];
+      let audioContext,
+        analyser,
+        dataArray,
+        audioSource,
+        ground,
+        isPlaying = !1,
+        leftLine,
+        rightLine,
+        endLight;
+      function getRandomColor() {
+        return Math.floor(16777215 * Math.random());
+      }
+      function updateEnvironmentColors() {
+        const e = new THREE.Color(getRandomColor());
+        scene.fog.color = e;
+      }
+      function createGround() {
+        ground && scene.remove(ground);
+        const e = new THREE.PlaneGeometry(2e3, 2e4),
+          t = new THREE.MeshPhongMaterial({
+            color: 1118481,
+            specular: 328965,
+          });
+        ((ground = new THREE.Mesh(e, t)).rotation.x = -Math.PI / 2),
+          (ground.position.y = -0.1),
+          (ground.position.z = -1e4),
+          scene.add(ground);
+      }
+
+      function createStreetLines() {
+        const e = new THREE.PlaneGeometry(2, 2e4),
+          t = new THREE.MeshBasicMaterial({
+            color: 16776960,
+            side: THREE.DoubleSide,
+          });
+        ((leftLine = new THREE.Mesh(e, t)).rotation.x = -Math.PI / 2),
+          leftLine.position.set(-105, 0.3, -1e4),
+          scene.add(leftLine),
+          ((rightLine = new THREE.Mesh(e, t)).rotation.x = -Math.PI / 2),
+          rightLine.position.set(105, 0.3, -1e4),
+          scene.add(rightLine);
+      }
+      function createEndLight() {
+        endLight && scene.remove(endLight);
+        const e = new THREE.PointLight(16711680, 1, 10000);
+        e.position.set(0, 200, -20000), scene.add(e), (endLight = e);
+      }
+      function createBuilding(e, t, n, o, i) {
+        const a = new THREE.BoxGeometry(o, n, i),
+          r = new THREE.MeshPhongMaterial({
+            color: 4473924,
+          }),
+          s = new THREE.Mesh(a, r);
+        s.position.set(e, n / 2, t),
+          (s.baseHeight = n),
+          scene.add(s),
+          buildings.push(s);
+        const d = [65535, 16711935, 16776960, 65280],
+          l = new THREE.BoxGeometry(o + 0.5, 0.5, i + 0.5),
+          c = 320 === Math.abs(e),
+          u = c ? 1 : 5 * Math.random() + 2;
+        for (let o = 1; o < n; o += u) {
+          const n = new THREE.MeshBasicMaterial({
+              color: d[Math.floor(Math.random() * d.length)],
+            }),
+            i = new THREE.Mesh(l, n);
+          i.position.set(e, o, t),
+            (i.visible = !1),
+            scene.add(i),
+            lights.push(i);
+        }
+      }
+      function generateCity() {
+        buildings.forEach((e) => scene.remove(e)),
+          lights.forEach((e) => scene.remove(e)),
+          (buildings.length = 0),
+          (lights.length = 0),
+          updateEnvironmentColors();
+        const e = [-400, -360, -320, 320, 360, 400];
+        for (let t of e)
+          for (let e = -1e4; e <= 1e4; e += 40)
+            if (!(Math.random() > 0.8)) {
+              const n = 200 * Math.random() + 20,
+                o = 20 * Math.random() + 10,
+                i = 20 * Math.random() + 10;
+              createBuilding(t, e, n, o, i);
+            }
+      }
+      const ambientLight = new THREE.AmbientLight(4210752);
+      scene.add(ambientLight);
+      const directionalLight = new THREE.DirectionalLight(16777215, 0.5);
+      function createStars() {
+        const e = document.getElementById("stars");
+        for (let t = 0; t < 150; t++) {
+          const t = document.createElement("div");
+          (t.className = "star"),
+            (t.style.left = `${100 * Math.random()}%`),
+            (t.style.top = `${50 * Math.random()}%`),
+            (t.style.width = `${Math.random() * 2 + 1}px`),
+            (t.style.height = t.style.width),
+            (t.style.animation = `twinkle ${
+              5 * Math.random() + 5
+            }s linear infinite`),
+            e.appendChild(t);
+        }
+      }
+      function createShootingStar() {
+        const e = document.getElementById("shooting-stars"),
+          t = document.createElement("div");
+        (t.className = "shooting-star"),
+          (t.style.left = `${100 * Math.random()}%`),
+          (t.style.top = `${20 * Math.random()}%`),
+          (t.style.width = `${Math.random() * 3 + 2}px`),
+          (t.style.height = t.style.width),
+          (t.style.animation = `shoot ${
+            Math.random() * 1 + 0.5
+          }s linear forwards`),
+          e.appendChild(t),
+          setTimeout(() => e.removeChild(t), 1500);
+      }
+      directionalLight.position.set(1, 1, 1),
+        scene.add(directionalLight),
+        createGround(),
+        createStreetLines(),
+        createEndLight(),
+        (scene.fog = new THREE.FogExp2(789518, 15e-5)),
+        generateCity(),
+        document
+          .getElementById("generateCity")
+          .addEventListener("click", generateCity);
+      const menuToggle = document.getElementById("menu-toggle"),
+        menu = document.getElementById("menu");
+      menuToggle.addEventListener("click", () => {
+        menu.classList.toggle("open"), menuToggle.classList.toggle("open");
+      });
+      const fullscreenBtn = document.getElementById("fullscreenBtn");
+      function toggleFullscreen() {
+        document.fullscreenElement
+          ? document.exitFullscreen && document.exitFullscreen()
+          : document.documentElement.requestFullscreen();
+      }
+      function setupAudio(e) {
+        audioContext && audioContext.close(),
+          (audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)()),
+          (analyser = audioContext.createAnalyser()),
+          (analyser.fftSize = 256),
+          audioContext.decodeAudioData(e, function (e) {
+            ((audioSource = audioContext.createBufferSource()).buffer = e),
+              audioSource.connect(analyser),
+              analyser.connect(audioContext.destination),
+              audioSource.start(0),
+              (isPlaying = !0);
+          }),
+          (dataArray = new Uint8Array(analyser.frequencyBinCount));
+      }
+      fullscreenBtn.addEventListener("click", toggleFullscreen),
+        createStars(),
+        setInterval(createShootingStar, 2e3),
+        document
+          .getElementById("audioFile")
+          .addEventListener("change", function (e) {
+            const t = e.target.files[0],
+              n = new FileReader();
+            (n.onload = function (e) {
+              const t = e.target.result;
+              setupAudio(t);
+            }),
+              n.readAsArrayBuffer(t);
+          }),
+        document
+          .getElementById("playBtn")
+          .addEventListener("click", function () {
+            audioContext &&
+              "suspended" === audioContext.state &&
+              audioContext.resume(),
+              audioSource &&
+                0 === audioSource.playbackRate.value &&
+                (audioSource.playbackRate.value = 1),
+              (isPlaying = !0);
+          }),
+        document
+          .getElementById("pauseBtn")
+          .addEventListener("click", function () {
+            audioSource && (audioSource.playbackRate.value = 0),
+              (isPlaying = !1);
+          }),
+        document
+          .getElementById("stopBtn")
+          .addEventListener("click", function () {
+            audioSource && audioSource.stop(),
+              audioContext && audioContext.close(),
+              (audioContext = null),
+              (audioSource = null),
+              (analyser = null),
+              (isPlaying = !1);
+            document.getElementById("audioFile").value = "";
+          });
+      let flightSpeed = 5,
+        loopPoint = -3500;
+      function animate() {
+        if (
+          (requestAnimationFrame(animate),
+          isPlaying &&
+            analyser &&
+            (analyser.getByteFrequencyData(dataArray),
+            buildings.forEach((e, t) => {
+              const n = dataArray[t % dataArray.length] / 255;
+              (e.scale.y = 1 + 2 * n),
+              (e.position.y = (e.baseHeight * e.scale.y) / 2);
+            })),
+          (camera.position.z -= flightSpeed),
+          leftLine &&
+            rightLine &&
+            ((leftLine.position.z = camera.position.z - 1e4),
+            (rightLine.position.z = camera.position.z - 1e4)),
+          camera.position.z <= loopPoint && (camera.position.z = 0),
+          endLight && (endLight.position.z = camera.position.z - 2e4),
+          document.getElementById("stars").children)
+        )
+          for (let e of document.getElementById("stars").children) {
+            let t = parseFloat(e.style.left);
+            (t = (t + 0.05) % 100), (e.style.left = `${t}%`);
+
+            // Adjust opacity based on camera position
+            const distanceFromHorizon = camera.position.z + 10000; // Adjust based on your scene's scale
+            const maxDistance = 10000; // Distance at which stars fade to 0%
+            const opacity = Math.max(0, 1 - (distanceFromHorizon / maxDistance)); // Fade out to 0% opacity at the horizon
+            e.style.opacity = opacity; // Adjust opacity based on distance from horizon
+          }
+        const canvas = document.getElementById("canvas");
+        const maxOpacityDistance = 1000; // Distance at which the canvas fades out completely
+        const distanceFromTop = Math.max(0, camera.position.z / maxOpacityDistance);
+        canvas.style.opacity = 10 - distanceFromTop; // Adjust opacity based on distance
+        renderer.render(scene, camera);
+        if (endLight) {
+          const bassValue = dataArray[0] / 255; // Use the first frequency bin for bass
+          endLight.intensity = 1 + bassValue * 2; // Pulse the light intensity based on bass
+          endLight.distance = 5000 + bassValue * 2000; // Pulse the light distance based on bass
+        }
+      }
+      animate(),
+        window.addEventListener("resize", () => {
+          (camera.aspect = window.innerWidth / window.innerHeight),
+            camera.updateProjectionMatrix(),
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+  </body>
+</html>
