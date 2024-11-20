@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fractal Visualizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+    <link href="styles.css" rel="stylesheet" type="text/css">
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <div class="menu-toggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="sidebar">
+      <div class="control-group">
+        <label for="lineWeight">Line Thickness</label>
+        <input type="range" id="lineWeight" min="0.1" max="5" step="0.1" value="1.5">
+      </div>
+      <div class="control-group">
+        <label for="numLines">Line Count</label>
+        <input type="range" id="numLines" min="5" max="200" step="1" value="200">
+      </div>
+      <div class="control-group">
+        <label for="spacing">Line Spacing</label>
+        <input type="range" id="spacing" min="1" max="10" step="0.1" value="3">
+      </div>
+      <div class="control-group">
+        <label for="opacity">Opacity</label>
+        <input type="range" id="opacity" min="0.1" max="1" step="0.01" value="0.5">
+      </div>
+      <div class="control-group">
+        <label for="saturation">Saturation</label>
+        <input type="range" id="saturation" min="0" max="170" step="0.1" value="100">
+      </div>
+      <div class="control-group">
+        <label for="rotation">Rotation Amount</label>
+        <input type="range" id="rotation" min="0" max="360" step="0.1" value="90">
+      </div>
+      <div class="control-group">
+        <label for="speed">Rotation Speed</label>
+        <input type="range" id="speed" min="0.5" max="2" step="0.01" value="1">
+      </div>
+      <div class="control-group">
+        <label for="shape">Shape</label>
+        <select id="shape">
+          <option value="square">Square</option>
+          <option value="rectangle">Rectangle</option>
+          <option value="ellipse">Ellipse</option>
+          <option value="triangle">Triangle</option>
+          <option value="beam">Beam</option>
+          <option value="fibonacci">Fibonacci</option>
+          <option value="dove">Dove</option> 
+          <option value="tails">Tails</option> 
+          <option value="star">Star</option>
+          <option value="flower">Flower</option>
+          <option value="mandala">Mandala</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="pattern">Pattern</label>
+        <select id="pattern">
+          <option value="circular">Pendulum</option>
+          <option value="spiral">Spiral</option>
+          <option value="wave">Wave</option>
+          <option value="zigzag">Zigzag</option> 
+          <option value="vortex">Vortex</option> 
+          <option value="orbital">Orbital</option> 
+          <option value="pulse">Pulse</option>
+          <option value="chaos">Chaos</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="backgroundColor">Background Color</label>
+        <input type="color" id="backgroundColor" value="#071520">
+      </div>
+      <div class="control-group">
+        <label>
+          <input type="checkbox" id="starField"> Enable Star Field
+        </label>
+      </div>
+      <div class="control-group">
+        <label for="starSpeed">Star Field Speed</label>
+        <input type="range" id="starSpeed" min="0.05" max="0.3" step="0.01" value="0.2">
+      </div>
+      <button class="randomize-btn" onclick="randomizeParams()">Randomize</button>
+      <div class="control-group">
+        <label>
+          <input type="checkbox" id="autoProgress"> Auto Progress
+        </label>
+        <div class="control-group">
+          <button onclick="exportSettings()">Export Settings</button>
+          <button onclick="importSettings()">Import Settings</button>
+      </div>
+      </div>
+    </div>
+    <div id="myContainer"></div>
+  </body>
+</html>
