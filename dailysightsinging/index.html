@@ -267,6 +267,14 @@
         // Disable right-click context menu
         document.addEventListener('contextmenu', preventContextMenu);
 
+        // Function to prevent long press
+        const preventLongPress = (event) => {
+            event.preventDefault();
+        };
+
+        // Disable long press on touch devices
+        document.addEventListener('touchstart', preventLongPress);
+
         // Show custom password modal
         const showPasswordModal = () => {
             document.getElementById('passwordModal').style.display = 'block';
