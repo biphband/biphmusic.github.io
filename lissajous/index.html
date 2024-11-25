@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .controls {
+            margin: 20px;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            width: 600px;
+        }
+        .slider-container {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 15px;
+            background: #4a4a4a;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5a5a5a;
+        }
+        .chord-editor {
+            margin-top: 20px;
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+        }
+        .chord-row {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .chord-label {
+            width: 80px;
+        }
+        select {
+            margin: 0 5px;
+            padding: 3px;
+            background: #4a4a4a;
+            color: white;
+            border: none;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div class="controls">
+        <div class="slider-container">
+            <label>X Frequency:</label>
+            <input type="range" id="xFreq" min="1" max="10" step="0.1" value="1">
+            <span id="xFreqValue">1.0</span>
+        </div>
+        <div class="slider-container">
+            <label>Y Frequency:</label>
+            <input type="range" id="yFreq" min="1" max="10" step="0.1" value="1">
+            <span id="yFreqValue">1.0</span>
+        </div>
+        <div class="slider-container">
+            <label>Speed:</label>
+            <input type="range" id="speed" min="0.1" max="3" step="0.1" value="0.1">
+            <span id="speedValue">0.1</span>
+        </div>
+        <div class="slider-container">
+            <label>Custom Ratio:</label>
+            <input type="number" id="xRatio" min="1" max="20" value="1" style="width: 60px">
+            <span>:</span>
+            <input type="number" id="yRatio" min="1" max="20" value="1" style="width: 60px">
+            <button onclick="applyRatio()">Apply Ratio</button>
+        </div>
+        <div class="slider-container">
+            <label>Wave Type:</label>
+            <select id="waveType">
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="triangle">Triangle</option>
+                <option value="sawtooth">Sawtooth</option>
+            </select>
+            <div class="slider-container">
+                <label>Trigger Mode:</label>
+                <input type="checkbox" id="triggerMode">
+                <span>Trigger every crossing</span>
+            </div>
+        </div>
+        <button id="audioToggle" onclick="toggleAudio()">Start Audio</button>
+        <button onclick="recenterAnimation()">Recenter Animation</button>
+        
+        <div class="chord-editor">
+            <h3>Chord Progression Editor</h3>
+            <div id="chordProgression"></div>
+        </div>
+    </div>
+
+<script>
+let angle = 0;
+let node;
+let audioStarted = false;
+let crossedHorizontal = false;
+let crossedVertical = false;
+let lastHorizontalTriggerTime = 0;
+let lastVerticalTriggerTime = 0;
+let axisOpacity = 100;
+let yAxisOpacity = 100;
+let trail = [];
+const TRAIL_LENGTH = 20;
+let currentChord = 0;
+
+const notes = [
+    'B4', 'A4', 'G4', 'F4', 'E4', 'D4', 'C4',
+    'B3', 'A3', 'G3', 'F3', 'E3', 'D3', 'C3',
+    'None'
+];
+
+const pentatonicScale = [440.00, 523.25, 587.33, 659.25, 783.99];
+
+let chordProgression = [
+    ['None', 'None', 'None', 'None'],
+    ['None', 'None', 'None', 'None'],
+    ['None', 'None', 'None', 'None'],
+    ['None', 'None', 'None', 'None']
+];
+
+const reverb = new Tone.Reverb({
+    decay: 4,
+    wet: 0.5
+}).toDestination();
+
+const synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: {
+        type: 'sine'
+    },
+    envelope: {
+        attack: 0.05,
+        decay: 0.2,
+        sustain: 0.2,
+        release: 1
+    },
+    volume: -12
+}).connect(reverb);
+
+function recenterAnimation() {
+    angle = 0;
+    trail = [];
+    node = new Node();
+    currentChord = 0;
+}
+
+class Node {
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.prevX = 0;
+        this.prevY = 0;
+        this.color = color(100, 200, 255);
+    }
+
+    update(xFreq, yFreq, frameCount) {
+        this.prevX = this.x;
+        this.prevY = this.y;
+        this.x = 150 * sin(radians(frameCount * xFreq));
+        this.y = 150 * sin(radians(frameCount * yFreq + angle));
+        
+        trail.push({x: this.x, y: this.y});
+        if (trail.length > TRAIL_LENGTH) {
+            trail.shift();
+        }
+    }
+
+    draw() {
+        noFill();
+        stroke(100, 200, 255);
+        beginShape();
+        for (let i = 0; i < trail.length; i++) {
+            let alpha = map(i, 0, trail.length, 0, 255);
+            stroke(100, 200, 255, alpha);
+            vertex(trail[i].x, trail[i].y);
+        }
+        endShape();
+        
+        fill(this.color);
+        noStroke();
+        ellipse(this.x, this.y, 10, 10);
+    }
+}
+
+function setup() {
+    const canvas = createCanvas(400, 400);
+    canvas.parent('canvas-container');
+    node = new Node();
+    setupControls();
+    createChordEditor();
+}
+
+function createChordEditor() {
+    const container = document.getElementById('chordProgression');
+    container.innerHTML = '';
+    
+    for (let i = 0; i < 4; i++) {
+        const chordDiv = document.createElement('div');
+        chordDiv.className = 'chord-row';
+        
+        const label = document.createElement('span');
+        label.className = 'chord-label';
+        label.textContent = `Chord ${i + 1}:`;
+        chordDiv.appendChild(label);
+        
+        for (let j = 0; j < 4; j++) {
+            const select = document.createElement('select');
+            select.id = `chord${i}-note${j}`;
+            notes.forEach(note => {
+                const option = document.createElement('option');
+                option.value = note;
+                option.text = note;
+                if (note === chordProgression[i][j]) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            select.addEventListener('change', (e) => updateChordProgression(i, j, e.target.value));
+            chordDiv.appendChild(select);
+        }
+        
+        container.appendChild(chordDiv);
+    }
+}
+
+function updateChordProgression(chordIndex, noteIndex, value) {
+    chordProgression[chordIndex][noteIndex] = value;
+}
+
+function playChord() {
+    if (!audioStarted) return;
+    
+    const triggerEveryTime = document.getElementById('triggerMode').checked;
+    const currentTime = millis();
+    
+    // Only check timing if we're in alternate trigger mode
+    if (!triggerEveryTime && currentTime - lastHorizontalTriggerTime <= 500) {
+        return;
+    }
+    
+    const currentChordNotes = chordProgression[currentChord].filter(note => note !== 'None');
+    if (currentChordNotes.length > 0) {
+        synth.triggerAttackRelease(currentChordNotes, "8n");
+    }
+    
+    yAxisOpacity = 255;
+    currentChord = (currentChord + 1) % 4;
+    lastHorizontalTriggerTime = currentTime;
+}
+
+
+function toggleAudio() {
+    if (!audioStarted) {
+        Tone.start();
+        audioStarted = true;
+        document.getElementById('audioToggle').textContent = 'Stop Audio';
+    } else {
+        Tone.Transport.stop();
+        audioStarted = false;
+        document.getElementById('audioToggle').textContent = 'Start Audio';
+    }
+}
+
+function playTone() {
+    if (!audioStarted) return;
+    
+    const triggerEveryTime = document.getElementById('triggerMode').checked;
+    const currentTime = millis();
+    
+    // Only check timing if we're in alternate trigger mode
+    if (!triggerEveryTime && currentTime - lastVerticalTriggerTime <= 500) {
+        return;
+    }
+    
+    const randomNote = pentatonicScale[Math.floor(Math.random() * pentatonicScale.length)];
+    synth.triggerAttackRelease(randomNote, "8n");
+    axisOpacity = 255;
+    lastVerticalTriggerTime = currentTime;
+}
+
+function setupControls() {
+    ['xFreq', 'yFreq', 'speed'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateSliderValue);
+    });
+    
+    document.getElementById('waveType').addEventListener('change', updateWaveType);
+}
+
+function draw() {
+    background(0);
+    translate(width/2, height/2);
+    
+    stroke(255, 255, 255, axisOpacity);
+    line(-width/2, 0, width/2, 0);
+    
+    stroke(255, 255, 255, yAxisOpacity);
+    line(0, -height/2, 0, height/2);
+    
+    if (axisOpacity > 100) axisOpacity -= 10;
+    if (yAxisOpacity > 100) yAxisOpacity -= 10;
+    
+    const xFreq = parseFloat(document.getElementById('xFreq').value);
+    const yFreq = parseFloat(document.getElementById('yFreq').value);
+    const speed = parseFloat(document.getElementById('speed').value);
+    
+    stroke(100, 100, 255, 150);
+    noFill();
+    beginShape();
+    for (let i = 0; i < 360; i++) {
+        let x = 150 * sin(radians(i * xFreq));
+        let y = 150 * sin(radians(i * yFreq + angle));
+        vertex(x, y);
+    }
+    endShape();
+    
+    node.update(xFreq, yFreq, frameCount);
+    node.draw();
+    
+    const triggerEveryTime = document.getElementById('triggerMode').checked;
+    
+    // Vertical crossing (both directions)
+    if ((node.prevY <= 0 && node.y >= 0) || (node.prevY >= 0 && node.y <= 0)) {
+        if (triggerEveryTime || !crossedVertical) {
+            playTone();
+            crossedVertical = true;
+        }
+    } else if (Math.abs(node.y) > 5) {
+        crossedVertical = false;
+    }
+    
+    // Horizontal crossing (both directions)
+    if ((node.prevX <= 0 && node.x >= 0) || (node.prevX >= 0 && node.x <= 0)) {
+        if (triggerEveryTime || !crossedHorizontal) {
+            playChord();
+            crossedHorizontal = true;
+        }
+    } else if (Math.abs(node.x) > 5) {
+        crossedHorizontal = false;
+    }
+    
+    angle += speed;
+}
+
+
+function updateSliderValue(e) {
+    document.getElementById(e.target.id + 'Value').textContent = e.target.value;
+}
+
+function updateWaveType(e) {
+    synth.set({
+        oscillator: {
+            type: e.target.value
+        }
+    });
+}
+
+function applyRatio() {
+    const xRatio = parseInt(document.getElementById('xRatio').value);
+    const yRatio = parseInt(document.getElementById('yRatio').value);
+    
+    const currentXFreq = parseFloat(document.getElementById('xFreq').value);
+    const currentYFreq = parseFloat(document.getElementById('yFreq').value);
+    
+    const scaleFactor = Math.max(currentXFreq, currentYFreq) / Math.max(xRatio, yRatio);
+    
+    const newXFreq = (scaleFactor * xRatio);
+    const newYFreq = (scaleFactor * yRatio);
+    
+    const clampedXFreq = Math.min(Math.max(newXFreq, 1), 10);
+    const clampedYFreq = Math.min(Math.max(newYFreq, 1), 10);
+    
+    document.getElementById('xFreq').value = clampedXFreq;
+    document.getElementById('yFreq').value = clampedYFreq;
+    
+    document.getElementById('xFreqValue').textContent = clampedXFreq.toFixed(1);
+    document.getElementById('yFreqValue').textContent = clampedYFreq.toFixed(1);
+}
+</script>
+</body>
+</html>
