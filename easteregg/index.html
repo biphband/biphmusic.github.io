@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Decorative Easter Egg</title>
+    <title>彩蛋</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
@@ -21,15 +21,71 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
         let scene, camera, renderer, egg;
+        const soundEffects = [
+            'soundeffects/yeying.mp3',
+            'soundeffects/awww.mp3',
+            'soundeffects/bikehorn.mp3',
+            'soundeffects/bruh.mp3',
+            'soundeffects/censorbeep.mp3',
+            'soundeffects/childrencheer.mp3',
+            'soundeffects/crowcall.mp3',
+            'soundeffects/DameDane.mp3',
+            'soundeffects/ding.mp3',
+            'soundeffects/Dojo negative point.mp3',
+            'soundeffects/Dojo positive point.mp3',
+            'soundeffects/doorbell.mp3',
+            'soundeffects/drama chipmunk.mp3',
+            'soundeffects/dundundunn.mp3',
+            'soundeffects/gamepoint.WAV',
+            'soundeffects/gong.wav',
+            'soundeffects/heavenchoir.mp3',
+            'soundeffects/Huh.caf',
+            'soundeffects/jokedrums.mp3',
+            'soundeffects/mariofail.mp3',
+            'soundeffects/mysterious.mp3',
+            'soundeffects/notatall.mp3',
+            'soundeffects/policesiren.wav',
+            'soundeffects/punch.mp3',
+            'soundeffects/rubberduck.mp3',
+            'soundeffects/sadsong.mp3',
+            'soundeffects/sheepbaa.mp3',
+            'soundeffects/twang.wav',
+            'soundeffects/uhoh.mp3',
+            'soundeffects/unacceptable.mp3',
+            'soundeffects/womp womp womp.mp3',
+            'soundeffects/Wowecho.mp3',
+            'soundeffects/xiexieni.mp3',
+            'soundeffects/yes.mp3'
+        ];
 
         function init() {
             scene = new THREE.Scene();
 
+            const skyGeometry = new THREE.SphereGeometry(500, 60, 40);
+            skyGeometry.scale(-1, 1, 1);
             const textureLoader = new THREE.TextureLoader();
             const backgroundTexture = textureLoader.load('https://cdn.glitch.global/c2ccdc8b-d87a-49af-95e6-e3cd029bbd31/2048-polyhaven-wasteland_clouds_puresky.jpeg');
-            scene.background = backgroundTexture;
+            const skyMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture });
+            const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+            sky.rotation.y = Math.PI;
+            scene.add(sky);
+
+            const waterGeometry = new THREE.PlaneGeometry(1000, 1000);
+            const waterMaterial = new THREE.MeshPhongMaterial({
+                color: 0x006994,
+                transparent: true,
+                opacity: 0.1,
+                specular: 0xffffff,
+                shininess: 100,
+                reflectivity: 1.0
+            });
+            const water = new THREE.Mesh(waterGeometry, waterMaterial);
+            water.rotation.x = -Math.PI / 2;
+            water.position.y = -2;
+            scene.add(water);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.6, 5);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
@@ -42,13 +98,70 @@
 
             createEgg();
 
-            camera.position.z = 5;
-
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
+            controls.enableZoom = false;
+            controls.enablePan = false;
+            controls.target = new THREE.Vector3(0, 1, 0);
+            controls.minPolarAngle = 0;
+            controls.maxPolarAngle = Math.PI;
+            controls.update();
+
+            // Add click event listener
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            window.addEventListener('click', (event) => {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObject(egg);
+
+                if (intersects.length > 0) {
+                    eggBounce();
+                    playRandomSound();
+                }
+            });
 
             animate();
+        }
+
+        let animationFrameId;
+
+        function eggBounce() {
+    const duration = 2000; // Total duration of the bounce in milliseconds
+    const startY = egg.position.y;
+    const endY = startY + 2000; // Bounce height
+
+    const startTime = performance.now(); // Start time for the animation
+
+    function animate(currentTime) {
+        const elapsedTime = currentTime - startTime;
+        const progress = Math.min(elapsedTime / duration, 1);
+
+        // Ease out/in effect using a cubic function
+        const easeProgress = progress < 0.5 
+            ? 4 * progress * progress * progress // Ease out for first half
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2; // Ease in for second half
+
+        // Update egg position
+        egg.position.y = startY + (endY - startY) * easeProgress;
+
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        }
+    }
+
+    // Start the animation
+    requestAnimationFrame(animate);
+}
+
+        function playRandomSound() {
+            const randomIndex = Math.floor(Math.random() * soundEffects.length);
+            const audio = new Audio(soundEffects[randomIndex]);
+            audio.play();
         }
 
         function createEgg() {
@@ -56,13 +169,14 @@
             const material = createStrippedMaterial();
             egg = new THREE.Mesh(geometry, material);
             egg.scale.set(1.2, 1.5, 1.2);
+            egg.position.y = 1;
 
-            for (let i = 0; i < egg.geometry.attributes.position.count; i++) {
-        const y = egg.geometry.attributes.position.getY(i);
-        const scaleFactor = Math.max(0, 1 - (y + 1) / 9); // Smooth tapering based on y position
-        egg.geometry.attributes.position.setX(i, egg.geometry.attributes.position.getX(i) * scaleFactor);
-    }
-    egg.geometry.attributes.position.needsUpdate = true;
+            for (let i = 0; i < geometry.attributes.position.count; i++) {
+                const y = geometry.attributes.position.getY(i);
+                const scaleFactor = Math.max(0, 1 - (y + 1) / 9);
+                geometry.attributes.position.setX(i, geometry.attributes.position.getX(i) * scaleFactor);
+            }
+            geometry.attributes.position.needsUpdate = true;
 
             scene.add(egg);
         }
@@ -73,11 +187,9 @@
             canvas.height = 1024;
             const ctx = canvas.getContext('2d');
 
-            // Background color
             ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Create stripes
             const numStripes = 12;
             const stripeWidth = canvas.height / numStripes;
             
@@ -86,7 +198,6 @@
                     ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
                     ctx.fillRect(0, i * stripeWidth, canvas.width, stripeWidth);
 
-                    // Add decorative patterns within stripes
                     ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 70%)`;
                     for (let j = 0; j < canvas.width; j += 50) {
                         ctx.beginPath();
@@ -107,7 +218,6 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            egg.rotation.y += 0.005;
             renderer.render(scene, camera);
         }
 
