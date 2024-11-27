@@ -209,23 +209,23 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Calculate days since start date and determine current example
-            const startDate = new Date('2024-11-04');
-            const today = new Date();
-            const differenceInTime = today.getTime() - startDate.getTime();
-            const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
-            const currentExample = (differenceInDays % 30) + 1; // Assuming 30 examples, loops back to 1
+    // Calculate days since start date and determine current example
+    const startDate = new Date('2024-11-04');
+    const today = new Date();
+    const differenceInTime = today.getTime() - startDate.getTime();
+    const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
+    const currentExample = (differenceInDays % 30) + 1; // Cycles through 1-30
 
-            // Update the image source with the current example number
-            const exerciseImage = document.getElementById('exerciseImage');
-            exerciseImage.src = `examples/${currentExample}.jpg`;
+    // Update the image source with the current example number
+    const exerciseImage = document.getElementById('exerciseImage');
+    exerciseImage.src = `examples/${currentExample}.jpg`;
 
-            // Display the current date
-            const dateSubtitle = document.getElementById('dateSubtitle');
-            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-            const todayFormatted = today.toLocaleDateString('en-US', options);
-            dateSubtitle.textContent = `${todayFormatted} (Exercise ${currentExample})`;
-        });
+    // Display the current date and exercise number
+    const dateSubtitle = document.getElementById('dateSubtitle');
+    const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+    const todayFormatted = today.toLocaleDateString('en-US', options);
+    dateSubtitle.textContent = `${todayFormatted} (Exercise ${currentExample})`;
+});
 
         document.addEventListener('DOMContentLoaded', () => {
             const dateSubtitle = document.getElementById('dateSubtitle');
@@ -326,9 +326,9 @@
         function isTimeToView() {
     const now = new Date();
     const startTime = new Date(now);
-    startTime.setHours(10, 45, 0, 0);
+    startTime.setHours(10, 45, 0, 0); // 10:45 AM
     const endTime = new Date(now);
-    endTime.setHours(10, 48, 0, 0);
+    endTime.setHours(10, 48, 0, 0);   // 10:48 AM
     return now >= startTime && now <= endTime;
 }
 
