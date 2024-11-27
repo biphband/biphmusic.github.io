@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Decorative Easter Egg</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let scene, camera, renderer, egg;
+
+        function init() {
+            scene = new THREE.Scene();
+
+            const textureLoader = new THREE.TextureLoader();
+            const backgroundTexture = textureLoader.load('https://cdn.glitch.global/c2ccdc8b-d87a-49af-95e6-e3cd029bbd31/2048-polyhaven-wasteland_clouds_puresky.jpeg');
+            scene.background = backgroundTexture;
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            createEgg();
+
+            camera.position.z = 5;
+
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            animate();
+        }
+
+        function createEgg() {
+            const geometry = new THREE.SphereGeometry(1, 32, 32);
+            const material = createStrippedMaterial();
+            egg = new THREE.Mesh(geometry, material);
+            egg.scale.set(1.2, 1.5, 1.2);
+
+            for (let i = 0; i < egg.geometry.attributes.position.count; i++) {
+        const y = egg.geometry.attributes.position.getY(i);
+        const scaleFactor = Math.max(0, 1 - (y + 1) / 9); // Smooth tapering based on y position
+        egg.geometry.attributes.position.setX(i, egg.geometry.attributes.position.getX(i) * scaleFactor);
+    }
+    egg.geometry.attributes.position.needsUpdate = true;
+
+            scene.add(egg);
+        }
+
+        function createStrippedMaterial() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+
+            // Background color
+            ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Create stripes
+            const numStripes = 12;
+            const stripeWidth = canvas.height / numStripes;
+            
+            for (let i = 0; i < numStripes; i++) {
+                if (i % 2 === 0) {
+                    ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    ctx.fillRect(0, i * stripeWidth, canvas.width, stripeWidth);
+
+                    // Add decorative patterns within stripes
+                    ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 70%)`;
+                    for (let j = 0; j < canvas.width; j += 50) {
+                        ctx.beginPath();
+                        ctx.arc(j, i * stripeWidth + stripeWidth/2, 10, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            const texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+
+            return new THREE.MeshPhongMaterial({
+                map: texture,
+                shininess: 50
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            egg.rotation.y += 0.005;
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        init();
+    </script>
+</body>
+</html>
