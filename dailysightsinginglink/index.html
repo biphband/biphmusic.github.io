@@ -58,6 +58,7 @@
             padding: 10px;
             border: 1.5px solid #65a6cb;
             border-radius: 5px;
+            background-color: #2c3b4300;
             display: inline-block;
         }
 
@@ -84,7 +85,7 @@
         <h1>Daily Sight Singing Practice</h1>
         <h2 id="dateSubtitle"></h2>
         <div id="timeRestriction" class="time-restriction"></div>
-        <a href="https://biphmusic.github.io/dailysightsinging/" class="browser-link">Open in browser to view</a>
+        <button onclick="openInNewTab()" class="browser-link">Open in browser to view</button>
     </div>
 
     <div class="reminders">
@@ -113,6 +114,10 @@
             ctx.fillStyle = 'black';
             ctx.fillText('QR Code Placeholder', 50, 100);
         });
+
+        function openInNewTab() {
+            window.open('https://biphmusic.github.io/dailysightsinging/', '_blank');
+        }
 
         function updateCountdown() {
             const now = new Date();
