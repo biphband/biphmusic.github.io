@@ -404,6 +404,7 @@
                 const minutes = Math.floor(timeLeft / 60000);
                 const seconds = Math.floor((timeLeft % 60000) / 1000);
                 timeRestriction.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} remaining`;
+                document.getElementById('recordingNotice').style.display = 'block';
             } else if (now < targetTime) {
                 const timeLeft = targetTime - now;
                 const hours = Math.floor(timeLeft / 3600000);
@@ -413,6 +414,7 @@
                 exerciseImage.classList.remove('revealed');
             } else if (now < peerReviewEnd) {
                 timeRestriction.textContent = "Bring your recording in for peer review!";
+                document.getElementById('recordingNotice').style.display = 'none';
                 exerciseImage.classList.remove('revealed');
             } else {
                 const timeLeft = nextDay - now;
