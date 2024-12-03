@@ -17,7 +17,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            user-select: none; /* Disable text and image highlighting */
+            user-select: none;
         }
 
         .container {
@@ -79,12 +79,12 @@
             margin-top: -10px;
             margin-bottom: 35px;
             border-radius: 50%;
-            background-color: #888888; /* Default gray color */
-            cursor: not-allowed; /* Show not-allowed cursor when disabled */
+            background-color: #888888;
+            cursor: not-allowed;
         }
 
         #recordButton:not(:disabled) {
-            background-color: #f44336; /* Red color when enabled */
+            background-color: #f44336;
             cursor: pointer;
         }
 
@@ -114,7 +114,8 @@
             display: none; 
             margin-top: -10px;
             margin-bottom: 25px;
-            width: 100%; }
+            width: 100%;
+        }
 
         #downloadButton {
             display: none;
@@ -133,30 +134,28 @@
             font-size: 16px;
             margin-top: -15px;
             margin-bottom: 35px;
-            display: none;
+            display:none;
         }
 
-        /* Add styles for the modal */
         #passwordModal {
+            display: none;
             position: fixed;
-            z-index: 1000;
-            width: 500px; /* Adjusted width for a smaller modal */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
             justify-content: center;
             align-items: center;
-            color: black; /* Change the password modal text color to black */
         }
 
         .modal-content {
             background-color: white;
-            padding: 10px; /* Reduced padding for a smaller modal */
+            padding: 20px;
             border-radius: 5px;
             text-align: center;
-        }
-
-        #passwordInput {
-            padding: 5px; /* Reduced padding for a smaller modal */
-            width: 80%;
+            color: black;
         }
     </style>
 </head>
@@ -169,7 +168,7 @@
         <div id="timeRestriction" class="time-restriction"></div>
         
         <div class="image-container">
-            <img src="examples/1.jpg" alt="Sight Singing Exercise" id="exerciseImage" draggable="false">
+            <img id="exerciseImage" alt="Sight Singing Exercise" draggable="false">
         </div>
         
         <div id="countdown" style="display: none;"></div>
@@ -193,7 +192,7 @@
         </h3>
     </div>
 
-    <div id="passwordModal" style="display: none;">
+    <div id="passwordModal">
         <div class="modal-content">
             <span id="closeModal" style="cursor:pointer;"></span>
             <br>Enter Password
@@ -203,37 +202,6 @@
     </div>
 
     <script>
-        // Disable right-click context menu
-        document.addEventListener('contextmenu', (event) => {
-            event.preventDefault();
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-    // Calculate days since start date and determine current example
-    const startDate = new Date('2024-11-04');
-    const today = new Date();
-    const differenceInTime = today.getTime() - startDate.getTime();
-    const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
-    const currentExample = (differenceInDays % 30) + 1; // Cycles through 1-30
-
-    // Update the image source with the current example number
-    const exerciseImage = document.getElementById('exerciseImage');
-    exerciseImage.src = `examples/${currentExample}.jpg`;
-
-    // Display the current date and exercise number
-    const dateSubtitle = document.getElementById('dateSubtitle');
-    const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-    const todayFormatted = today.toLocaleDateString('en-US', options);
-    dateSubtitle.textContent = `${todayFormatted} (Exercise ${currentExample})`;
-});
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const dateSubtitle = document.getElementById('dateSubtitle');
-            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-            const today = new Date().toLocaleDateString('en-US', options);
-            dateSubtitle.textContent = today;
-        });
-
         const allowedNames = [
             "Ben Chen", "Howard Ding", "Terry He", "Alice Li", "Vincent Mu",
             "Tiger Pan", "Chris Peng", "Lucy Sheng", "Diego Su", "Hailey Wang",
@@ -245,269 +213,147 @@
 
         let mediaRecorder;
         let audioChunks = [];
-        let audioContext;
+        let isRecording = false;
         let analyser;
-        let microphone;
-        const recordButton = document.getElementById('recordButton');
-        const nameInput = document.getElementById('nameInput');
-        const visualizer = document.getElementById('visualizer');
-        const audioPlayback = document.getElementById('audioPlayback');
-        const downloadButton = document.getElementById('downloadButton');
-        const exerciseImage = document.getElementById('exerciseImage');
-        const countdownElement = document.getElementById('countdown');
         let animationId;
-        let recordingStartTime;
-        let countdownTimer;
 
-        // Function to prevent right-click context menu
-        const preventContextMenu = (event) => {
-            event.preventDefault();
-        };
+        document.addEventListener('DOMContentLoaded', () => {
+            const startDate = new Date('2024-11-04');
+            const today = new Date();
+            const differenceInTime = today.getTime() - startDate.getTime();
+            let differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
+            
+            // Calculate number of complete weeks
+            const completeWeeks = Math.floor(differenceInDays / 7);
+            // Subtract 2 days for each complete week (to account for weekends)
+            differenceInDays -= (completeWeeks * 2);
+            
+            // Check if current day is weekend
+            const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
+            if (currentDay === 0) differenceInDays -= 2;
+            if (currentDay === 6) differenceInDays -= 1;
+            
+            const currentExample = (differenceInDays % 30) + 1;
 
-        // Disable right-click context menu
-        document.addEventListener('contextmenu', preventContextMenu);
+            const exerciseImage = document.getElementById('exerciseImage');
+            exerciseImage.src = `examples/${currentExample}.jpg`;
 
-        // Function to prevent long press
-        const preventLongPress = (event) => {
-            event.preventDefault();
-        };
+            const dateSubtitle = document.getElementById('dateSubtitle');
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            const todayFormatted = today.toLocaleDateString('en-US', options);
+            dateSubtitle.textContent = todayFormatted;  // Removed exercise number
+            // Add periodic check for time and name
+            setInterval(checkNameAndTime, 1000);
+        });
 
-        // Disable long press on touch devices
-        document.addEventListener('touchstart', preventLongPress);
-
-        // Show custom password modal
-        const showPasswordModal = () => {
-            document.getElementById('passwordModal').style.display = 'block';
-            document.getElementById('passwordInput').focus(); // Set focus on the password input
-        };
-
-        // Close modal
-        document.getElementById('closeModal').onclick = () => {
-            document.getElementById('passwordModal').style.display = 'none';
-        };
-
-        // Check if the image should remain unblurred
-        const shouldUnblurImage = localStorage.getItem('unblurImage') === 'true';
-
-        // Unblur the image if the flag is set
-        if (shouldUnblurImage) {
-            exerciseImage.classList.add('revealed');
+        function checkNameAndTime() {
+            const name = nameInput.value.trim();
+            if (name === "Mr. Tubbs") {
+                document.getElementById('passwordModal').style.display = 'flex';
+            } else if (allowedNames.includes(name) && checkTime()) {
+                document.getElementById('exerciseImage').classList.add('revealed');
+                document.getElementById('recordButton').disabled = false;
+            }
         }
 
-        // Handle password submission
+        function checkTime() {
+            const now = new Date();
+            const hour = now.getHours();
+            const minutes = now.getMinutes();
+            return (hour === 10 && minutes >= 45 && minutes < 48);
+        }
+
+        const nameInput = document.getElementById('nameInput');
+        nameInput.addEventListener('input', () => {
+            const name = nameInput.value.trim();
+            if (name === "Mr. Tubbs") {
+                document.getElementById('passwordModal').style.display = 'flex';
+            } else if (allowedNames.includes(name) && checkTime()) {
+                document.getElementById('exerciseImage').classList.add('revealed');
+                document.getElementById('recordButton').disabled = false;
+                document.getElementById('recordingNotice').style.display = 'block';
+            }
+        });
+
         document.getElementById('submitPassword').onclick = () => {
             const password = document.getElementById('passwordInput').value;
             if (password === "review") {
-                // Open the image in a new tab
                 const exerciseImageSrc = document.getElementById('exerciseImage').src;
-                window.open(exerciseImageSrc, '_blank'); // Open the image in a new tab
-                recordButton.disabled = false; // Enable the record button
-                document.getElementById('passwordModal').style.display = 'none'; // Close modal
+                window.open(exerciseImageSrc, '_blank');
+                document.getElementById('recordButton').disabled = false;
+                document.getElementById('passwordModal').style.display = 'none';
             } else {
-                alert("Incorrect password."); // Notify if password is wrong
+                alert("Incorrect password.");
             }
         };
 
-        // Add event listener for pressing return key
         document.getElementById('passwordInput').addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
-                document.getElementById('submitPassword').click(); // Trigger password submission
+                document.getElementById('submitPassword').click();
             }
         });
 
-        // Modify the input event listener for nameInput
-        nameInput.addEventListener('input', () => {
-            const normalizedInput = nameInput.value.trim().toLowerCase();
-            if (normalizedInput === "mr. tubbs") {
-                showPasswordModal(); // Show custom password modal
-            }
-        });
+        document.getElementById('recordButton').addEventListener('click', async () => {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    const audioContext = new AudioContext();
+                    const source = audioContext.createMediaStreamSource(stream);
+                    analyser = audioContext.createAnalyser();
+                    source.connect(analyser);
+                    
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
 
-        function isTimeToView() {
-    const now = new Date();
-    const startTime = new Date(now);
-    startTime.setHours(10, 45, 0, 0); // 10:45 AM
-    const endTime = new Date(now);
-    endTime.setHours(10, 48, 0, 0);   // 10:48 AM
-    return now >= startTime && now <= endTime;
-}
+                    document.getElementById('visualizer').style.display = 'block';
+                    drawVisualization();
 
-        function formatTimeRemaining(targetDate) {
-    const now = new Date();
-    let diff = targetDate - now;
-    
-    // Handle negative differences
-    if (diff < 0) return "0m 0s";
-    
-    // Convert to positive number
-    diff = Math.max(0, diff);
-    
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
-    if (hours === 0) {
-        return `${minutes}m ${seconds}s`;
-    }
-    return `${hours}h ${minutes}m ${seconds}s`;
-}
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
 
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        document.getElementById('audioPlayback').src = audioUrl;
+                        document.getElementById('audioPlayback').style.display = 'block';
+                        document.getElementById('downloadButton').style.display = 'block';
+                        document.getElementById('visualizer').style.display = 'none';
+                        cancelAnimationFrame(animationId);
+                    };
 
-function updateTimeRestriction() {
-    const now = new Date();
-    const todayStart = new Date(now);
-    todayStart.setHours(10, 45, 0, 0);
-    const todayEnd = new Date(now);
-    todayEnd.setHours(10, 48, 0, 0);
-    const finalEnd = new Date(now);
-    finalEnd.setHours(11, 0, 0, 0);
-
-    const tomorrowStart = new Date(now);
-    tomorrowStart.setDate(now.getDate() + 1);
-    tomorrowStart.setHours(10, 45, 0, 0);
-
-    const timeRestrictionDiv = document.getElementById('timeRestriction');
-    const recordingNotice = document.getElementById('recordingNotice');
-    const exerciseImage = document.getElementById('exerciseImage');
-
-    // Always start with disabled state
-    recordButton.disabled = true;
-    recordButton.style.backgroundColor = '#888888';
-    recordButton.style.cursor = 'not-allowed';
-    
-    // Reset image blur state
-    exerciseImage.classList.remove('revealed');
-
-    if (now < todayStart) {
-        // Before start time
-        timeRestrictionDiv.textContent = `Today's example will go live in: ${formatTimeRemaining(todayStart)}`;
-        recordingNotice.style.display = 'none';
-    } else if (now >= todayStart && now <= todayEnd) {
-        // During allowed window
-        const normalizedInput = nameInput.value.trim().toLowerCase();
-        const isNameAllowed = allowedNames.some(name => name.toLowerCase() === normalizedInput);
-        
-        timeRestrictionDiv.textContent = `Time remaining: ${formatTimeRemaining(todayEnd)}`;
-        recordingNotice.style.display = 'block';
-        
-        if (isNameAllowed) {
-            recordButton.disabled = false;
-            recordButton.style.backgroundColor = '#f44336';
-            recordButton.style.cursor = 'pointer';
-            exerciseImage.classList.add('revealed'); // Unblur the image
-        }
-    } else if (now > todayEnd && now < finalEnd) {
-        // After allowed window but before final end
-        timeRestrictionDiv.innerHTML = `Please bring your recording in for peer review!`;
-        recordingNotice.style.display = 'none';
-    } else {
-        // After final end
-        timeRestrictionDiv.textContent = `Tomorrow's example will go live in: ${formatTimeRemaining(tomorrowStart)}`;
-        recordingNotice.style.display = 'none';
-    }
-
-    setTimeout(updateTimeRestriction, 1000);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    updateTimeRestriction();
-    
-    nameInput.addEventListener('input', () => {
-        const normalizedInput = nameInput.value.trim().toLowerCase();
-        const isNameAllowed = allowedNames.some(name => name.toLowerCase() === normalizedInput);
-    });
-
-            let isRecording = false;
-let recordingTimeout;
-let hasRecordedToday = false;
-let recordingStartTime;
-
-recordButton.onclick = async () => {
-    // Check if already recorded today
-    if (hasRecordedToday) {
-        return;
-    }
-
-    if (!isRecording) {
-        // Start recording
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioContext.createAnalyser();
-        microphone = audioContext.createMediaStreamSource(stream);
-        microphone.connect(analyser);
-        analyser.fftSize = 256;
-
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
-        };
-        mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            audioPlayback.src = URL.createObjectURL(audioBlob);
-            audioPlayback.style.display = 'block';
-            downloadButton.style.display = 'block';
-            visualizer.style.display = 'none';
-            recordButton.style.backgroundColor = '#888888';
-            recordButton.style.cursor = 'not-allowed';
-            recordButton.disabled = true;
-            convertToMp3();
-            
-            // Reset recording state and disable further recording
-            isRecording = false;
-            hasRecordedToday = true;
-            document.getElementById('recordIcon').classList.remove('recording');
-            recordButton.style.backgroundColor = '#888888'; // Gray out the button
-            recordButton.disabled = true; // Disable the button
-            if (recordingTimeout) {
-                clearTimeout(recordingTimeout);
-            }
-
-            // Update recording notice
-            const recordingNotice = document.getElementById('recordingNotice');
-            recordingNotice.textContent = 'Recording complete.';
-            recordingNotice.style.color = '#4CAF50'; // Change to green to indicate completion
-        };
-        audioChunks = [];
-        mediaRecorder.start();
-        recordingStartTime = Date.now();
-        recordButton.style.backgroundColor = '#32CD32';
-        visualizer.style.display = 'block';
-        drawVisualization();
-        clearInterval(countdownTimer);
-        countdownElement.style.display = 'none';
-        
-        // Update recording state
-        isRecording = true;
-        document.getElementById('recordIcon').classList.add('recording');
-
-        // Set timeout for end of recording period
-        const now = new Date();
-        const todayEnd = new Date(now);
-        todayEnd.setHours(10, 48, 0, 0);
-        const timeUntilEnd = todayEnd - now;
-        if (timeUntilEnd > 0) {
-            recordingTimeout = setTimeout(() => {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
+                    mediaRecorder.start();
+                    isRecording = true;
+                    document.getElementById('recordIcon').classList.add('recording');
+                    document.getElementById('recordingNotice').style.display = 'block';
+                } catch (err) {
+                    console.error('Error accessing microphone:', err);
                 }
-            }, timeUntilEnd);
-        }
-    } else {
-        // Stop recording only if 5 seconds have elapsed
-        const recordingDuration = Date.now() - recordingStartTime;
-        if (recordingDuration >= 5000) { // 5000 milliseconds = 5 seconds
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
+            } else {
                 mediaRecorder.stop();
-                cancelAnimationFrame(animationId);
+                isRecording = false;
+                document.getElementById('recordIcon').classList.remove('recording');
+                document.getElementById('recordingNotice').style.display = 'none';
             }
-        } else {
-            // Optionally notify the user that they need to wait
-            const recordingNotice = document.getElementById('recordingNotice');
-            recordingNotice.textContent = 'Keep going!';
-            recordingNotice.style.color = '#ff9800'; // Orange color for warning
-        }
-    }
-};
+        });
+
+        document.getElementById('downloadButton').addEventListener('click', () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+            const url = URL.createObjectURL(audioBlob);
+            const a = document.createElement('a');
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+            const name = document.getElementById('nameInput').value.trim();
+            const capitalizedName = name.split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+            
+            a.href = url;
+            a.download = `${formattedDate} Sight Singing - ${capitalizedName}.mp3`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
 
         function drawVisualization() {
             const canvas = visualizer;
@@ -535,77 +381,51 @@ recordButton.onclick = async () => {
             animationId = requestAnimationFrame(drawVisualization);
         }
 
-        function convertToMp3() {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            const fileReader = new FileReader();
+        function updateCountdown() {
+            const now = new Date();
+            const targetTime = new Date(now);
+            targetTime.setHours(10, 45, 0);
+            
+            const endTime = new Date(now);
+            endTime.setHours(10, 48, 0);
+            
+            const peerReviewEnd = new Date(now);
+            peerReviewEnd.setHours(10, 50, 0);
 
-            fileReader.onload = function(event) {
-                const arrayBuffer = event.target.result;
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
-                audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
-                    const channelData = audioBuffer.getChannelData(0);
-                    const mp3encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, 128);
-                    const mp3Data = [];
+            const nextDay = new Date(now);
+            nextDay.setDate(nextDay.getDate() + 1);
+            nextDay.setHours(10, 45, 0);
 
-                    const sampleBlockSize = 1152;
-                    for (let i = 0; i < channelData.length; i += sampleBlockSize) {
-                        const sampleChunk = channelData.subarray(i, i + sampleBlockSize);
-                        const int16SampleChunk = new Int16Array(sampleChunk.length);
-                        for (let j = 0; j < sampleChunk.length; j++) {
-                            int16SampleChunk[j] = Math.max(-1, Math.min(1, sampleChunk[j])) * 0x7FFF;
-                        }
-                        const mp3buf = mp3encoder.encodeBuffer(int16SampleChunk);
-                        if (mp3buf.length > 0) {
-                            mp3Data.push(mp3buf);
-                        }
-                    }
-
-                    const mp3buf = mp3encoder.flush();
-                    if (mp3buf.length > 0) {
-                        mp3Data.push(mp3buf);
-                    }
-
-                    const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
-                    downloadButton.onclick = () => {
-                        const fileName = generateFileName();
-                        const url = URL.createObjectURL(mp3Blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = fileName;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                    };
-                });
-            };
-
-            fileReader.readAsArrayBuffer(audioBlob);
+            const timeRestriction = document.getElementById('timeRestriction');
+            const exerciseImage = document.getElementById('exerciseImage');
+            
+            if (now >= targetTime && now < endTime) {
+                const timeLeft = endTime - now;
+                const minutes = Math.floor(timeLeft / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                timeRestriction.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} remaining`;
+            } else if (now < targetTime) {
+                const timeLeft = targetTime - now;
+                const hours = Math.floor(timeLeft / 3600000);
+                const minutes = Math.floor((timeLeft % 3600000) / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                timeRestriction.textContent = `Today's sight singing example will go live in ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                exerciseImage.classList.remove('revealed');
+            } else if (now < peerReviewEnd) {
+                timeRestriction.textContent = "Bring your recording in for peer review!";
+                exerciseImage.classList.remove('revealed');
+            } else {
+                const timeLeft = nextDay - now;
+                const hours = Math.floor(timeLeft / 3600000);
+                const minutes = Math.floor((timeLeft % 3600000) / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                timeRestriction.textContent = `Tomorrow's sight singing example will go live in ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                exerciseImage.classList.remove('revealed');
+            }
         }
 
-
-        function generateFileName() {
-            const name = nameInput.value.trim().replace(/[^a-z0-9]/gi, '_');
-            const date = recordingStartTime.toISOString().slice(0, 19).replace('T', '_').replace(/:/g, '-');
-            return `${name}_${date}.mp3`;
-        }
-
-        // Close modal when clicking outside of it
-        window.onclick = (event) => {
-            const modal = document.getElementById('passwordModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        };
-
-        // Close modal when pressing the Escape key
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                document.getElementById('passwordModal').style.display = 'none';
-            }
-        });
-    }); 
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
     </script>
 </body>
 </html>
