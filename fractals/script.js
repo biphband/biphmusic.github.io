@@ -288,6 +288,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'v') {
+        newVariation();
+      }
+    });
+
     document.addEventListener('keydown', function(event) {
         if (event.key === 'c') {
             document.documentElement.classList.toggle('crt-effect');
@@ -1127,7 +1133,98 @@ function randomizeParams() {
 }
 
 
+function newVariation() {
+  // Store current audio state
+  const audioPlayer = document.getElementById('audioPlayer');
+  const wasPlaying = !audioPlayer.paused;
+  const currentTime = audioPlayer.currentTime;
+  
+  // Store current audio-reactive mappings
+  const currentMappings = new Map(parameterMappings);
+  const currentSmoothValues = new Map(visualizer?.smoothedValues || new Map());
 
+  // Define random ranges for each parameter
+  const randomLineWeight = Math.random() * 10; // 0 to 10
+  const randomNumLines = Math.floor(Math.random() * 200) + 20; // 20 to 220
+  const randomOpacity = Math.random() * 0.8 + 0.2; // 0.2 to 1.0
+  const randomSaturation = Math.random() * 250; // 0 to 1
+  const randomSpeed = Math.random() * 5; // 0 to 5
+  const randomRotation = Math.random() * 360; // 0 to 360
+  const randomStarSpeed = Math.random() * 5; // 0 to 5
+  const randomSpacing = Math.random() * 50 + 10; // 10 to 60
+
+  // Set random values to inputs first
+  document.getElementById('lineWeight').value = randomLineWeight;
+  document.getElementById('numLines').value = randomNumLines;
+  document.getElementById('opacity').value = randomOpacity;
+  document.getElementById('saturation').value = randomSaturation;
+  document.getElementById('speed').value = randomSpeed;
+  document.getElementById('rotation').value = randomRotation;
+  document.getElementById('starSpeed').value = randomStarSpeed;
+  document.getElementById('spacing').value = randomSpacing;
+  
+
+  const patterns = [
+    'circular',
+    'spiral',
+    'wave',
+    'zigzag',
+    'vortex',
+    'orbital',
+    'pulse',
+    'chaos'
+  ];
+  
+  const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
+  
+  document.getElementById('pattern').value = randomPattern;
+ 
+  
+  // Now update the params object
+  params.lineWeight = randomLineWeight;
+  params.numLines = randomNumLines;
+  params.opacity = randomOpacity;
+  params.saturation = randomSaturation;
+  params.speed = randomSpeed;
+  params.rotation = randomRotation;
+  params.starSpeed = randomStarSpeed;
+  params.spacing = randomSpacing;
+  params.pattern = randomPattern;
+  
+  // Trigger all input events
+  document.querySelectorAll('input, select').forEach(el => {
+    const event = new Event('input', { bubbles: true });
+    const changeEvent = new Event('change', { bubbles: true });
+    
+    // Trigger native event handlers
+    el.dispatchEvent(event);
+    el.dispatchEvent(changeEvent);
+  });
+  
+  // Restore audio-reactive mappings
+  parameterMappings = currentMappings;
+  if (visualizer) {
+    visualizer.smoothedValues = currentSmoothValues;
+  }
+  
+  // Restore audio-reactive parameters
+  parameterMappings.forEach((_, param) => {
+    if (visualizer?.smoothedValues.has(param)) {
+      params[param] = visualizer.smoothedValues.get(param);
+    }
+  });
+  
+  // Force visualization update
+  if (typeof updateVisualization === 'function') {
+    updateVisualization();
+  }
+  
+  // Ensure audio continues if it was playing
+  if (wasPlaying && audioPlayer.paused) {
+    audioPlayer.currentTime = currentTime;
+    audioPlayer.play().catch(console.error);
+  }
+}
 
 
 

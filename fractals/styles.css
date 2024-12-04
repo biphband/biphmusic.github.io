@@ -117,6 +117,21 @@ html, body {
   background: rgba(255, 255, 255, 0.2);
 }
 
+.variation-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  margin-top: 15px; /* Adjusted for consistency */
+  transition: background 0.3s;
+}
+
+.variation-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .help-overlay {
   position: fixed;
   top: 0;
