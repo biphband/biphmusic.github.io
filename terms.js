@@ -215,6 +215,37 @@ const unit4 = [
     "Predominant"
 ]
 
+const unit5 = [
+    "Contrasting Period",
+    "Predominant",
+    "Period",
+    "Parallel 5ths/8ves",
+    "Chromatic",
+    "Tonicize",
+    "Range",
+    "Parallel Modulation",
+    "Key Change",
+    "Crossed Voices",
+    "Parallel Period",
+    "Secondary Dominant",
+    "Overlapping Voices",
+    "Modulate",
+    "Function",
+    "Secondary Leading Tone",
+    "Tendency Tones",
+    "Voice Leading",
+    "Direct/Hidden 5ths",
+    "Spacing",
+    "Direct Modulation",
+    "Resolution",
+    "Motion",
+    "Similar Motion",
+    "Contrary Motion",
+    "Parallel Motion",
+    "Oblique Motion",
+    "Static Motion"
+];
+
 
 const cumulative = [
     "Accidental",
@@ -417,7 +448,29 @@ const cumulative = [
     "Phrygian Half Cadence",
     "Minor Plagal Cadence",
     "Picardy Third",
-    "Predominant"
+    "Predominant",
+    "Contrasting Period",
+    "Predominant",
+    "Period",
+    "Parallel 5ths/8ves",
+    "Chromatic",
+    "Tonicize",
+    "Range",
+    "Parallel Modulation",
+    "Key Change",
+    "Crossed Voices",
+    "Parallel Period",
+    "Secondary Dominant",
+    "Overlapping Voices",
+    "Modulate",
+    "Function",
+    "Secondary Leading Tone",
+    "Tendency Tones",
+    "Voice Leading",
+    "Direct/Hidden 5ths",
+    "Spacing",
+    "Direct Modulation",
+    "Resolution"
     ];
 
         const theglossary = [
@@ -623,5 +676,27 @@ const cumulative = [
             {"Term": "Picardy Third", "Definition": "A resolution at the end of a minor song that finishes on a major I"},
             {"Term": "Predominant", "Definition": "A harmony that precedes the V chord"},
             {"Term": "Function", "Definition": "The specific role (job) that a chord plays"},
-            {"Term": "Cadence", "Definition": "A resting point at the end of a musical phrase"}
+            {"Term": "Cadence", "Definition": "A resting point at the end of a musical phrase"},
+            {"Term": "Contrasting Period", "Definition": "A period in which both phrases start with different material"},
+            {"Term": "Predominant", "Definition": "A category of chord whose function is to precede a V chord"},
+            {"Term": "Period", "Definition": "A set of two phrases, one ending in a HC and the second ending in a AC"},
+            {"Term": "Parallel 5ths/8ves", "Definition": "When two voices, an octave or 5th apart move in the same direction by the same interval"},
+            {"Term": "Chromatic", "Definition": "Moving by half steps (leaving the key)"},
+            {"Term": "Tonicize", "Definition": "To temporarily use a new key center in a musical passage"},
+            {"Term": "Range", "Definition": "The total span of notes a given instrument or voice type can play/sing"},
+            {"Term": "Parallel Modulation", "Definition": "To keep the same tonic but change from major to minor, or vice versa"},
+            {"Term": "Key Change", "Definition": "When the root key of a particular piece shifts to another center"},
+            {"Term": "Crossed Voices", "Definition": "When any lower voice has a note higher than the upper voice, or vice versa"},
+            {"Term": "Parallel Period", "Definition": "A period in which both phrases start with the same material"},
+            {"Term": "Secondary Dominant", "Definition": "A five (V) of some diatonic chord, leads to new keys"},
+            {"Term": "Overlapping Voices", "Definition": "When any lower voice has a note higher than the previously sung note of the upper voice"},
+            {"Term": "Modulate", "Definition": "To slowly change from one key to another, the process of changing keys"},
+            {"Term": "Function", "Definition": "How a chord works in the context of others, how it resolves, etc."},
+            {"Term": "Secondary Leading Tone", "Definition": "A seven (vii) of some diatonic chord, leads to new keys"},
+            {"Term": "Tendency Tones", "Definition": "Voices that should resolve in certain ways (i.e. in a V7 chord, the 7th↘︎, 3rd ↗︎)"},
+            {"Term": "Voice Leading", "Definition": "The concept of how individual notes in a part move to the next note (ideally smoothly)"},
+            {"Term": "Direct/Hidden 5ths", "Definition": "When the soprano skips up/down and the bass moves in similar motion to a 5th or 8ve"},
+            {"Term": "Spacing", "Definition": "The intervalic distance between any two consecutive voice parts"},
+            {"Term": "Direct Modulation", "Definition": "To move immediately from one key into another with no transition"},
+            {"Term": "Resolution", "Definition": "The specific direction that active tones should move, how they resolve"}
         ];
