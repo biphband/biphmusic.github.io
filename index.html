@@ -3,31 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AP Music Theory Student Portal</title>
-    <link rel="icon" href="/icons/BGIcon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Cormorant+Garamond:wght@300&display=swap" rel="stylesheet">
+    <title>Word Wall</title>
+    <link rel="icon" href="icons/BGicon.png">
     <style>
-       @font-face {
+        @font-face {
             font-family: 'Zapfino';
             src: url('fonts/Zapfino.ttf') format('truetype');
         }
-       
-       body {
+        
+        body {
             background-color: rgb(45, 70, 119);
-            height: 100%;
             font-family: 'Andika', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            color: rgb(255, 255, 255);
+            /* font-family: 'Helvetica Neue', Arial, sans-serif; */
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
         }
 
-        body, html {
-            margin-top: 2vh;
-            background-position-y: 15px;
-            background-size: 25vh;
-        }
-        
         .background {
             position: fixed;
             top: 0;
@@ -91,41 +84,15 @@
     z-index: 10; 
 }
 
+.Subtitle {
+            font-family: 'Zapfino', sans-serif;
+            color: white;
+            margin-top: -0.7em;
+            font-size: 40px;
+            margin-bottom: 35px; /* Add some space below the subtitle */
+        }
 
-        .content {
-            text-align: center;
-            padding: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            max-height: calc(100vh - 60px); /* Ensure content doesn't push nav out of view */
-            overflow-y: auto; /* Allow scrolling if content is too tall */
-        }
-        h1 {
-            font-size: 10vw;
-            line-height: 1.2;
-            margin-bottom: 20px;
-            font-family: 'Cinzel Decorative', cursive;
-            font-weight: 400;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        h2 {
-            font-size: 2vw;
-            font-weight: 300;
-            text-align: center;
-            margin-top: 0;
-            letter-spacing: 2px;
-        }
-        h3 {
-    font-family: 'Zapfino';
-    font-size: clamp(1.5rem, 5vw, 2.5rem); /* Min: 1rem, Preferred: 5vw, Max: 3rem */
-    font-weight: 300;
-    text-align: center;
-    margin-top: 0;
-    letter-spacing: 2px;
-}
-        .hamburger-menu {
+.hamburger-menu {
             position: absolute;
             margin-left: 7px;
             top: 20px;
@@ -230,166 +197,203 @@
             font-size: 12px;
         }
 
-        .divider-image {
-    display: block; 
-    width: 60%;
-    max-width: 600px; 
-    object-fit: cover;
-    margin: 0 auto; 
-    margin-top: 20px; 
-    margin-bottom: -10px; 
-}
-        
-        @media (min-width: 800px) {
-            h1 {
-                font-size: 8vw;; /* Cap font size for large screens */
-            }
-            h2 {
-                font-size: 2vh; /* Cap font size for large screens */
-            }
-        }
-        @media (min-width: 1000px) {
-            h1 {
-                font-size: 7vw;; /* Cap font size for large screens */
-            }
-            h2 {
-                font-size: 2.5vh; /* Cap font size for large screens */
-            }
-        }
-        @media (min-width: 1200px) {
-            h1 {
-                font-size: 6vw;; /* Cap font size for large screens */
-            }
-            h2 {
-                font-size: 2.5vh; /* Cap font size for large screens */
-            }
-        }
-
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         .container {
-            width: 60%;
+            max-width: 800px;
             margin: 0 auto;
         }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+       
+/* Add CSS here */
 
-
-        .links-grid {
+.content {
+            padding-top: 120px; /* Adjust based on your header height */
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        #glossary {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
         }
-
-        .link-card {
-            background-color: #fff;
-            border-radius: 8px;
+        .term-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: transform 0.5s ease, box-shadow 0.8s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100px; /* Set a fixed height */
+            margin-bottom: 10px; /* Add consistent margin between cards */
         }
 
-
-        .link-card:hover {
+        .term-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 80px rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 50px rgba(255, 255, 255, 0.1);
         }
-
-        .link-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .link-content {
-            padding: 20px;
-        }
-
-        .link-title {
-            font-size: 1.2rem;
-            color: #2c3e50;
+        .term {
+            font-family: sans-serif;
+            font-size: 1.1em;
             margin-bottom: 10px;
+            color: #fbe179;
+        }
+        .definition {
+            font-size: 1.1em;
+            line-height: 1.4;
+            flex-grow: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .poof {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            opacity: 0;
+            animation: poofAnimation 0.4s ease-out; /* Animation duration reduced to 0.3s */
+        }
+        .poof::before,
+        .poof::after {
+            content: '';
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+        }
+        .poof::before {
+            width: 80px;
+            height: 80px;
+            top: -20px;
+            left: -20px;
+        }
+        .poof::after {
+            width: 60px;
+            height: 60px;
+            top: 30px;
+            left: 50px;
+        }
+        @keyframes poofAnimation {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(3);
+                opacity: 0;
+            }
+        }
+        .slide {
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
         }
 
-        .link-description {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            margin-bottom: 15px;
-            text-align: center;
+        #unitSelector {
+            display: block;
+            margin: 0 auto 20px; /* Reduced bottom margin */
+            padding: 5px; /* Reduced padding */
+            font-size: 16px;
         }
 
-        .link-url {
-            display: inline-block;
-            text-decoration: none;
-            color: #3498db;
-            font-weight: bold;
-            transition: color 0.3s ease;
+        .hidden-mode-toggle {
+            position: absolute;
+            top: 50px;
+            left: 11px;
+            background: none;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 60px;
+            height: 50px;
         }
 
-        .link-url:hover {
-            color: #2980b9;
+        .hidden-mode-toggle img {
+            width: 100%;
+            height: 100%;
         }
 
-        .external-links {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-}
+        .term-card .reveal-btn {
+            display: none;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            top: 40%;
+            transform: translateX(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 60px;  /* Increased from 20px */
+            height: 60px; /* Increased from 20px */
+            z-index: 10;  /* Ensure it's above other elements */
+        }
 
-.external-links li {
-    margin-bottom: 50px;
-}
+        .term-card .reveal-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
-.external-links li:last-child {
-    margin-bottom: 0;
-}
+        .term-card .close-btn {
+            display: none;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.56);
+            z-index: 11; /* Ensure it's above the reveal button */
+            padding: 10px; /* Increased padding for larger clickable area */
+            transition: color 0.3s; /* Transition for hover effect */
+        }
 
-.external-link-wrapper {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    transition: transform 0.3s ease;
-}
+        .term-card .close-btn:hover {
+            color: rgba(255, 255, 255, 1); /* Change color on hover */
+        }
 
-.external-link-wrapper:hover {
-    transform: scale(1.01);
-}
+        .hidden-mode .term-card .reveal-btn,
+        .hidden-mode .term-card .close-btn {
+            display: block;
+        }
 
-.external-link-icon {
-    width: 50px;
-    height: 50px;
-    margin-right: 15px;
-}
+        .hidden-mode .term-card .definition {
+            display: none;
+        }
 
-.external-link-icon2 {
-    width: 60px;
-    height: 60px;
-    margin-right: 15px;
-    margin-left:-10px
-}
+        /* Ensure the reveal button stays within the card */
+        .term-card {
+            position: relative;
+            overflow: hidden;
+            padding-bottom: 60px; /* Reduced padding to remove extra space */
+        }
 
-.external-link-content {
-    flex-grow: 1;
-}
+        .shuffle-button {
+            position: absolute;
+            top: 95px;
+            left: 11px;
+            background: none;
+            border: none;
+            padding: 10px;
+            opacity: 0.7;
+            cursor: pointer;
+            width: 60px;
+            height: 50px;
+        }
 
-.external-link-title {
-    font-weight: bold;
-    color: #2c3e50;
-}
-
-.external-link-wrapper:hover .external-link-title {
-    color: #3498db;
-}
-
-.external-link-description {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    margin-top: 5px;
-}
+        .shuffle-button img {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -417,122 +421,250 @@
         </div>
     </div>
 
-    <div class="content">
-        <h1>AP<br>Music<br>Theory<br>Student<br>Portal</h1>
-        <h2>Unlock Your Musical Potential</h2>
-    </div>
-    
+    <h1 class="Title">BIPH Music</h1>
+    <h1 class="Subtitle">Word Wall</h1>
 
-    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/images/MusicNotation.png" class="divider-image">
+    <select id="unitSelector" onchange="filterTerms()" style="margin-top: -20px;">
+        <option value="Cumulative">Cumulative</option>
+        <option value="Unit1">Unit 1</option>
+        <option value="Unit2">Unit 2</option>
+        <option value="Unit3">Unit 3</option>
+        <option value="Unit4">Unit 4</option>
+        <option value="Unit5">Unit 5</option>
+    </select>
 
-    
-    <h1> ⠀⠀</h1>
-    <h3>Tools</h3>
+    <button class="hidden-mode-toggle" onclick="toggleHiddenMode()">
+        <img src="icons/hidden-off.png" alt="Toggle Hidden Mode" id="hiddenModeIcon">
+    </button>
 
-    
+    <button class="shuffle-button" onclick="shuffleCards()">
+        <img src="icons/shuffle.png" alt="Shuffle">
+    </button>
 
-
-<div class="container">
-
-        <div class="links-grid">
-            <a href="https://biphmusic.github.io/units"  style="text-decoration: none; color: inherit;">
-                <div class="link-card">
-                    <img src="https://i.icanvas.com/list-hero/music-notes-MA400.jpg" alt="Resource 1" class="link-image">
-                    <div class="link-content">
-                        <h2 class="link-title">AP Music Theory Units</h2>
-                        <p class="link-description">An overview of all units, their subtopics, as well as relevant vocabulary.</p>
-                    </div>
-                </div>
-            </a>
-
-            <a href="https://biphmusic.github.io/flashcards/"  style="text-decoration: none; color: inherit;">
-                <div class="link-card">
-                    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/images/BIPH-Music-Flashcards.png" alt="Resource 1" class="link-image">
-                    <div class="link-content">
-                        <h2 class="link-title">Flash Cards</h2>
-                        <p class="link-description">For memorizing vocabulary, harmony and everything in between.</p>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="https://biphmusic.github.io/dice/"  style="text-decoration: none; color: inherit;">
-                <div class="link-card">
-                    <img src="https://github.com/BIPHMusic/biphmusic.github.io/blob/main/images/Musical-Dice.png?raw=true" alt="Resource 2" class="link-image">
-                    <div class="link-content">
-                        <h2 class="link-title">Dice Simulator</h2>
-                        <p class="link-description">Randomized notes, chords, keys, scale degrees, solfege, the choice is yours.</p>
-                    </div>
-                </div>
-            </a>
-
-            <a href="https://biphmusic.github.io/piano/"  style="text-decoration: none; color: inherit;">
-                <div class="link-card">
-                    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/images/WebPiano.png" alt="Resource 3" class="link-image">
-                    <div class="link-content">
-                        <h2 class="link-title">Web Piano 1.0</h2>
-                        <p class="link-description">Use this online keyboard as a visual aid, to practice scales, or to just to play.</p>
-                    </div>
-                </div>
-            </a>
-         </div>
-
-    <h1> </h1>
-    <h3>External Links</h3>
-    <div class="external-links">
-        <ul>
-            <li>
-                <a href="https://www.musictheory.net/exercises" class="external-link-wrapper" >
-                    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/icons/MusicTheoryNetIcon.png" alt="Site 1 Icon" class="external-link-icon">
-                    <div class="external-link-content">
-                        <span class="external-link-title">MusicTheory.net</span>
-                        <p class="external-link-description">Practice your music literacy and aural skills here.</p>
-                    </div>
-                </a>
-            </li>
-            <li>
-                <a href="https://teoria.com/en/exercises/" class="external-link-wrapper" >
-                    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/icons/TeoriaComIcon.png" alt="Site 2 Icon" class="external-link-icon2">
-                    <div class="external-link-content">
-                        <span class="external-link-title">Teoria.com</span>
-                        <p class="external-link-description">Great practice for sight reading and harmonic / melodic dictation.</p>
-                    </div>
-                </a>
-            </li>
-            <li>
-                <a href="https://apclassroom.collegeboard.org/" class="external-link-wrapper" >
-                    <img src="https://raw.githubusercontent.com/BIPHMusic/biphmusic.github.io/main/icons/APClassroomIcon.png" alt="Site 3 Icon" class="external-link-icon2">
-                    <div class="external-link-content">
-                        <span class="external-link-title">AP Classroom</span>
-                        <p class="external-link-description">The official website of Collegeboard.</p>
-                    </div>
-                </a>
-            </li>
-        </ul>
-    </div>
-</div>
+    <div id="glossary"></div>
 
     <div class="logocontainer">        
         <img src="BASIS logo/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
     </div>
+    
 
+
+    <script src="../terms.js"></script> <!-- Reference to the terms.js file -->
     <script>
+
+
+        let hiddenMode = false;
+        let removedCardsStandard = []; // Track removed cards in standard mode
+        let removedCardsHidden = []; // Track removed cards in hidden mode
+
+        function createTermCard(term) {
+            const card = document.createElement('div');
+            card.className = 'term-card';
+            card.innerHTML = `
+                <div class="term">${term.Term}</div>
+                <div class="definition">${term.Definition}</div>
+                <button class="reveal-btn" onclick="revealDefinition(this)">
+                    <img src="icons/magnifying-glass.png" alt="Reveal">
+                </button>
+                <button class="close-btn" onclick="removeCard(this.parentElement)">✕</button>
+            `;
+
+            // Add click event to the card to remove it if not in hidden mode
+            card.addEventListener('click', (event) => {
+                if (!event.target.classList.contains('close-btn')) {
+                    if (!hiddenMode) {
+                        removeCard(card); // Trigger removeCard if not in hidden mode
+                    } else {
+                        revealDefinition(card.querySelector('.reveal-btn'));
+                    }
+                }
+            });
+
+            return card;
+        }
+
+        function toggleHiddenMode() {
+            hiddenMode = !hiddenMode;
+            const hiddenModeIcon = document.getElementById('hiddenModeIcon');
+            hiddenModeIcon.src = hiddenMode ? "icons/hidden-on.png" : "icons/hidden-off.png";
+            document.body.classList.toggle('hidden-mode', hiddenMode);
+            
+            // Reapply the current filter to update card appearances
+            filterTerms(); 
+            const removedCards = hiddenMode ? removedCardsStandard : removedCardsHidden;
+            removedCards.forEach(card => card.card.remove()); // Ensure removed cards stay removed
+        }
+
+        function revealDefinition(button) {
+            const card = button.closest('.term-card');
+            const definition = card.querySelector('.definition');
+            
+            definition.style.display = 'block';
+            button.style.display = 'none';
+
+            // Fade in
+            setTimeout(() => {
+                definition.style.opacity = '1';
+            }, 10);
+
+            if (hiddenMode) {
+                setTimeout(() => {
+                    // Fade out
+                    definition.style.opacity = '0';
+                    setTimeout(() => {
+                        definition.style.display = 'none';
+                        button.style.display = 'block';
+                    }, 300); // Match this with the transition duration
+                }, 2000);
+            }
+        }
+
+        function removeCard(card) {
+            const poof = document.createElement('div');
+            poof.className = 'poof';
+            card.appendChild(poof);
+
+            // Start fading out the card immediately
+            card.style.opacity = '0';
+
+            // Add card to the appropriate removed list based on the current mode
+            if (hiddenMode) {
+                removedCardsHidden.push({ term: card.querySelector('.term').textContent, card }); // Store term and card
+            } else {
+                removedCardsStandard.push({ term: card.querySelector('.term').textContent, card }); // Store term and card
+            }
+
+            poof.addEventListener('animationend', () => {
+                card.remove();
+                rearrangeCards();
+            });
+        }
+
+        function rearrangeCards() {
+            const glossary = document.getElementById('glossary');
+            const cards = Array.from(glossary.children);
+            const cardPositions = cards.map(card => card.getBoundingClientRect());
+
+            cards.forEach((card, index) => {
+                const startRect = cardPositions[index];
+                card.style.position = 'absolute';
+                card.style.left = `${startRect.left}px`;
+                card.style.top = `${startRect.top}px`;
+                card.style.width = `${startRect.width}px`;
+                card.style.height = `${startRect.height}px`;
+            });
+
+            glossary.innerHTML = '';
+            cards.forEach(card => {
+                if (card.style.opacity !== '0') {
+                    glossary.appendChild(card);
+                }
+            });
+
+            requestAnimationFrame(() => {
+                cards.forEach(card => {
+                    card.classList.add('slide');
+                    card.style.position = '';
+                    card.style.left = '';
+                    card.style.top = '';
+                    card.style.width = '';
+                    card.style.height = '';
+                });
+            });
+        }
+
+        function filterTerms() {
+    const selectedUnit = document.getElementById('unitSelector').value;
+    let filteredTerms;
+
+    if (selectedUnit === 'Cumulative') {
+        filteredTerms = theglossary; // Reference to the entire glossary
+    } else if (selectedUnit === 'Unit5') {
+        const unitTerms = unit5; 
+        filteredTerms = theglossary.filter(term => unitTerms.includes(term.Term)); 
+    } else {
+        const unitTerms = eval(selectedUnit.toLowerCase()); // Get terms for other units
+        filteredTerms = theglossary.filter(term => unitTerms.includes(term.Term)); // Filter the glossary
+    }
+
+    const glossary = document.getElementById('glossary');
+    glossary.innerHTML = '';
+
+            // Combine removed cards based on the current mode
+            const removedCards = hiddenMode ? removedCardsStandard : removedCardsHidden;
+
+            filteredTerms.forEach(term => {
+                // Only create cards that are not in the removed list
+                if (!removedCards.some(card => card.term === term.Term)) {
+                    const card = createTermCard(term);
+                    glossary.appendChild(card);
+                }
+            });
+        }
+
+        function shuffleCards() {
+            const glossary = document.getElementById('glossary');
+            const cards = Array.from(glossary.children);
+            const shuffledCards = cards.sort(() => Math.random() - 0.5); // Randomize the order
+
+            // Clear the glossary and append shuffled cards
+            glossary.innerHTML = '';
+            shuffledCards.forEach(card => {
+                glossary.appendChild(card);
+            });
+
+            // Animate the cards to new positions and adjust opacity
+            const positions = shuffledCards.map(card => {
+                const rect = card.getBoundingClientRect();
+                const newLeft = glossary.clientWidth / 2 - rect.left - rect.width / 2;
+                const newTop = glossary.clientHeight / 2 - rect.top - rect.height / 2;
+                return {
+                    left: newLeft,
+                    top: newTop
+                };
+            });
+
+            shuffledCards.forEach((card, index) => {
+                card.style.transition = 'transform 0.3s ease, opacity 0.3s ease'; // Quick animation for both transform and opacity
+                card.style.transform = `translate(${positions[index].left}px, ${positions[index].top}px)`;
+                card.style.opacity = '0.1'; // Drop opacity
+            });
+
+            // Reset positions and opacity after animation
+            setTimeout(() => {
+                shuffledCards.forEach(card => {
+                    card.style.transition = ''; // Reset transition
+                    card.style.transform = ''; // Reset position
+                    card.style.opacity = '1'; // Return opacity
+                });
+            }, 300); // Match this with the animation duration
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const unitSelector = document.getElementById('unitSelector');
+            unitSelector.value = unitSelector.options[unitSelector.options.length - 1].value; // Set default to last option
+            filterTerms();
+            document.querySelector('.hidden-mode-toggle').style.display = 'block';
+        });
+
         // Hamburger menu functionality
         const menuToggle = document.querySelector('.menu-toggle');
-    const menuItems = document.querySelector('.menu-items');
-    
-    menuToggle.addEventListener('click', () => {
-        menuToggle.classList.toggle('open');
-        menuItems.classList.toggle('show');
-    });
-    
-    // Close the menu when clicking outside
-    document.addEventListener('click', (event) => {
-        // Check if the click was outside the menu and the toggle button
-        if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
-            menuToggle.classList.remove('open');
-            menuItems.classList.remove('show');
-        }
-    });
+        const menuItems = document.querySelector('.menu-items');
+        
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('open');
+            menuItems.classList.toggle('show');
+        });
+        
+        // Close the menu when clicking outside
+        document.addEventListener('click', (event) => {
+            // Check if the click was outside the menu and the toggle button
+            if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+                menuToggle.classList.remove('open');
+                menuItems.classList.remove('show');
+            }
+        });
     </script>
+
 </body>
 </html>
