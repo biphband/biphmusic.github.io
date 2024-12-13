@@ -430,6 +430,7 @@
         <option value="Unit2">Unit 2</option>
         <option value="Unit3">Unit 3</option>
         <option value="Unit4">Unit 4</option>
+        <option value="Unit5">Unit 5</option>
     </select>
 
     <button class="hidden-mode-toggle" onclick="toggleHiddenMode()">
@@ -578,8 +579,8 @@
 
     if (selectedUnit === 'Cumulative') {
         filteredTerms = theglossary; // Reference to the entire glossary
-    } else if (selectedUnit === 'unit4') {
-        const unitTerms = oct25; 
+    } else if (selectedUnit === 'Unit5') {
+        const unitTerms = unit5; 
         filteredTerms = theglossary.filter(term => unitTerms.includes(term.Term)); 
     } else {
         const unitTerms = eval(selectedUnit.toLowerCase()); // Get terms for other units
