@@ -431,7 +431,7 @@
         <option value="Unit3">Unit 3</option>
         <option value="Unit4">Unit 4</option>
         <option value="Unit5">Unit 5</option>
-        <option value="Jan16">Jan 16 Test</option>
+        <option value="jan16">Jan 16 Test</option>
     </select>
 
     <button class="hidden-mode-toggle" onclick="toggleHiddenMode()">
@@ -580,7 +580,7 @@
 
     if (selectedUnit === 'Cumulative') {
         filteredTerms = theglossary; // Reference to the entire glossary
-    } else if (selectedUnit === 'Jan16') {
+    } else if (selectedUnit === 'jan16') {
         const unitTerms = jan16; 
         filteredTerms = theglossary.filter(term => unitTerms.includes(term.Term)); 
     } else {
