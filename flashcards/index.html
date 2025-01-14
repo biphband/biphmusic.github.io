@@ -345,7 +345,7 @@ input:checked + .slider:before {
         <option value="Unit3">Unit 3</option>
         <option value="Unit4">Unit 4</option>
         <option value="Unit5">Unit 5</option>
-        <option value="Jan16">Jan 16 Test</option>
+        <option value="jan16">Jan 16 Test</option>
       </select>
     </div>
 
@@ -576,7 +576,7 @@ input:checked + .slider:before {
 
         if (selectedUnit === 'Cumulative') {
             filteredTerms = cumulative;
-        } else if (selectedUnit === 'Jan16') {
+        } else if (selectedUnit === 'jan16') {
             filteredTerms = jan16;
         } else {
             // Get the corresponding unit terms
@@ -591,7 +591,7 @@ input:checked + .slider:before {
     }
 
     // Set the dropdown to always select the last item
-    document.getElementById('unitSelector').value = 'Jan16'; // Change to the last option
+    document.getElementById('unitSelector').value = 'jan16'; // Change to the last option
     filterTerms(); // Call to filter terms based on the default selection
 
     getRandomWord();
