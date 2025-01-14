@@ -246,6 +246,36 @@ const unit5 = [
     "Static Motion"
 ];
 
+const jan16 = [
+    "Modes",
+    "Ionian",
+    "Dorian",
+    "Phrygian",
+    "Lydian",
+    "Mixolydian",
+    "Aeolian",
+    "Locrian",
+    "Augmented 6 chord",
+    "Italian Aug 6",
+    "German Aug 6",
+    "French Aug 6",
+    "Neapolitan 6 Chord",
+    "Harmonic Rhythm",
+    "Ornaments",
+    "Contour",
+    "Parallel 5ths/8ves",
+    "Direct/Hidden 5ths",
+    "Crossed Voices",
+    "Overlapping Voices",
+    "Voice Leading",
+    "Resolution",
+    "Tendency Tones",
+    "Spacing",
+    "Range",
+    "Secondary Dominant",
+    "Secondary Leading Tone"
+]
+
 
 const cumulative = [
     "Accidental",
@@ -470,7 +500,23 @@ const cumulative = [
     "Direct/Hidden 5ths",
     "Spacing",
     "Direct Modulation",
-    "Resolution"
+    "Resolution",
+    "Modes",
+    "Ionian",
+    "Dorian",
+    "Phrygian",
+    "Lydian",
+    "Mixolydian",
+    "Aeolian",
+    "Locrian",
+    "Augmented 6 chord",
+    "Italian Aug 6",
+    "German Aug 6",
+    "French Aug 6",
+    "Neapolitan 6 Chord",
+    "Harmonic Rhythm",
+    "Ornaments",
+    "Contour"
     ];
 
         const theglossary = [
@@ -698,5 +744,21 @@ const cumulative = [
             {"Term": "Direct/Hidden 5ths", "Definition": "When the soprano skips up/down and the bass moves in similar motion to a 5th or 8ve"},
             {"Term": "Spacing", "Definition": "The intervalic distance between any two consecutive voice parts"},
             {"Term": "Direct Modulation", "Definition": "To move immediately from one key into another with no transition"},
-            {"Term": "Resolution", "Definition": "The specific direction that active tones should move, how they resolve"}
+            {"Term": "Resolution", "Definition": "The specific direction that active tones should move, how they resolve"},
+            {"Term":"Modes","Definition":"Scales that start from degrees other than Do (Re to Re, Mi to Mi, etc.)"}, 
+            {"Term":"Ionian","Definition":"Major Scale"}, 
+            {"Term":"Dorian","Definition":"Minor Scale w/ Natural 6"}, 
+            {"Term":"Phrygian","Definition":"Minor Scale w/ Flat 2"}, 
+            {"Term":"Lydian","Definition":"Major Scale w/ Sharp 4"}, 
+            {"Term":"Mixolydian","Definition":"Major Scale w/ Flat 7"}, 
+            {"Term":"Aeolian","Definition":"Natural Minor Scale"}, 
+            {"Term":"Locrian","Definition":"Minor Scale w/ Flat 2 & 5"}, 
+            {"Term":"Augmented 6 chord","Definition":"A chord that precedes the V chord by half steps from the inside"}, 
+            {"Term":"Italian Aug 6","Definition":"An Augmented 6 chord with degrees 1,3, and 7"}, 
+            {"Term":"German Aug 6","Definition":"An Augmented 6 chord with degrees 1,3,5, and 7"}, 
+            {"Term":"French Aug 6","Definition":"An Augmented 6 chord with degrees 1,3,#4, and 7"}, 
+            {"Term":"Neapolitan 6 Chord","Definition":"A major chord built off of the flat 2, usually in first inversion"}, 
+            {"Term":"Harmonic Rhythm","Definition":"How fast chords change in a piece"}, 
+            {"Term":"Ornaments","Definition":"Notes added to give more interest to a melody (to make it fancier)"}, 
+            {"Term":"Contour","Definition":"The shape of a given melody or phrase"}, 
         ];
