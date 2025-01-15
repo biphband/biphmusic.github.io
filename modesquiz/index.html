@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Mode Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        input[type="text"], input[type="password"] {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .play-count {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+        .incorrect {
+            color: red;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .results-table th, .results-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .results-table th {
+            background-color: #f5f5f5;
+        }
+        .correct-mark {
+        color: #4CAF50;
+        font-weight: bold;
+    }
+        .student-result {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="login-section">
+            <h2>Enter your name to begin the quiz</h2>
+            <input type="text" id="name-input" placeholder="Your name">
+            <button onclick="checkName()">Start Quiz</button>
+            <div id="error-message" class="error"></div>
+        </div>
+
+        <div id="password-section" class="hidden">
+            <h2>Teacher Mode</h2>
+            <input type="password" id="password-input" placeholder="Enter password">
+            <button onclick="checkPassword()">Login</button>
+        </div>
+
+        <div id="quiz-section" class="hidden">
+            <h2>Music Mode Quiz</h2>
+            <div id="question-container">
+                <p>Question <span id="question-number">1</span>/20</p>
+                <button id="play-button" onclick="playAudio()">Play Audio</button>
+                <span class="play-count" id="play-count">Plays remaining: 2</span>
+                <br><br>
+                <input type="text" id="answer-input" list="modes" placeholder="Enter your answer">
+                <datalist id="modes">
+                    <option value="Ionian">
+                    <option value="Dorian">
+                    <option value="Phrygian">
+                    <option value="Lydian">
+                    <option value="Mixolydian">
+                    <option value="Aeolian">
+                    <option value="Locrian">
+                </datalist>
+                <button onclick="submitAnswer()">Submit Answer</button>
+            </div>
+        </div>
+
+        <div id="password-section" class="hidden">
+            <h2>Teacher Mode</h2>
+            <input type="password" id="password-input" placeholder="Enter password" autofocus>
+            <button onclick="checkPassword()">Login</button>
+        </div>
+
+        <div id="teacher-section" class="hidden">
+            <h2>Teacher Mode</h2>
+            <input type="file" id="json-input" accept=".json" multiple>
+            <div id="results-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const approvedNames = ['ben', 'howard', 'terry', 'alice', 'vincent', 'tiger', 'chris', 'lucy', 'diego', 'hailey', 'eileen', 'angelina', 'serena', 'catherine', 'andrew', 'jennifer'];
+        const TEACHER_PASSWORD = '18721958';
+        
+        const audioFiles = [
+            'Aeolian1.mp3', 'Aeolian2.mp3', 'Aeolian3.mp3',
+            'Dorian1.mp3', 'Dorian2.mp3', 'Dorian3.mp3',
+            'Ionian1.mp3', 'Ionian2.mp3',
+            'Locrian1.mp3', 'Locrian2.mp3', 'Locrian3.mp3',
+            'Lydian1.mp3', 'Lydian2.mp3', 'Lydian3.mp3', 'Lydian4.mp3',
+            'Mixolydian1.mp3', 'Mixolydian2.mp3', 'Mixolydian3.mp3',
+            'Mixolydian4.mp3', 'Mixolydian5.mp3', 'Mixolydian6.mp3', 'Mixolydian7.mp3',
+            'Phrygian1.mp3', 'Phrygian2.mp3', 'Phrygian3.mp3', 'Phrygian4.mp3',
+            'Phrygian5.mp3', 'Phrygian6.mp3', 'Phrygian7.mp3', 'Phrygian8.mp3'
+        ];
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+        }
+
+        function generateQuestionSet(seed) {
+            const shuffled = [...audioFiles];
+            const seededRandom = (min, max) => {
+                const x = Math.sin(hashCode(seed + max.toString()) * 10000) * 10000;
+                return min + (x - Math.floor(x)) * (max - min);
+            };
+
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(seededRandom(0, i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            
+            return {
+                urls: shuffled.slice(0, 20).map(file => `audio/${file}`),
+                answers: shuffled.slice(0, 20).map(file => file.replace(/[0-9].mp3$/, ''))
+            };
+        }
+
+
+        function hashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash;
+        }
+
+        let currentStudent = '';
+        let currentQuestion = 0;
+        let answers = [];
+        let playCount = 2;
+        let audioElement = new Audio();
+        let questionBank = {};
+
+        // Add error handling for audio
+        audioElement.addEventListener('error', function(e) {
+            console.error('Error loading audio:', e);
+            alert('Error loading audio file. Please try again.');
+        });
+
+        function checkName() {
+            const nameInput = document.getElementById('name-input').value.toLowerCase();
+            const errorElement = document.getElementById('error-message');
+
+            if (nameInput === 'mr. tubbs') {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('password-section').classList.remove('hidden');
+                return;
+            }
+
+            if (approvedNames.includes(nameInput)) {
+                currentStudent = nameInput;
+                questionBank[nameInput] = generateQuestionSet(nameInput);
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('quiz-section').classList.remove('hidden');
+                initializeQuiz();
+            } else {
+                errorElement.textContent = 'Name not found in approved list';
+            }
+        }
+
+        function checkPassword() {
+            const password = document.getElementById('password-input').value;
+            if (password === TEACHER_PASSWORD) {
+                document.getElementById('password-section').classList.add('hidden');
+                document.getElementById('teacher-section').classList.remove('hidden');
+                // Auto-focus the file input when entering teacher mode
+                document.getElementById('json-input').focus();
+            } else {
+                alert('Incorrect password');
+            }
+        }
+
+        function initializeQuiz() {
+            currentQuestion = 0;
+            answers = [];
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            playCount = 2;
+            document.getElementById('question-number').textContent = currentQuestion + 1;
+            document.getElementById('play-count').textContent = `Plays remaining: ${playCount}`;
+            document.getElementById('play-button').disabled = false;
+            document.getElementById('answer-input').value = '';
+            
+            audioElement.src = questionBank[currentStudent].urls[currentQuestion];
+            // Preload the audio
+            audioElement.load();
+        }
+
+        function playAudio() {
+            if (playCount > 0) {
+                audioElement.currentTime = 0; // Reset audio to start
+                audioElement.play()
+                    .catch(e => {
+                        console.error('Error playing audio:', e);
+                        alert('Error playing audio file. Please try again.');
+                    });
+                playCount--;
+                document.getElementById('play-count').textContent = `Plays remaining: ${playCount}`;
+                if (playCount === 0) {
+                    document.getElementById('play-button').disabled = true;
+                }
+            }
+        }
+
+        function submitAnswer() {
+            const answerInput = document.getElementById('answer-input');
+            const answer = answerInput.value.trim();
+            
+            if (!answer) {
+                alert('Please enter an answer before proceeding.');
+                return;
+            }
+
+            answers.push(answer);
+
+            if (currentQuestion < 19) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            const resultData = {
+                student: capitalizeFirstLetter(currentStudent),
+                date: new Date().toISOString().split('T')[0],
+                answers: answers,
+                questionSet: questionBank[currentStudent]
+            };
+
+            // Encode the JSON data using Base64
+            const jsonString = JSON.stringify(resultData, null, 2);
+            const encodedData = btoa(jsonString); // Base64 encode
+
+            const blob = new Blob([encodedData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${capitalizeFirstLetter(currentStudent)} - ${resultData.date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('name-input').value = '';
+        }
+
+        function checkAnswers() {
+            const fileInput = document.getElementById('json-input');
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.innerHTML = '';
+
+            if (fileInput.files.length === 0) {
+                alert('Please select at least one JSON file to check.');
+                return;
+            }
+
+            const files = Array.from(fileInput.files).sort((a, b) => a.name.localeCompare(b.name));
+
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        // Decode the Base64 data
+                        const decodedData = atob(e.target.result); // Base64 decode
+                        const submission = JSON.parse(decodedData); // Parse JSON
+
+                        const correctAnswers = submission.questionSet.answers;
+                        let score = 0;
+
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'student-result';
+                        resultDiv.innerHTML = `
+                            <h3>${submission.student}</h3>
+                            <p>Date: ${submission.date}</p>
+                            <table class="results-table">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Student Answer</th>
+                                    <th>Correct Answer</th>
+                                </tr>
+                                ${submission.answers.map((answer, index) => {
+                                    const isCorrect = answer.toLowerCase() === correctAnswers[index].toLowerCase();
+                                    if (isCorrect) score++;
+                                    return `
+                                        <tr>
+                                            <td>${index + 1}</td>
+                                            <td class="${isCorrect ? '' : 'incorrect'}">${answer} ${isCorrect ? '<span class="correct-mark">√</span>' : ''}</td>
+                                            <td>${correctAnswers[index]}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </table>
+                            <p>Score: ${score}/20 (${(score/20*100).toFixed(1)}%)</p>
+                        `;
+                        resultsContainer.appendChild(resultDiv);
+                    } catch (error) {
+                        console.error('Error parsing JSON:', error);
+                        alert(`Error parsing file: ${file.name}`);
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
+
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Get the currently focused element
+            const activeElement = document.activeElement;
+            const nameInput = document.getElementById('name-input');
+            const passwordInput = document.getElementById('password-input');
+            const answerInput = document.getElementById('answer-input');
+            
+            // Handle Enter key
+            if (e.key === 'Enter') {
+                if (activeElement === nameInput || (!nameInput.value && !document.getElementById('login-section').classList.contains('hidden'))) {
+                    checkName();
+                    e.preventDefault();
+                } else if (activeElement === passwordInput || (!passwordInput.value && !document.getElementById('password-section').classList.contains('hidden'))) {
+                    checkPassword();
+                    e.preventDefault();
+                } else if (!document.getElementById('quiz-section').classList.contains('hidden')) {
+                    submitAnswer();
+                    e.preventDefault();
+                }
+            }
+            
+            // Handle Space key for audio playback
+            else if (e.key === ' ' || e.key === 'Spacebar') {
+                // Only prevent default if we're not in an input field
+                if (activeElement.tagName !== 'INPUT' && !document.getElementById('quiz-section').classList.contains('hidden')) {
+                    e.preventDefault();
+                    playAudio();
+                }
+            }
+            
+            // Handle arrow keys for datalist navigation
+            else if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !document.getElementById('quiz-section').classList.contains('hidden')) {
+                const modes = ['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Mixolydian', 'Aeolian', 'Locrian'];
+                const currentValue = answerInput.value;
+                let currentIndex = modes.indexOf(currentValue);
+                
+                if (e.key === 'ArrowDown') {
+                    currentIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % modes.length;
+                } else {
+                    currentIndex = currentIndex === -1 ? modes.length - 1 : (currentIndex - 1 + modes.length) % modes.length;
+                }
+                
+                answerInput.value = modes[currentIndex];
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-check answers when files are selected
+            document.getElementById('json-input').addEventListener('change', function(e) {
+                checkAnswers();
+            });
+        });
+
+        // Focus the name input when the page loads
+        window.addEventListener('load', function() {
+            document.getElementById('name-input').focus();
+        });
+
+        // Prevent form submission on enter
+        document.addEventListener('submit', function(e) {
+            e.preventDefault();
+        });
+
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.target.id === 'password-section' && 
+                    !mutation.target.classList.contains('hidden')) {
+                    document.getElementById('password-input').focus();
+                }
+            });
+        });
+
+        observer.observe(document.getElementById('password-section'), {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+
+        // Add input event listeners to handle auto-completion
+        document.getElementById('answer-input').addEventListener('input', function(e) {
+            const value = e.target.value;
+            const modes = ['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Mixolydian', 'Aeolian', 'Locrian'];
+            
+            // Auto-complete if partial match is found
+            const match = modes.find(mode => 
+                mode.toLowerCase().startsWith(value.toLowerCase())
+            );
+            
+            if (match && value.length > 0) {
+                e.target.value = match;
+            }
+        });
+
+    </script>
+</body>
+</html>
