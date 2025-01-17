@@ -112,12 +112,6 @@
             </div>
         </div>
 
-        <div id="password-section" class="hidden">
-            <h2>Teacher Mode</h2>
-            <input type="password" id="password-input" placeholder="Enter password" autofocus>
-            <button onclick="checkPassword()">Login</button>
-        </div>
-
         <div id="teacher-section" class="hidden">
             <h2>Teacher Mode</h2>
             <input type="file" id="json-input" accept=".json" multiple>
@@ -301,61 +295,136 @@
         }
 
         function checkAnswers() {
-            const fileInput = document.getElementById('json-input');
-            const resultsContainer = document.getElementById('results-container');
-            resultsContainer.innerHTML = '';
+        const fileInput = document.getElementById('json-input');
+        const resultsContainer = document.getElementById('results-container');
+        resultsContainer.innerHTML = '';
 
-            if (fileInput.files.length === 0) {
-                alert('Please select at least one JSON file to check.');
-                return;
-            }
+        if (fileInput.files.length === 0) {
+            alert('Please select at least one JSON file to check.');
+            return;
+        }
 
-            const files = Array.from(fileInput.files).sort((a, b) => a.name.localeCompare(b.name));
+        const studentOrder = [
+            'Ben', 'Howard', 'Terry', 'Alice', 'Vincent', 'Tiger', 
+            'Chris', 'Lucy', 'Diego', 'Hailey', 'Eileen', 'Angelina', 
+            'Serena', 'Catherine', 'Andrew', 'Jennifer'
+        ];
 
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        // Decode the Base64 data
-                        const decodedData = atob(e.target.result); // Base64 decode
-                        const submission = JSON.parse(decodedData); // Parse JSON
+        const files = Array.from(fileInput.files);
+        const results = [];
 
-                        const correctAnswers = submission.questionSet.answers;
-                        let score = 0;
-
-                        const resultDiv = document.createElement('div');
-                        resultDiv.className = 'student-result';
-                        resultDiv.innerHTML = `
-                            <h3>${submission.student}</h3>
-                            <p>Date: ${submission.date}</p>
-                            <table class="results-table">
-                                <tr>
-                                    <th>#</th>
-                                    <th>Student Answer</th>
-                                    <th>Correct Answer</th>
-                                </tr>
-                                ${submission.answers.map((answer, index) => {
-                                    const isCorrect = answer.toLowerCase() === correctAnswers[index].toLowerCase();
-                                    if (isCorrect) score++;
-                                    return `
-                                        <tr>
-                                            <td>${index + 1}</td>
-                                            <td class="${isCorrect ? '' : 'incorrect'}">${answer} ${isCorrect ? '<span class="correct-mark">√</span>' : ''}</td>
-                                            <td>${correctAnswers[index]}</td>
-                                        </tr>
-                                    `;
-                                }).join('')}
-                            </table>
-                            <p>Score: ${score}/20 (${(score/20*100).toFixed(1)}%)</p>
-                        `;
-                        resultsContainer.appendChild(resultDiv);
-                    } catch (error) {
-                        console.error('Error parsing JSON:', error);
-                        alert(`Error parsing file: ${file.name}`);
+        let filesProcessed = 0;
+        
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const decodedData = atob(e.target.result);
+                    const submission = JSON.parse(decodedData);
+                    results.push(submission);
+                    
+                    filesProcessed++;
+                    if (filesProcessed === files.length) {
+                        displaySortedResults(results);
                     }
-                };
-                reader.readAsText(file);
-            });
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    alert(`Error parsing file: ${file.name}`);
+                    filesProcessed++;
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function displaySortedResults(results) {
+    // Sort results according to studentOrder
+    results.sort((a, b) => {
+        const indexA = studentOrder.indexOf(a.student);
+        const indexB = studentOrder.indexOf(b.student);
+        return indexA - indexB;
+    });
+
+    // Clear existing results
+    resultsContainer.innerHTML = '';
+
+    // Display individual results
+    results.forEach(submission => {
+        const correctAnswers = submission.questionSet.answers;
+        let score = 0;
+
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'student-result';
+        resultDiv.innerHTML = `
+            <h3>${submission.student}</h3>
+            <p>Date: ${submission.date}</p>
+            <table class="results-table">
+                <tr>
+                    <th>#</th>
+                    <th>Student Answer</th>
+                    <th>Correct Answer</th>
+                </tr>
+                ${submission.answers.map((answer, index) => {
+                    const isCorrect = answer.toLowerCase() === correctAnswers[index].toLowerCase();
+                    if (isCorrect) score++;
+                    return `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td class="${isCorrect ? '' : 'incorrect'}">${answer} ${isCorrect ? '<span class="correct-mark">√</span>' : ''}</td>
+                            <td>${correctAnswers[index]}</td>
+                        </tr>
+                    `;
+                }).join('')}
+            </table>
+            <p>Score: ${score}/20 (${(score/20*100).toFixed(1)}%)</p>
+        `;
+        resultsContainer.appendChild(resultDiv);
+    });
+
+    // Create summary spreadsheet
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'summary-table';
+    summaryDiv.style.marginTop = '2rem';
+    summaryDiv.style.overflowX = 'auto';
+
+    // Create a lookup object for quick access to scores
+    const scoreMap = new Map(results.map(r => {
+        const score = r.answers.reduce((acc, ans, idx) => 
+            acc + (ans.toLowerCase() === r.questionSet.answers[idx].toLowerCase() ? 1 : 0), 0);
+        return [r.student, (score/20*100).toFixed(1)];
+    }));
+
+    const table = document.createElement('table');
+    table.style.borderCollapse = 'collapse';
+    table.style.width = '100%';
+    table.style.minWidth = 'max-content';
+
+    // Names row
+    const nameRow = document.createElement('tr');
+    studentOrder.forEach(student => {
+        const th = document.createElement('th');
+        th.style.border = '1px solid #ccc';
+        th.style.padding = '8px';
+        th.textContent = student;
+        nameRow.appendChild(th);
+    });
+
+    // Scores row
+    const scoreRow = document.createElement('tr');
+    studentOrder.forEach(student => {
+        const td = document.createElement('td');
+        td.style.border = '1px solid #ccc';
+        td.style.padding = '8px';
+        td.style.textAlign = 'center';
+        const score = scoreMap.get(student);
+        td.textContent = score ? `${score}%` : 'N/A';
+        scoreRow.appendChild(td);
+    });
+
+    table.appendChild(nameRow);
+    table.appendChild(scoreRow);
+    summaryDiv.appendChild(table);
+    resultsContainer.appendChild(summaryDiv);
+}
         }
 
 
