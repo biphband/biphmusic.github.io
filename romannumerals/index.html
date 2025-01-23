@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: rgb(45, 70, 119);
+            font-family: 'Andika', sans-serif;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .mode-toggle {
+            margin: 20px auto;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 80px;
+            background: rgba(104, 187, 215, 0.296);
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 18px;
+            display: block;
+        }
+
+        .mode-toggle:hover {
+            background: rgba(104, 187, 215, 0.5);
+        }
+
+        .harmonies {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px auto;
+            width: 100%;
+            max-width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .harmony-block {
+            flex: 1;
+            min-width: 0;
+            background: rgba(104, 187, 215, 0.296);
+            padding: 15px 5px;
+            border-radius: 5px;
+            text-align: center;
+            position: relative;
+        }
+
+        .harmony-main {
+            font-family: 'Crimson Pro', serif;
+            font-size: clamp(24px, 5vw, 72px);
+            margin-bottom: 5px;
+            letter-spacing: 0.05em;
+        }
+
+        .harmony-alternate {
+            font-size: clamp(12px, 3vw, 20px);
+            color: #ffffff90;
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            cursor:pointer;
+        }
+
+        .harmony-alternate .tooltip {
+            visibility: hidden;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 1;
+            top: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: max-content;
+            font-size: clamp(10px, 2vw, 14px);
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+        }
+
+        .harmony-alternate:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .harmony-alternate .tooltip::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
+        }
+
+        @media (max-width: 600px) {
+            .harmonies {
+                padding: 0 5px;
+                gap: 5px;
+            }
+
+            .harmony-block {
+                padding: 10px 2px;
+            }
+        }
+
+        .hamburger-menu {
+            position: absolute;
+            margin-left: 7px;
+            top: 20px;
+            left: 13px;
+            z-index: 1000;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 20;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s linear;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-items {
+            position: absolute;
+            top: 25px;
+            left: -250px;
+            background: linear-gradient(135deg, rgba(48, 67, 104, 0.8), rgba(20, 31, 53, 0.8));
+            width: 250px;
+            height: 90vh;
+            padding-top: 20px;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-items.show {
+            left: 0;
+            opacity: 1;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .menu-items.show a {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-items a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-items a:nth-child(1) { transition-delay: 0.1s; }
+.menu-items a:nth-child(2) { transition-delay: 0.2s; }
+.menu-items a:nth-child(3) { transition-delay: 0.3s; }
+.menu-items a:nth-child(4) { transition-delay: 0.4s; }
+.menu-items a:nth-child(5) { transition-delay: 0.5s; }
+.menu-items a:nth-child(6) { transition-delay: 0.6s; }
+.menu-items a:nth-child(7) { transition-delay: 0.7s; }
+.menu-items a:nth-child(8) { transition-delay: 0.8s; }
+.menu-items a:nth-child(9) { transition-delay: 0.9s; }
+.menu-items a:nth-child(10) { transition-delay: 1.0s; }
+.menu-items a:nth-child(11) { transition-delay: 1.1s; }
+
+        .menu-title {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .logocontainer {
+    min-height: 10vh;
+    padding-bottom: 50px;
+}
+
+.logo {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 25vh;
+    height: auto;
+    z-index: 10; 
+}
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
+    <div class="hamburger-menu">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="menu-items" id="menu-items">
+            <div class="menu-title">BIPH Music</div>
+            <a href="https://biphmusic.github.io/">Home</a>
+            <a href="https://biphmusic.github.io/dailysightsinging/">Daily Sight Singing</a>
+            <a href="https://biphmusic.github.io/wordwall/">Word Wall</a>
+            <a href="https://biphmusic.github.io/flashcards/">Flash Cards</a>
+            <a href="https://biphmusic.github.io/dice/">Dice Simulator</a>
+            <a href="https://biphmusic.github.io/chords/">Chord Quality</a>
+            <a href="https://biphmusic.github.io/progressions/">Chord Progressions</a>
+            <a href="https://biphmusic.github.io/piano/">Web Piano</a>
+            <a href="https://biphmusic.github.io/units/">AP Units</a>
+            <a href="mailto:garrison.tubbs-biph@basischina.com">Contact</a>
+            
+            <div class="menu-footer">© Garrison Tubbs 2024</div>
+        </div>
+    </div>
+
+    <button class="mode-toggle" onclick="toggleMode()">Major</button>
+    <div class="harmonies" id="harmonies"></div>
+
+    <div class="logocontainer">        
+        <img src="../icons/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
+    </div>
+
+    <script>
+        const scaleHarmonies = {
+            major: [
+                { main: 'I' },
+                { main: 'ii' },
+                { main: 'iii' },
+                { main: 'IV' },
+                { main: 'V' },
+                { main: 'vi' },
+                { main: 'viiº' }
+            ],
+            minor: [
+                { main: 'i' },
+                { main: 'iiº', alternate: 'ii', description: 'raised 6' },
+                { main: 'III', alternate: 'III+', description: 'raised 7' },
+                { main: 'iv', alternate: 'IV', description: 'raised 7' },
+                { main: 'V', alternate: 'v', description: 'flat 7' },
+                { main: 'VI', alternate: 'viº', description: 'raised 6' },
+                { main: 'VII', alternate: 'viiº', description: 'raised 7' }
+            ]
+        };
+
+        let currentMode = 'major';
+
+        function toggleMode() {
+            currentMode = currentMode === 'major' ? 'minor' : 'major';
+            const button = document.querySelector('.mode-toggle');
+            button.textContent = currentMode.charAt(0).toUpperCase() + currentMode.slice(1);
+            updateHarmonies();
+        }
+
+        function updateHarmonies() {
+            const harmoniesContainer = document.getElementById('harmonies');
+            harmoniesContainer.innerHTML = '';
+
+            const currentScale = scaleHarmonies[currentMode];
+
+            currentScale.forEach(harmony => {
+                const block = document.createElement('div');
+                block.className = 'harmony-block';
+
+                const mainDiv = document.createElement('div');
+                mainDiv.className = 'harmony-main';
+                mainDiv.textContent = harmony.main;
+                block.appendChild(mainDiv);
+
+                if (harmony.alternate) {
+                    const altDiv = document.createElement('div');
+                    altDiv.className = 'harmony-alternate';
+                    altDiv.textContent = harmony.alternate;
+                    
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = harmony.description;
+                    altDiv.appendChild(tooltip);
+                    
+                    block.appendChild(altDiv);
+                }
+
+                harmoniesContainer.appendChild(block);
+            });
+        }
+
+        // Initial render
+        updateHarmonies();
+
+                 // Hamburger menu functionality
+    const menuToggle = document.querySelector('.menu-toggle');
+    const menuItems = document.querySelector('.menu-items');
+    
+    menuToggle.addEventListener('click', () => {
+        menuToggle.classList.toggle('open');
+        menuItems.classList.toggle('show');
+    });
+    
+    // Close the menu when clicking outside
+    document.addEventListener('click', (event) => {
+        // Check if the click was outside the menu and the toggle button
+        if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+            menuToggle.classList.remove('open');
+            menuItems.classList.remove('show');
+        }
+    });
+    </script>
+</body>
+</html>
