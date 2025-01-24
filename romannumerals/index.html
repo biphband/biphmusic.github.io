@@ -148,23 +148,32 @@
         }
 
         function displayChord(chord) {
-            const chordDisplay = document.getElementById('chord-display');
-            chordDisplay.textContent = chord;
-            chordDisplay.classList.add('visible');
-            
-            // Clear any existing timeout
-            if (chordDisplayTimeout) {
-                clearTimeout(chordDisplayTimeout);
-            }
-            
-            // Set new timeout
-            chordDisplayTimeout = setTimeout(() => {
-                chordDisplay.classList.remove('visible');
-                setTimeout(() => {
-                    chordDisplay.textContent = '';
-                }, 500); // Wait for fade out animation to complete
-            }, 5000);
+        const chordDisplay = document.getElementById('chord-display');
+        
+        // Get the current key from the display
+        const currentKeyDisplay = document.querySelector('.current-key-display');
+        const currentKey = currentKeyDisplay.textContent.split(' ')[0]; // Extract just the key name
+        
+        // Get the actual chord name based on the current key
+        const actualChord = getChord(chord, currentKey);
+        
+        // Display the chord
+        chordDisplay.textContent = actualChord;
+        chordDisplay.classList.add('visible');
+        
+        // Clear any existing timeout
+        if (chordDisplayTimeout) {
+            clearTimeout(chordDisplayTimeout);
         }
+        
+        // Set new timeout
+        chordDisplayTimeout = setTimeout(() => {
+            chordDisplay.classList.remove('visible');
+            setTimeout(() => {
+                chordDisplay.textContent = 'Click a numeral';
+            }, 500); // Wait for fade out animation to complete
+        }, 5000);
+    }
 
         function getChord(roman, key) {
     const majorChords = ['', 'm', 'm', '', '', 'm', 'dim'];
@@ -307,48 +316,43 @@ function raiseNote(note) {
 }
 
 function updateHarmonies() {
-    const harmoniesContainer = document.getElementById('harmonies');
-    harmoniesContainer.innerHTML = '';
+        const harmoniesContainer = document.getElementById('harmonies');
+        harmoniesContainer.innerHTML = '';
 
-    const currentScale = scaleHarmonies[currentMode];
+        const currentScale = scaleHarmonies[currentMode];
 
-    currentScale.forEach(harmony => {
-        const block = document.createElement('div');
-        block.className = 'harmony-block';
+        currentScale.forEach(harmony => {
+            const block = document.createElement('div');
+            block.className = 'harmony-block';
 
-        const mainDiv = document.createElement('div');
-        mainDiv.className = 'harmony-main';
-        mainDiv.textContent = harmony.main;
-        mainDiv.onclick = () => {
-            const key = document.getElementById('current-key').textContent.split(' ')[0];
-            const chord = getChord(harmony.main, key);
-            displayChord(chord);
-        };
-        block.appendChild(mainDiv);
-
-        if (harmony.alternate) {
-            const altDiv = document.createElement('div');
-            altDiv.className = 'harmony-alternate';
-            altDiv.textContent = harmony.alternate;
-            
-            // Add click handler for alternate harmony
-            altDiv.onclick = () => {
-                const key = document.getElementById('current-key').textContent.split(' ')[0];
-                const chord = getChord(harmony.alternate, key);
-                displayChord(chord);
+            const mainDiv = document.createElement('div');
+            mainDiv.className = 'harmony-main';
+            mainDiv.textContent = harmony.main;
+            mainDiv.onclick = () => {
+                displayChord(harmony.main);
             };
-            
-            const tooltip = document.createElement('span');
-            tooltip.className = 'tooltip';
-            tooltip.textContent = harmony.description;
-            altDiv.appendChild(tooltip);
-            
-            block.appendChild(altDiv);
-        }
+            block.appendChild(mainDiv);
 
-        harmoniesContainer.appendChild(block);
-    });
-}
+            if (harmony.alternate) {
+                const altDiv = document.createElement('div');
+                altDiv.className = 'harmony-alternate';
+                altDiv.textContent = harmony.alternate;
+                
+                altDiv.onclick = () => {
+                    displayChord(harmony.alternate);
+                };
+                
+                const tooltip = document.createElement('span');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = harmony.description;
+                altDiv.appendChild(tooltip);
+                
+                block.appendChild(altDiv);
+            }
+
+            harmoniesContainer.appendChild(block);
+        });
+    }
 
         // Initial render
         updateHarmonies();
