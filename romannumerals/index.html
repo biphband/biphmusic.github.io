@@ -79,6 +79,8 @@
 
         .harmonies {
             display: flex;
+            background: rgba(104, 187, 215, 0.202);
+            border-radius: 5px;
             justify-content: center;
             gap: 10px;
             margin: 20px auto;
@@ -91,9 +93,7 @@
         .harmony-block {
             flex: 1;
             min-width: 0;
-            background: rgba(104, 187, 215, 0.296);
             padding: 15px 5px;
-            border-radius: 5px;
             text-align: center;
             position: relative;
         }
@@ -103,16 +103,30 @@
             font-size: clamp(24px, 5vw, 72px);
             margin-bottom: 5px;
             letter-spacing: 0.05em;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .harmony-main:hover {
+            background: rgba(104, 187, 215, 0.5);
         }
 
         .harmony-alternate {
             font-size: clamp(12px, 3vw, 20px);
             color: #ffffff90;
             margin-top: 5px;
-            padding-top: 5px;
+            padding: 5px;
             border-top: 1px solid rgba(255, 255, 255, 0.2);
             position: relative;
-            cursor:pointer;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .harmony-alternate:hover {
+            background: rgba(104, 187, 215, 0.5);
         }
 
         .harmony-alternate .tooltip {
@@ -293,6 +307,64 @@ h1 {
             margin-top: -0.7em;
             font-size: 40px;
         }
+        .key-selector {
+        text-align: center;
+        margin: 20px auto;
+        font-size: 24px;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .key-arrows {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .key-arrow {
+        background: rgba(104, 187, 215, 0.296);
+        border: none;
+        color: white;
+        padding: 5px 15px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s;
+    }
+
+    .key-arrow:hover {
+        background: rgba(104, 187, 215, 0.5);
+    }
+
+    .chord-display {
+        margin: 20px auto;
+        width: 200px;
+        height: 200px;
+        background: rgba(104, 187, 215, 0.296);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 48px;
+        font-family: 'Crimson Pro', serif;
+        border-radius: 10px;
+        color: white;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    #chord-display.visible {
+            opacity: 1;
+        }
+
+    .harmony-block {
+        cursor: pointer;
+    }
+
+    #current-key {
+        font-size: 52px;
+    }
     </style>
 </head>
 <body>
@@ -329,6 +401,19 @@ h1 {
     <button class="mode-toggle" onclick="toggleMode()">Major</button>
     <div class="harmonies" id="harmonies"></div>
 
+    <div class="key-selector">
+        <span>In the key of:</span>
+        <div class="key-arrows">
+            <button class="key-arrow" onclick="changeKey('up')">↑</button>
+            <button class="key-arrow" onclick="changeKey('down')">↓</button>
+        </div>
+        <span id="current-key">C</span>
+    </div>
+
+    <div class="chord-display" id="chord-display">
+        Click a numeral
+    </div>
+
     <div class="logocontainer">        
         <img src="../icons/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
     </div>
@@ -346,76 +431,281 @@ h1 {
             ],
             minor: [
                 { main: 'i' },
-                { main: 'iiº', alternate: 'ii', description: 'raised 6' },
-                { main: 'III', alternate: 'III+', description: 'raised 7' },
-                { main: 'iv', alternate: 'IV', description: 'raised 7' },
-                { main: 'V', alternate: 'v', description: 'flat 7' },
-                { main: 'VI', alternate: 'viº', description: 'raised 6' },
-                { main: 'VII', alternate: 'viiº', description: 'raised 7' }
+                { main: 'iiº', alternate: 'ii', description: 'if you have a raised 6' },
+                { main: 'III', alternate: 'III+', description: 'if you have a raised 7' },
+                { main: 'iv', alternate: 'IV', description: 'if you have a raised 7' },
+                { main: 'V', alternate: 'v', description: 'if you have a flat 7' },
+                { main: 'VI', alternate: 'viº', description: 'if you have a raised 6' },
+                { main: 'VII', alternate: 'viiº', description: 'if you have a raised 7' }
             ]
         };
 
         let currentMode = 'major';
+        let chordDisplayTimeout;
 
         function toggleMode() {
             currentMode = currentMode === 'major' ? 'minor' : 'major';
             const button = document.querySelector('.mode-toggle');
             button.textContent = currentMode.charAt(0).toUpperCase() + currentMode.slice(1);
             updateHarmonies();
+            updateKeyDisplay();
         }
 
-        function updateHarmonies() {
-            const harmoniesContainer = document.getElementById('harmonies');
-            harmoniesContainer.innerHTML = '';
+        function updateKeyDisplay() {
+            const keyElement = document.getElementById('current-key');
+            const key = isSharpDirection ? keys.sharp[currentKeyIndex] : keys.flat[currentKeyIndex];
+            keyElement.textContent = `${key} ${currentMode}`;
+        }
 
-            const currentScale = scaleHarmonies[currentMode];
+        const keys = {
+            sharp: ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#'],
+            flat: ['C', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb']
+        };
 
-            currentScale.forEach(harmony => {
-                const block = document.createElement('div');
-                block.className = 'harmony-block';
+        let currentKeyIndex = 0;
+        let isSharpDirection = true;
 
-                const mainDiv = document.createElement('div');
-                mainDiv.className = 'harmony-main';
-                mainDiv.textContent = harmony.main;
-                block.appendChild(mainDiv);
-
-                if (harmony.alternate) {
-                    const altDiv = document.createElement('div');
-                    altDiv.className = 'harmony-alternate';
-                    altDiv.textContent = harmony.alternate;
-                    
-                    const tooltip = document.createElement('span');
-                    tooltip.className = 'tooltip';
-                    tooltip.textContent = harmony.description;
-                    altDiv.appendChild(tooltip);
-                    
-                    block.appendChild(altDiv);
+        function changeKey(direction) {
+            if (direction === 'up') {
+                if (!isSharpDirection) {
+                    isSharpDirection = true;
+                    currentKeyIndex = keys.sharp.indexOf(keys.flat[currentKeyIndex]);
                 }
-
-                harmoniesContainer.appendChild(block);
-            });
+                currentKeyIndex = (currentKeyIndex + 1) % keys.sharp.length;
+            } else {
+                if (isSharpDirection) {
+                    isSharpDirection = false;
+                    currentKeyIndex = keys.flat.indexOf(keys.sharp[currentKeyIndex]);
+                }
+                currentKeyIndex = (currentKeyIndex + 1) % keys.flat.length;
+            }
+            updateKeyDisplay();
         }
+
+        function displayChord(chord) {
+            const chordDisplay = document.getElementById('chord-display');
+            chordDisplay.textContent = chord;
+            chordDisplay.classList.add('visible');
+            
+            // Clear any existing timeout
+            if (chordDisplayTimeout) {
+                clearTimeout(chordDisplayTimeout);
+            }
+            
+            // Set new timeout
+            chordDisplayTimeout = setTimeout(() => {
+                chordDisplay.classList.remove('visible');
+                setTimeout(() => {
+                    chordDisplay.textContent = '';
+                }, 500); // Wait for fade out animation to complete
+            }, 5000);
+        }
+
+        function getChord(roman, key) {
+    const majorChords = ['', 'm', 'm', '', '', 'm', 'dim'];
+    const minorChords = ['m', 'dim', '', 'm', '', '', ''];
+    
+    const notes = {
+        // Major scales
+        'C': {
+            major: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+            minor: ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb']
+        },
+        'G': {
+            major: ['G', 'A', 'B', 'C', 'D', 'E', 'F#'],
+            minor: ['G', 'A', 'Bb', 'C', 'D', 'Eb', 'F']
+        },
+        'D': {
+            major: ['D', 'E', 'F#', 'G', 'A', 'B', 'C#'],
+            minor: ['D', 'E', 'F', 'G', 'A', 'Bb', 'C']
+        },
+        'A': {
+            major: ['A', 'B', 'C#', 'D', 'E', 'F#', 'G#'],
+            minor: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+        },
+        'E': {
+            major: ['E', 'F#', 'G#', 'A', 'B', 'C#', 'D#'],
+            minor: ['E', 'F#', 'G', 'A', 'B', 'C', 'D']
+        },
+        'B': {
+            major: ['B', 'C#', 'D#', 'E', 'F#', 'G#', 'A#'],
+            minor: ['B', 'C#', 'D', 'E', 'F#', 'G', 'A']
+        },
+        'F#': {
+            major: ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'E#'],
+            minor: ['F#', 'G#', 'A', 'B', 'C#', 'D', 'E']
+        },
+        'C#': {
+            major: ['C#', 'D#', 'E#', 'F#', 'G#', 'A#', 'B#'],
+            minor: ['C#', 'D#', 'E', 'F#', 'G#', 'A', 'B']
+        },
+        'F': {
+            major: ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'],
+            minor: ['F', 'G', 'Ab', 'Bb', 'C', 'Db', 'Eb']
+        },
+        'Bb': {
+            major: ['Bb', 'C', 'D', 'Eb', 'F', 'G', 'A'],
+            minor: ['Bb', 'C', 'Db', 'Eb', 'F', 'Gb', 'Ab']
+        },
+        'Eb': {
+            major: ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'],
+            minor: ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb', 'Db']
+        },
+        'Ab': {
+            major: ['Ab', 'Bb', 'C', 'Db', 'Eb', 'F', 'G'],
+            minor: ['Ab', 'Bb', 'Cb', 'Db', 'Eb', 'Fb', 'Gb']
+        },
+        'Db': {
+            major: ['Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'C'],
+            minor: ['Db', 'Eb', 'Fb', 'Gb', 'Ab', 'Bbb', 'Cb']
+        },
+        'Gb': {
+            major: ['Gb', 'Ab', 'Bb', 'Cb', 'Db', 'Eb', 'F'],
+            minor: ['Gb', 'Ab', 'Bbb', 'Cb', 'Db', 'Ebb', 'Fb']
+        },
+        'Cb': {
+            major: ['Cb', 'Db', 'Eb', 'Fb', 'Gb', 'Ab', 'Bb'],
+            minor: ['Cb', 'Db', 'Ebb', 'Fb', 'Gb', 'Abb', 'Bbb']
+        }
+    };
+
+    const romanToIndex = {
+        'I': 0, 'i': 0,
+        'II': 1, 'ii': 1, 'iiº': 1,
+        'III': 2, 'iii': 2, 'III+': 2,
+        'IV': 3, 'iv': 3,
+        'V': 4, 'v': 4,
+        'VI': 5, 'vi': 5, 'viº': 5,
+        'VII': 6, 'vii': 6, 'viiº': 6
+    };
+
+    const index = romanToIndex[roman];
+    const noteArray = notes[key][currentMode];
+    let quality = currentMode === 'major' ? majorChords[index] : minorChords[index];
+    
+    // Handle special cases for minor mode alternate chords
+    if (currentMode === 'minor') {
+        if (roman === 'III+') {
+            quality = 'Aug';  // Changed from '+' to 'Aug'
+        } else if (roman === 'viº' || roman === 'viiº') {
+            quality = 'dim';
+            // For these specific diminished chords, we need to raise the note
+            if (roman === 'viº') {
+                // Raise the sixth degree
+                const normalNote = noteArray[5];  // VI degree
+                return raiseNote(normalNote) + quality;
+            } else if (roman === 'viiº') {
+                // Raise the seventh degree
+                const normalNote = noteArray[6];  // VII degree
+                return raiseNote(normalNote) + quality;
+            }
+        } else if (roman === 'ii') {
+            quality = 'm';  // Changed from 'dim' to 'm' for ii
+        } else if (roman === 'v') {
+            quality = 'm';  // Ensures lowercase v is minor
+        } else if (roman === 'IV') {
+            quality = '';  // Makes IV major in minor
+        }
+    }
+    
+    return noteArray[index] + quality;
+}
+
+// Helper function to raise a note by a semitone
+function raiseNote(note) {
+    const flatToNatural = {
+        'Bb': 'B',
+        'Eb': 'E',
+        'Ab': 'A',
+        'Db': 'D',
+        'Gb': 'G',
+        'Cb': 'C',
+        'Fb': 'F'
+    };
+    
+    const naturalToSharp = {
+        'B': 'B',  // B doesn't need to be raised
+        'E': 'E',  // E doesn't need to be raised
+        'A': 'A',  // A doesn't need to be raised
+        'D': 'D',  // D doesn't need to be raised
+        'G': 'G',  // G doesn't need to be raised
+        'C': 'C#',
+        'F': 'F#'
+    };
+    
+    // If it's a flat note, first convert to natural
+    if (note in flatToNatural) {
+        return flatToNatural[note];
+    }
+    // Then convert natural to sharp if needed
+    return naturalToSharp[note] || note;
+}
+
+function updateHarmonies() {
+    const harmoniesContainer = document.getElementById('harmonies');
+    harmoniesContainer.innerHTML = '';
+
+    const currentScale = scaleHarmonies[currentMode];
+
+    currentScale.forEach(harmony => {
+        const block = document.createElement('div');
+        block.className = 'harmony-block';
+
+        const mainDiv = document.createElement('div');
+        mainDiv.className = 'harmony-main';
+        mainDiv.textContent = harmony.main;
+        mainDiv.onclick = () => {
+            const key = document.getElementById('current-key').textContent.split(' ')[0];
+            const chord = getChord(harmony.main, key);
+            displayChord(chord);
+        };
+        block.appendChild(mainDiv);
+
+        if (harmony.alternate) {
+            const altDiv = document.createElement('div');
+            altDiv.className = 'harmony-alternate';
+            altDiv.textContent = harmony.alternate;
+            
+            // Add click handler for alternate harmony
+            altDiv.onclick = () => {
+                const key = document.getElementById('current-key').textContent.split(' ')[0];
+                const chord = getChord(harmony.alternate, key);
+                displayChord(chord);
+            };
+            
+            const tooltip = document.createElement('span');
+            tooltip.className = 'tooltip';
+            tooltip.textContent = harmony.description;
+            altDiv.appendChild(tooltip);
+            
+            block.appendChild(altDiv);
+        }
+
+        harmoniesContainer.appendChild(block);
+    });
+}
 
         // Initial render
         updateHarmonies();
+        updateKeyDisplay();
 
-                 // Hamburger menu functionality
-    const menuToggle = document.querySelector('.menu-toggle');
-    const menuItems = document.querySelector('.menu-items');
-    
-    menuToggle.addEventListener('click', () => {
-        menuToggle.classList.toggle('open');
-        menuItems.classList.toggle('show');
-    });
-    
-    // Close the menu when clicking outside
-    document.addEventListener('click', (event) => {
-        // Check if the click was outside the menu and the toggle button
-        if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
-            menuToggle.classList.remove('open');
-            menuItems.classList.remove('show');
-        }
-    });
+        // Hamburger menu functionality
+        const menuToggle = document.querySelector('.menu-toggle');
+        const menuItems = document.querySelector('.menu-items');
+        
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('open');
+            menuItems.classList.toggle('show');
+        });
+        
+        // Close the menu when clicking outside
+        document.addEventListener('click', (event) => {
+            // Check if the click was outside the menu and the toggle button
+            if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+                menuToggle.classList.remove('open');
+                menuItems.classList.remove('show');
+            }
+        });
     </script>
 </body>
 </html>
