@@ -49,6 +49,7 @@
             <button class="key-arrow" onclick="changeKey('down')">↓</button>
         </div>
         <div class="current-key-display">C Major</div>
+        <div class="warning-message" id="warning-message">non-standard scale*</div>
     </div>
 
     <div class="feature-menu-container" onclick="toggleFeatureMenu()">
@@ -118,13 +119,25 @@
 
         function updateKeyDisplay() {
             const keyElement = document.querySelector('.current-key-display');
+            const warningMessage = document.getElementById('warning-message');
+            const harmoniesContainer = document.getElementById('harmonies');
             const key = isSharpDirection ? keys.sharp[currentKeyIndex] : keys.flat[currentKeyIndex];
             keyElement.textContent = `${key} ${currentMode}`;
+
+            // Show warning message and disable harmonies for Gb Minor and Cb Minor
+            if ((key === 'Gb' || key === 'Cb') && currentMode === 'minor') {
+                warningMessage.style.display = 'block';
+                harmoniesContainer.classList.add('disabled');
+            } else {
+                warningMessage.style.display = 'none';
+                harmoniesContainer.classList.remove('disabled');
+            }
         }
 
         const keys = {
             sharp: ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#'],
             flat: ['C', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb']
+            
         };
 
         let currentKeyIndex = 0;
@@ -149,7 +162,7 @@
 
         function displayChord(chord) {
         const chordDisplay = document.getElementById('chord-display');
-        
+
         // Get the current key from the display
         const currentKeyDisplay = document.querySelector('.current-key-display');
         const currentKey = currentKeyDisplay.textContent.split(' ')[0]; // Extract just the key name
