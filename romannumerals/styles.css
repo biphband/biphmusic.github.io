@@ -5,6 +5,10 @@ body {
     margin: 0;
     padding: 20px;
     line-height: 1.6;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .background {
@@ -51,23 +55,28 @@ body {
     100% { opacity: 0.7; transform: scale(1.1); }
 }
 
-.mode-toggle {
-    margin: 20px auto;
-    margin-top: -10px;
-    padding: 10px 30px;
-    border: none;
-    border-radius: 5px;
-    background: rgba(104, 187, 215, 0.296);
-    color: white;
-    cursor: pointer;
-    transition: background 0.3s;
-    font-size: 18px;
-    display: block;
+.controls {
+    text-align: center;
+    font-size: 20px;
+    padding-bottom: 10px;
 }
 
-.mode-toggle:hover {
-    background: rgba(104, 187, 215, 0.5);
-}
+.mode-toggle,
+        .sevenths-toggle {
+            padding: 5px 15px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(104, 187, 215, 0.296);
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: inherit;
+        }
+
+        .mode-toggle:hover,
+        .sevenths-toggle:hover {
+            background: rgba(104, 187, 215, 0.5);
+        }
 
 .harmonies {
     display: flex;
@@ -154,7 +163,7 @@ body {
     font-size: clamp(10px, 2vw, 14px);
     opacity: 0;
     transition: opacity 0.3s;
-    white-space: nowrap;
+    white-space: normal;
 }
 
 .harmony-alternate:hover .tooltip {
@@ -334,6 +343,8 @@ h1 {
 }
 
 .container {
+    margin-top: 0px;
+    margin-bottom: -20px;
     position: relative;
     width: 100%;
 }
@@ -390,12 +401,12 @@ margin: 20px auto;
 width: 150px;
 height: 130px;
 margin-top: 130px;
-background: rgba(104, 187, 215, 0.221);
+background: rgba(38, 232, 183, 0.479);
 display: flex;
 justify-content: center;
 align-items: center;
-font-size: 48px;
-font-family: 'Crimson Pro', serif;
+font-size: 40px;
+font-family: 'Andika', sans-serif;
 border-radius: 10px;
 color: white;
 opacity: 0;
@@ -425,7 +436,7 @@ width: 20px;
 height: 20px;
 position: relative;
 margin-top: 10px;
-margin-left: -123px;
+margin-left: -125px;
 transition: transform 0.1s;
 }
 
@@ -492,7 +503,7 @@ transition: transform 0.2s;
 }
 
 .feature-item:hover {
-transform: translateX(2px);
+transform: translateX(1.5px);
 }
 
 .feature-text {

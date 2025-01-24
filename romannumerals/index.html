@@ -16,6 +16,7 @@
     <h1 class="Title">BIPH Music</h1>
     <h1 class="Subtitle">Roman Numerals</h1>
 
+
     <div class="hamburger-menu">
         <button class="menu-toggle" onclick="toggleMenu()">
             <span></span>
@@ -39,7 +40,13 @@
         </div>
     </div>
 
-    <button class="mode-toggle" onclick="toggleMode()">Major</button>
+    <div class="controls">
+            <button class="sevenths-toggle" onclick="toggleSevenths()">Triads</button>
+            in a
+            <button class="mode-toggle" onclick="toggleMode()">Major</button>
+            Key
+    </div>
+
     <div class="harmonies" id="harmonies"></div>
 
     <div class="container">
@@ -97,12 +104,12 @@
             ],
             minor: [
                 { main: 'i' },
-                { main: 'iiº', alternate: 'ii', description: 'if you have a raised 6' },
-                { main: 'III', alternate: 'III+', description: 'if you have a raised 7' },
-                { main: 'iv', alternate: 'IV', description: 'if you have a raised 6' },
-                { main: 'V', alternate: 'v', description: 'if you have a flat 7' },
-                { main: 'VI', alternate: 'viº', description: 'if you have a raised 6' },
-                { main: 'VII', alternate: 'viiº', description: 'if you have a raised 7' }
+                { main: 'iiº', alternate: 'ii', description: 'if you have a raised 6'},
+                { main: 'III', alternate: 'III+', description: 'if you have a raised 7'},
+                { main: 'iv', alternate: 'IV', description: 'if you have a raised 6'},
+                { main: 'V', alternate: 'v', description: 'if you have a flat 7'},
+                { main: 'VI', alternate: 'viº', description: 'if you have a raised 6'},
+                { main: 'VII', alternate: '*viiº', description: 'if you have a raised 7<br> *common'}
             ]
         };
 
@@ -183,9 +190,9 @@
         chordDisplayTimeout = setTimeout(() => {
             chordDisplay.classList.remove('visible');
             setTimeout(() => {
-                chordDisplay.textContent = 'Click a numeral';
-            }, 500); // Wait for fade out animation to complete
-        }, 5000);
+                chordDisplay.textContent = '';
+            }, 200); // Wait for fade out animation to complete
+        }, 2000);
     }
 
         function getChord(roman, key) {
@@ -274,14 +281,14 @@
     if (currentMode === 'minor') {
         if (roman === 'III+') {
             quality = 'Aug';  // Changed from '+' to 'Aug'
-        } else if (roman === 'viº' || roman === 'viiº') {
+        } else if (roman === 'viº' || roman === '*viiº') {
             quality = 'dim';
             // For these specific diminished chords, we need to raise the note
             if (roman === 'viº') {
                 // Raise the sixth degree
                 const normalNote = noteArray[5];  // VI degree
                 return raiseNote(normalNote) + quality;
-            } else if (roman === 'viiº') {
+            } else if (roman === '*viiº') {
                 // Raise the seventh degree
                 const normalNote = noteArray[6];  // VII degree
                 return raiseNote(normalNote) + quality;
@@ -357,7 +364,7 @@ function updateHarmonies() {
                 
                 const tooltip = document.createElement('span');
                 tooltip.className = 'tooltip';
-                tooltip.textContent = harmony.description;
+                tooltip.innerHTML = harmony.description; // Change from textContent to innerHTML
                 altDiv.appendChild(tooltip);
                 
                 block.appendChild(altDiv);
@@ -373,25 +380,25 @@ function updateHarmonies() {
 
 
         function toggleFeatureMenu() {
-        const arrow = document.getElementById('arrow');
-        const container = document.querySelector('.feature-menu-container');
-        const featureList = document.getElementById('feature-list');
-        
-        arrow.classList.toggle('rotated');
-        container.classList.toggle('menu-open');
-        featureList.classList.toggle('show');
-    }
+    const arrow = document.getElementById('arrow');
+    const container = document.querySelector('.feature-menu-container');
+    const featureList = document.getElementById('feature-list');
 
-        // Hamburger menu functionality
-        const menuToggle = document.querySelector('.menu-toggle');
-        const menuItems = document.querySelector('.menu-items');
-        
-        menuToggle.addEventListener('click', () => {
-            menuToggle.classList.toggle('open');
-            menuItems.classList.toggle('show');
-        });
-        
-        document.addEventListener('click', (event) => {
+    arrow.classList.toggle('rotated');
+    container.classList.toggle('menu-open');
+    featureList.classList.toggle('show');
+}
+
+// Hamburger menu functionality
+const menuToggle = document.querySelector('.menu-toggle');
+const menuItems = document.querySelector('.menu-items');
+
+menuToggle.addEventListener('click', () => {
+    menuToggle.classList.toggle('open');
+    menuItems.classList.toggle('show');
+});
+
+document.addEventListener('click', (event) => {
     const featureContainer = document.querySelector('.feature-menu-container');
     const arrow = document.getElementById('arrow');
     const featureList = document.getElementById('feature-list');
@@ -408,6 +415,14 @@ function updateHarmonies() {
         featureContainer.classList.remove('menu-open');
         featureList.classList.remove('show');
     }
+});
+
+// Prevent closing the menu when clicking on checklist items
+const checklistItems = document.querySelectorAll('.feature-item input[type="checkbox"]');
+checklistItems.forEach(item => {
+    item.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent the click from bubbling up to the document
+    });
 });
     </script>
 </body>
