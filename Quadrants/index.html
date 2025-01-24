@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadrants</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgb(255, 255, 255);
+            color: white;
+            font-size: 2em;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        input {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 2em;
+            text-align: center;
+        }
+        input:focus {
+            outline: none;
+        }
+        .student {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 15px;
+            color: white;
+            transform: translate(-50%, -50%);
+            transition: all 1s ease-in-out;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .shuffle-btn {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4em;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .shuffle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="box"><input type="text" placeholder=""></div>
+        <div class="box"><input type="text" placeholder=""></div>
+        <div class="box"><input type="text" placeholder=""></div>
+        <div class="box"><input type="text" placeholder=""></div>
+        <button class="shuffle-btn">🔀</button>
+    </div>
+
+        <!--FULL CLASS LIST
+'Ben', 
+'Howard',
+'Terry', 
+'Alice',
+'Vincent', 
+'Tiger', 
+'Chris', 
+'Lucy',
+'Diego', 
+'Hailey', 
+'Eileen', 
+'Angelina',
+'Serena', 
+'Catherine', 
+'Andrew', 
+'Jennifer'
+            -->
+    <script>
+
+const students = [
+'Ben', 
+'Howard',
+'Terry', 
+'Alice',
+'Vincent', 
+'Tiger', 
+'Chris', 
+'Lucy',
+'Diego', 
+'Hailey', 
+'Eileen', 
+'Angelina',
+'Serena', 
+'Catherine', 
+'Andrew', 
+'Jennifer'
+              ];
+
+        const container = document.querySelector('.container');
+        const shuffleBtn = document.querySelector('.shuffle-btn');
+        const containerRect = container.getBoundingClientRect();
+        const centerX = containerRect.width / 2;
+        const centerY = containerRect.height / 2;
+
+        // Create student elements
+        students.forEach(student => {
+            const div = document.createElement('div');
+            div.className = 'student';
+            div.textContent = student;
+            div.style.left = `${centerX}px`;
+            div.style.top = `${centerY}px`;
+            container.appendChild(div);
+        });
+
+        const studentElements = document.querySelectorAll('.student');
+
+        function shuffle() {
+            // Make all students visible
+            studentElements.forEach(student => {
+                student.style.opacity = '1';
+            });
+
+            const quadrants = [[], [], [], []];
+            const shuffledStudents = [...studentElements].sort(() => Math.random() - 0.5);
+            
+            // Distribute students evenly among quadrants
+            shuffledStudents.forEach((student, index) => {
+                quadrants[index % 4].push(student);
+            });
+
+            // Position students within their quadrants
+            quadrants.forEach((quadrantStudents, quadrantIndex) => {
+                const quadrantWidth = containerRect.width / 2;
+                const quadrantHeight = containerRect.height / 2;
+                
+                const baseX = (quadrantIndex % 2) * quadrantWidth;
+                const baseY = Math.floor(quadrantIndex / 2) * quadrantHeight;
+
+                quadrantStudents.forEach(student => {
+                    const randomX = baseX + (Math.random() * 0.6 + 0.2) * quadrantWidth;
+                    const randomY = baseY + (Math.random() * 0.6 + 0.2) * quadrantHeight;
+                    
+                    student.style.left = `${randomX}px`;
+                    student.style.top = `${randomY}px`;
+                });
+            });
+        }
+
+        shuffleBtn.addEventListener('click', shuffle);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const containerRect = container.getBoundingClientRect();
+            const centerX = containerRect.width / 2;
+            const centerY = containerRect.height / 2;
+            
+            studentElements.forEach(student => {
+                student.style.left = `${centerX}px`;
+                student.style.top = `${centerY}px`;
+            });
+        });
+    </script>
+</body>
+</html>
