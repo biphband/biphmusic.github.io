@@ -150,15 +150,12 @@ function updateKeyDisplay() {
     const warningElement = document.getElementById('warning-message');
     const harmoniesContainer = document.getElementById('harmonies');
     
-    console.log('Current Key:', currentKey);
-    console.log('Current Mode:', currentMode);
-    
     if (!displayElement || !warningElement || !harmoniesContainer) {
         console.error('Required elements not found');
         return;
     }
     
-    displayElement.textContent = `${currentKey} ${currentMode}`; 
+    displayElement.textContent = `${currentKey} ${currentMode}`;
     
     // Define theoretical keys that don't work well
     const problematicKeys = {
@@ -166,20 +163,18 @@ function updateKeyDisplay() {
         major: ['G#', 'D#', 'A#']
     };
     
-    console.log('Problematic keys for current mode:', problematicKeys[currentMode]);
-    console.log('Is current key in problematic list?', problematicKeys[currentMode].includes(currentKey));
-    
     const shouldShowWarning = problematicKeys[currentMode].includes(currentKey);
     
-    console.log('Should show warning?', shouldShowWarning);
-    
-    warningElement.style.display = shouldShowWarning ? 'block' : 'none';
-    
     if (shouldShowWarning) {
+        const otherMode = currentMode === 'major' ? 'minor' : 'major';
+        warningElement.innerHTML = `${currentKey} ${currentMode} is a<br>non-standard scale*<br>(${currentKey} ${otherMode} is)`;
         harmoniesContainer.classList.add('disabled');
     } else {
+        warningElement.style.display = 'none';
         harmoniesContainer.classList.remove('disabled');
     }
+    
+    warningElement.style.display = shouldShowWarning ? 'block' : 'none';
 }
 
 
@@ -307,7 +302,7 @@ function updateKeyDisplay() {
     // Handle special cases for minor mode alternate seventh chords
     if (currentMode === 'minor') {
         if (roman === 'III+⁷') {
-            quality = 'Aug⁷';
+            quality = ' Aug⁷';
         } else if (roman === 'viø⁷' || roman === '*viiø⁷' || roman === 'viiø⁷') {
             quality = ' Half-dim⁷';
             if (roman === 'viø⁷') {
@@ -331,7 +326,7 @@ function updateKeyDisplay() {
     // Handle special cases for minor mode alternate triads
     if (currentMode === 'minor') {
         if (roman === 'III+') {
-            quality = 'Aug';
+            quality = ' Aug';
         } else if (roman === 'viº' || roman === '*viiº') {
             quality = 'dim';
             if (roman === 'viº') {
