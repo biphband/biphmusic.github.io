@@ -93,28 +93,36 @@
 
     <script>
         const scaleHarmonies = {
-            major: [
-                { main: 'I' },
-                { main: 'ii' },
-                { main: 'iii' },
-                { main: 'IV' },
-                { main: 'V' },
-                { main: 'vi' },
-                { main: 'viiº' }
-            ],
-            minor: [
-                { main: 'i' },
-                { main: 'iiº', alternate: 'ii', description: 'if you have a raised 6'},
-                { main: 'III', alternate: 'III+', description: 'if you have a raised 7'},
-                { main: 'iv', alternate: 'IV', description: 'if you have a raised 6'},
-                { main: 'V', alternate: 'v', description: 'if you have a flat 7'},
-                { main: 'VI', alternate: 'viº', description: 'if you have a raised 6'},
-                { main: 'VII', alternate: '*viiº', description: 'if you have a raised 7<br> *common'}
-            ]
-        };
+    major: [
+        { main: 'I', seventh: 'I⁷' },
+        { main: 'ii', seventh: 'ii⁷' },
+        { main: 'iii', seventh: 'iii⁷' },
+        { main: 'IV', seventh: 'IV⁷' },
+        { main: 'V', seventh: 'V⁷' },
+        { main: 'vi', seventh: 'vi⁷' },
+        { main: 'viiº', seventh: 'viiø⁷' }
+    ],
+    minor: [
+        { main: 'i', seventh: 'i⁷' },
+        { main: 'iiº', seventh: 'iiø⁷', alternate: 'ii', altSeventh: 'ii⁷', description: 'if you have a raised 6' },
+        { main: 'III', seventh: 'III⁷', alternate: 'III+', altSeventh: 'III+⁷', description: 'if you have a raised 7' },
+        { main: 'iv', seventh: 'iv⁷', alternate: 'IV', altSeventh: 'IV⁷', description: 'if you have a raised 6' },
+        { main: 'V', seventh: 'V⁷', alternate: 'v', altSeventh: 'v⁷', description: 'if you have a flat 7' },
+        { main: 'VI', seventh: 'VI⁷', alternate: 'viº', altSeventh: 'viø⁷', description: 'if you have a raised 6' },
+        { main: 'VII', seventh: 'VII⁷', alternate: '*viiº', altSeventh: '*viiø⁷', description: 'if you have a raised 7<br> *common' }
+    ]
+};
 
         let currentMode = 'major';
         let chordDisplayTimeout;
+        let isSevenths = false;
+
+        function toggleSevenths() {
+            isSevenths = !isSevenths;
+            const button = document.querySelector('.sevenths-toggle');
+            button.textContent = isSevenths ? 'Seventh Chords' : 'Triads';
+            updateHarmonies();
+        }
 
         function toggleMode() {
             currentMode = currentMode === 'major' ? 'minor' : 'major';
@@ -195,12 +203,13 @@
         }, 2000);
     }
 
-        function getChord(roman, key) {
+    function getChord(roman, key) {
     const majorChords = ['', 'm', 'm', '', '', 'm', 'dim'];
     const minorChords = ['m', 'dim', '', 'm', '', '', ''];
+    const majorSevenths = ['Maj⁷', 'min⁷', 'min⁷', 'Maj⁷', '⁷', 'min⁷', 'Half-dim⁷'];
+    const minorSevenths = ['min⁷', 'Half-dim⁷', 'Maj⁷', 'min⁷', '⁷', 'Maj⁷', '⁷'];
     
     const notes = {
-        // Major scales
         'C': {
             major: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
             minor: ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb']
@@ -265,42 +274,71 @@
 
     const romanToIndex = {
         'I': 0, 'i': 0,
-        'II': 1, 'ii': 1, 'iiº': 1,
+        'II': 1, 'ii': 1, 'iiº': 1, 'iiø': 1,
         'III': 2, 'iii': 2, 'III+': 2,
         'IV': 3, 'iv': 3,
         'V': 4, 'v': 4,
         'VI': 5, 'vi': 5, 'viº': 5,
-        'VII': 6, 'vii': 6, 'viiº': 6
+        'VII': 6, 'vii': 6, 'viiº': 6, 'viiø': 6,
     };
 
-    const index = romanToIndex[roman];
+    const index = romanToIndex[roman.replace('⁷', '')];
     const noteArray = notes[key][currentMode];
-    let quality = currentMode === 'major' ? majorChords[index] : minorChords[index];
+    let quality;
+
+    if (roman.includes('⁷')) {
+    quality = currentMode === 'major' ? majorSevenths[index] : minorSevenths[index];
     
-    // Handle special cases for minor mode alternate chords
-    if (currentMode === 'minor') {
-        if (roman === 'III+') {
-            quality = 'Aug';  // Changed from '+' to 'Aug'
-        } else if (roman === 'viº' || roman === '*viiº') {
-            quality = 'dim';
-            // For these specific diminished chords, we need to raise the note
-            if (roman === 'viº') {
-                // Raise the sixth degree
-                const normalNote = noteArray[5];  // VI degree
-                return raiseNote(normalNote) + quality;
-            } else if (roman === '*viiº') {
-                // Raise the seventh degree
-                const normalNote = noteArray[6];  // VII degree
-                return raiseNote(normalNote) + quality;
-            }
-        } else if (roman === 'ii') {
-            quality = 'm';  // Changed from 'dim' to 'm' for ii
-        } else if (roman === 'v') {
-            quality = 'm';  // Ensures lowercase v is minor
-        } else if (roman === 'IV') {
-            quality = '';  // Makes IV major in minor
+    if (currentMode === 'major') {
+        if (roman === 'viiø⁷') {
+            quality = ' Half-dim⁷';
         }
     }
+    
+    // Handle special cases for minor mode alternate seventh chords
+    if (currentMode === 'minor') {
+        if (roman === 'III+⁷') {
+            quality = 'Aug⁷';
+        } else if (roman === 'viø⁷' || roman === '*viiø⁷' || roman === 'viiø⁷') {
+            quality = ' Half-dim⁷';
+            if (roman === 'viø⁷') {
+                return raiseNote(noteArray[5]) + quality;
+            } else if (roman === '*viiø⁷') {
+                return raiseNote(noteArray[6]) + quality;
+            }
+        } else if (roman === 'ii⁷') {
+            quality = 'min⁷';
+        } else if (roman === 'iiø⁷') {
+            quality = ' Half-dim⁷';
+        } else if (roman === 'v⁷') {
+            quality = 'min⁷';
+        } else if (roman === 'IV⁷') {
+            quality = '⁷';
+        }
+    }
+} else {
+    quality = currentMode === 'major' ? majorChords[index] : minorChords[index];
+    
+    // Handle special cases for minor mode alternate triads
+    if (currentMode === 'minor') {
+        if (roman === 'III+') {
+            quality = 'Aug';
+        } else if (roman === 'viº' || roman === '*viiº') {
+            quality = 'dim';
+            if (roman === 'viº') {
+                return raiseNote(noteArray[5]) + quality;
+            } else if (roman === '*viiº') {
+                return raiseNote(noteArray[6]) + quality;
+            }
+        } else if (roman === 'ii') {
+            quality = 'm';
+        } else if (roman === 'v') {
+            quality = 'm';
+        } else if (roman === 'IV') {
+            quality = '';
+        }
+    }
+}
     
     return noteArray[index] + quality;
 }
@@ -336,43 +374,43 @@ function raiseNote(note) {
 }
 
 function updateHarmonies() {
-        const harmoniesContainer = document.getElementById('harmonies');
-        harmoniesContainer.innerHTML = '';
+    const harmoniesContainer = document.getElementById('harmonies');
+    harmoniesContainer.innerHTML = '';
 
-        const currentScale = scaleHarmonies[currentMode];
+    const currentScale = scaleHarmonies[currentMode];
 
-        currentScale.forEach(harmony => {
-            const block = document.createElement('div');
-            block.className = 'harmony-block';
+    currentScale.forEach(harmony => {
+        const block = document.createElement('div');
+        block.className = 'harmony-block';
 
-            const mainDiv = document.createElement('div');
-            mainDiv.className = 'harmony-main';
-            mainDiv.textContent = harmony.main;
-            mainDiv.onclick = () => {
-                displayChord(harmony.main);
+        const mainDiv = document.createElement('div');
+        mainDiv.className = 'harmony-main';
+        mainDiv.textContent = isSevenths ? harmony.seventh : harmony.main;
+        mainDiv.onclick = () => {
+            displayChord(isSevenths ? harmony.seventh : harmony.main);
+        };
+        block.appendChild(mainDiv);
+
+        if (harmony.alternate) {
+            const altDiv = document.createElement('div');
+            altDiv.className = 'harmony-alternate';
+            altDiv.textContent = isSevenths ? harmony.altSeventh : harmony.alternate;
+            
+            altDiv.onclick = () => {
+                displayChord(isSevenths ? harmony.altSeventh : harmony.alternate);
             };
-            block.appendChild(mainDiv);
+            
+            const tooltip = document.createElement('span');
+            tooltip.className = 'tooltip';
+            tooltip.innerHTML = harmony.description;
+            altDiv.appendChild(tooltip);
+            
+            block.appendChild(altDiv);
+        }
 
-            if (harmony.alternate) {
-                const altDiv = document.createElement('div');
-                altDiv.className = 'harmony-alternate';
-                altDiv.textContent = harmony.alternate;
-                
-                altDiv.onclick = () => {
-                    displayChord(harmony.alternate);
-                };
-                
-                const tooltip = document.createElement('span');
-                tooltip.className = 'tooltip';
-                tooltip.innerHTML = harmony.description; // Change from textContent to innerHTML
-                altDiv.appendChild(tooltip);
-                
-                block.appendChild(altDiv);
-            }
-
-            harmoniesContainer.appendChild(block);
-        });
-    }
+        harmoniesContainer.appendChild(block);
+    });
+}
 
         // Initial render
         updateHarmonies();
