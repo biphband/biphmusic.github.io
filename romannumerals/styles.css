@@ -398,14 +398,14 @@ h1 {
 
 .chord-display {
 margin: 20px auto;
-width: 150px;
+width: 180px;
 height: 130px;
 margin-top: 130px;
 background: rgba(38, 232, 183, 0.479);
 display: flex;
 justify-content: center;
 align-items: center;
-font-size: 40px;
+font-size: 4.5vw;
 font-family: 'Andika', sans-serif;
 border-radius: 10px;
 color: white;

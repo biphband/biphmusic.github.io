@@ -124,56 +124,65 @@
             updateHarmonies();
         }
 
-        function toggleMode() {
-            currentMode = currentMode === 'major' ? 'minor' : 'major';
-            const button = document.querySelector('.mode-toggle');
-            button.textContent = currentMode.charAt(0).toUpperCase() + currentMode.slice(1);
-            updateHarmonies();
-            updateKeyDisplay();
-        }
-
-        function updateKeyDisplay() {
-            const keyElement = document.querySelector('.current-key-display');
-            const warningMessage = document.getElementById('warning-message');
-            const harmoniesContainer = document.getElementById('harmonies');
-            const key = isSharpDirection ? keys.sharp[currentKeyIndex] : keys.flat[currentKeyIndex];
-            keyElement.textContent = `${key} ${currentMode}`;
-
-            // Show warning message and disable harmonies for Gb Minor and Cb Minor
-            if ((key === 'Gb' || key === 'Cb') && currentMode === 'minor') {
-                warningMessage.style.display = 'block';
-                harmoniesContainer.classList.add('disabled');
-            } else {
-                warningMessage.style.display = 'none';
-                harmoniesContainer.classList.remove('disabled');
-            }
-        }
-
-        const keys = {
-            sharp: ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#'],
-            flat: ['C', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb']
-            
-        };
-
+        const keySequence = ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B', 'Cb'];
         let currentKeyIndex = 0;
-        let isSharpDirection = true;
 
         function changeKey(direction) {
-            if (direction === 'up') {
-                if (!isSharpDirection) {
-                    isSharpDirection = true;
-                    currentKeyIndex = keys.sharp.indexOf(keys.flat[currentKeyIndex]);
-                }
-                currentKeyIndex = (currentKeyIndex + 1) % keys.sharp.length;
-            } else {
-                if (isSharpDirection) {
-                    isSharpDirection = false;
-                    currentKeyIndex = keys.flat.indexOf(keys.sharp[currentKeyIndex]);
-                }
-                currentKeyIndex = (currentKeyIndex + 1) % keys.flat.length;
-            }
-            updateKeyDisplay();
-        }
+    if (direction === 'up') {
+        currentKeyIndex = (currentKeyIndex + 1) % keySequence.length;
+    } else {
+        currentKeyIndex = (currentKeyIndex - 1 + keySequence.length) % keySequence.length;
+    }
+    updateKeyDisplay();
+}
+
+function toggleMode() {
+    currentMode = currentMode === 'major' ? 'minor' : 'major';
+    const button = document.querySelector('.mode-toggle');
+    button.textContent = currentMode.charAt(0).toUpperCase() + currentMode.slice(1);
+    updateHarmonies();
+    updateKeyDisplay();
+}
+
+function updateKeyDisplay() {
+    const currentKey = keySequence[currentKeyIndex];
+    const displayElement = document.querySelector('.current-key-display');
+    const warningElement = document.getElementById('warning-message');
+    const harmoniesContainer = document.getElementById('harmonies');
+    
+    console.log('Current Key:', currentKey);
+    console.log('Current Mode:', currentMode);
+    
+    if (!displayElement || !warningElement || !harmoniesContainer) {
+        console.error('Required elements not found');
+        return;
+    }
+    
+    displayElement.textContent = `${currentKey} ${currentMode}`; 
+    
+    // Define theoretical keys that don't work well
+    const problematicKeys = {
+        minor: ['Gb', 'Cb', 'Db'],
+        major: ['G#', 'D#', 'A#']
+    };
+    
+    console.log('Problematic keys for current mode:', problematicKeys[currentMode]);
+    console.log('Is current key in problematic list?', problematicKeys[currentMode].includes(currentKey));
+    
+    const shouldShowWarning = problematicKeys[currentMode].includes(currentKey);
+    
+    console.log('Should show warning?', shouldShowWarning);
+    
+    warningElement.style.display = shouldShowWarning ? 'block' : 'none';
+    
+    if (shouldShowWarning) {
+        harmoniesContainer.classList.add('disabled');
+    } else {
+        harmoniesContainer.classList.remove('disabled');
+    }
+}
+
+
 
         function displayChord(chord) {
         const chordDisplay = document.getElementById('chord-display');
