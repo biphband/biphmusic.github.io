@@ -75,7 +75,7 @@
         </label>
         <label class="feature-item">
             <input type="checkbox" id="augmented-sixth">
-            <span class="feature-text">Augmented 6 Chords</span>
+            <span class="feature-text">Augmented 6th Chords</span>
         </label>
         <label class="feature-item">
             <input type="checkbox" id="neapolitan">
@@ -84,7 +84,6 @@
     </div>
 
     <div class="chord-display" id="chord-display">
-        Click a numeral
     </div>
 
     <div class="logocontainer">        
@@ -179,17 +178,23 @@ function updateKeyDisplay() {
 
 
 
-        function displayChord(chord) {
-        const chordDisplay = document.getElementById('chord-display');
+function displayChord(chord) {
+    const chordDisplay = document.getElementById('chord-display');
 
-        // Get the current key from the display
-        const currentKeyDisplay = document.querySelector('.current-key-display');
-        const currentKey = currentKeyDisplay.textContent.split(' ')[0]; // Extract just the key name
-        
-        // Get the actual chord name based on the current key
-        const actualChord = getChord(chord, currentKey);
-        
-        // Display the chord
+    // Get the current key from the display
+    const currentKeyDisplay = document.querySelector('.current-key-display');
+    const currentKey = currentKeyDisplay.textContent.split(' ')[0];
+    
+    // Get the actual chord name based on whether it's an advanced harmony or not
+    let actualChord;
+    if (chord.includes('/') || ['It⁺⁶', 'Ger⁺⁶', 'Fr⁺⁶', 'N⁶'].includes(chord)) {
+        actualChord = getAdvancedChord(chord, currentKey);
+    } else {
+        actualChord = getChord(chord, currentKey);
+    }
+    
+    // Display the chord only if it's valid
+    if (actualChord && actualChord !== "Error") {
         chordDisplay.textContent = actualChord;
         chordDisplay.classList.add('visible');
         
@@ -206,75 +211,78 @@ function updateKeyDisplay() {
             }, 200); // Wait for fade out animation to complete
         }, 2000);
     }
+}
+
+
+const notes = {
+    'C': {
+        major: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+        minor: ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb']
+    },
+    'G': {
+        major: ['G', 'A', 'B', 'C', 'D', 'E', 'F#'],
+        minor: ['G', 'A', 'Bb', 'C', 'D', 'Eb', 'F']
+    },
+    'D': {
+        major: ['D', 'E', 'F#', 'G', 'A', 'B', 'C#'],
+        minor: ['D', 'E', 'F', 'G', 'A', 'Bb', 'C']
+    },
+    'A': {
+        major: ['A', 'B', 'C#', 'D', 'E', 'F#', 'G#'],
+        minor: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+    },
+    'E': {
+        major: ['E', 'F#', 'G#', 'A', 'B', 'C#', 'D#'],
+        minor: ['E', 'F#', 'G', 'A', 'B', 'C', 'D']
+    },
+    'B': {
+        major: ['B', 'C#', 'D#', 'E', 'F#', 'G#', 'A#'],
+        minor: ['B', 'C#', 'D', 'E', 'F#', 'G', 'A']
+    },
+    'F#': {
+        major: ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'E#'],
+        minor: ['F#', 'G#', 'A', 'B', 'C#', 'D', 'E']
+    },
+    'C#': {
+        major: ['C#', 'D#', 'E#', 'F#', 'G#', 'A#', 'B#'],
+        minor: ['C#', 'D#', 'E', 'F#', 'G#', 'A', 'B']
+    },
+    'F': {
+        major: ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'],
+        minor: ['F', 'G', 'Ab', 'Bb', 'C', 'Db', 'Eb']
+    },
+    'Bb': {
+        major: ['Bb', 'C', 'D', 'Eb', 'F', 'G', 'A'],
+        minor: ['Bb', 'C', 'Db', 'Eb', 'F', 'Gb', 'Ab']
+    },
+    'Eb': {
+        major: ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'],
+        minor: ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb', 'Db']
+    },
+    'Ab': {
+        major: ['Ab', 'Bb', 'C', 'Db', 'Eb', 'F', 'G'],
+        minor: ['Ab', 'Bb', 'Cb', 'Db', 'Eb', 'Fb', 'Gb']
+    },
+    'Db': {
+        major: ['Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'C'],
+        minor: ['Db', 'Eb', 'Fb', 'Gb', 'Ab', 'Bbb', 'Cb']
+    },
+    'Gb': {
+        major: ['Gb', 'Ab', 'Bb', 'Cb', 'Db', 'Eb', 'F'],
+        minor: ['Gb', 'Ab', 'Bbb', 'Cb', 'Db', 'Ebb', 'Fb']
+    },
+    'Cb': {
+        major: ['Cb', 'Db', 'Eb', 'Fb', 'Gb', 'Ab', 'Bb'],
+        minor: ['Cb', 'Db', 'Ebb', 'Fb', 'Gb', 'Abb', 'Bbb']
+    }
+};
+
 
     function getChord(roman, key) {
     const majorChords = ['', 'm', 'm', '', '', 'm', 'dim'];
     const minorChords = ['m', 'dim', '', 'm', '', '', ''];
     const majorSevenths = ['Maj⁷', 'min⁷', 'min⁷', 'Maj⁷', '⁷', 'min⁷', 'Half-dim⁷'];
     const minorSevenths = ['min⁷', 'Half-dim⁷', 'Maj⁷', 'min⁷', '⁷', 'Maj⁷', '⁷'];
-    
-    const notes = {
-        'C': {
-            major: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
-            minor: ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb']
-        },
-        'G': {
-            major: ['G', 'A', 'B', 'C', 'D', 'E', 'F#'],
-            minor: ['G', 'A', 'Bb', 'C', 'D', 'Eb', 'F']
-        },
-        'D': {
-            major: ['D', 'E', 'F#', 'G', 'A', 'B', 'C#'],
-            minor: ['D', 'E', 'F', 'G', 'A', 'Bb', 'C']
-        },
-        'A': {
-            major: ['A', 'B', 'C#', 'D', 'E', 'F#', 'G#'],
-            minor: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
-        },
-        'E': {
-            major: ['E', 'F#', 'G#', 'A', 'B', 'C#', 'D#'],
-            minor: ['E', 'F#', 'G', 'A', 'B', 'C', 'D']
-        },
-        'B': {
-            major: ['B', 'C#', 'D#', 'E', 'F#', 'G#', 'A#'],
-            minor: ['B', 'C#', 'D', 'E', 'F#', 'G', 'A']
-        },
-        'F#': {
-            major: ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'E#'],
-            minor: ['F#', 'G#', 'A', 'B', 'C#', 'D', 'E']
-        },
-        'C#': {
-            major: ['C#', 'D#', 'E#', 'F#', 'G#', 'A#', 'B#'],
-            minor: ['C#', 'D#', 'E', 'F#', 'G#', 'A', 'B']
-        },
-        'F': {
-            major: ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'],
-            minor: ['F', 'G', 'Ab', 'Bb', 'C', 'Db', 'Eb']
-        },
-        'Bb': {
-            major: ['Bb', 'C', 'D', 'Eb', 'F', 'G', 'A'],
-            minor: ['Bb', 'C', 'Db', 'Eb', 'F', 'Gb', 'Ab']
-        },
-        'Eb': {
-            major: ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'],
-            minor: ['Eb', 'F', 'Gb', 'Ab', 'Bb', 'Cb', 'Db']
-        },
-        'Ab': {
-            major: ['Ab', 'Bb', 'C', 'Db', 'Eb', 'F', 'G'],
-            minor: ['Ab', 'Bb', 'Cb', 'Db', 'Eb', 'Fb', 'Gb']
-        },
-        'Db': {
-            major: ['Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'C'],
-            minor: ['Db', 'Eb', 'Fb', 'Gb', 'Ab', 'Bbb', 'Cb']
-        },
-        'Gb': {
-            major: ['Gb', 'Ab', 'Bb', 'Cb', 'Db', 'Eb', 'F'],
-            minor: ['Gb', 'Ab', 'Bbb', 'Cb', 'Db', 'Ebb', 'Fb']
-        },
-        'Cb': {
-            major: ['Cb', 'Db', 'Eb', 'Fb', 'Gb', 'Ab', 'Bb'],
-            minor: ['Cb', 'Db', 'Ebb', 'Fb', 'Gb', 'Abb', 'Bbb']
-        }
-    };
 
     const romanToIndex = {
         'I': 0, 'i': 0,
@@ -377,6 +385,89 @@ function raiseNote(note) {
     return naturalToSharp[note] || note;
 }
 
+const advancedHarmonies = {
+    major: {
+        secondaryDominants: {
+            triads: [
+                { main: 'V/V' },
+                { main: 'V/vi' },
+                { main: 'V/ii' },
+                { main: 'V/iii' }
+            ],
+            sevenths: [
+                { main: 'V⁷/IV' },
+                { main: 'V⁷/V' },
+                { main: 'V⁷/vi' },
+                { main: 'V⁷/ii' },
+                { main: 'V⁷/iii' }
+            ]
+        },
+        secondaryLeadingTones: {
+            triads: [
+                { main: 'vii⁶/ii', description: 'usually in first inversion' },
+                { main: 'vii⁶/iii', description: 'usually in first inversion'  },
+                { main: 'vii⁶/IV', description: 'usually in first inversion'  },
+                { main: 'vii⁶/V', description: 'usually in first inversion'  },
+                { main: 'vii⁶/vi', description: 'usually in first inversion'  }
+            ],
+            sevenths: [
+                { main: 'viiº⁷/ii' },
+                { main: 'viiº⁷/iii' },
+                { main: 'viiº⁷/IV' },
+                { main: 'viiº⁷/V' },
+                { main: 'viiº⁷/vi' }
+            ]
+        },
+        augmentedSixth: [
+            { main: 'It⁺⁶' },
+            { main: 'Ger⁺⁶' },
+            { main: 'Fr⁺⁶' }
+        ],
+        neapolitan: [
+            { main: 'N⁶' }
+        ]
+    },
+    minor: {
+        secondaryDominants: {
+            triads: [
+                { main: 'V/iv' },
+                { main: 'V/V' },
+                { main: 'V/VII' }
+            ],
+            sevenths: [
+                { main: 'V⁷/iv' },
+                { main: 'V⁷/V' },
+                { main: 'V⁷/VI' },
+                { main: 'V⁷/VII' },
+                { main: 'V⁷/III' }
+            ]
+        },
+        secondaryLeadingTones: {
+            triads: [
+                { main: 'vii⁶/iv', description: 'usually in first inversion'  },
+                { main: 'vii⁶/V', description: 'usually in first inversion'  },
+                { main: 'vii⁶/VI', description: 'usually in first inversion'  },
+                { main: 'vii⁶/VII', description: 'usually in first inversion'  }
+            ],
+            sevenths: [
+                { main: 'viiø⁷/III' },
+                { main: 'viiº⁷/iv' },
+                { main: 'viiº⁷/V' },
+                { main: 'viiø⁷/VI' },
+                { main: 'viiø⁷/VII' }
+            ]
+        },
+        augmentedSixth: [
+            { main: 'It⁺⁶' },
+            { main: 'Ger⁺⁶' },
+            { main: 'Fr⁺⁶' }
+        ],
+        neapolitan: [
+            { main: 'N⁶' }
+        ]
+    }
+};
+
 function updateHarmonies() {
     const harmoniesContainer = document.getElementById('harmonies');
     harmoniesContainer.innerHTML = '';
@@ -414,6 +505,7 @@ function updateHarmonies() {
 
         harmoniesContainer.appendChild(block);
     });
+    updateAdvancedHarmonies();
 }
 
         // Initial render
@@ -422,14 +514,244 @@ function updateHarmonies() {
 
 
         function toggleFeatureMenu() {
-    const arrow = document.getElementById('arrow');
-    const container = document.querySelector('.feature-menu-container');
-    const featureList = document.getElementById('feature-list');
+            const arrow = document.getElementById('arrow');
+            const container = document.querySelector('.feature-menu-container');
+            const featureList = document.getElementById('feature-list');
 
-    arrow.classList.toggle('rotated');
-    container.classList.toggle('menu-open');
-    featureList.classList.toggle('show');
+            arrow.classList.toggle('rotated');
+            container.classList.toggle('menu-open');
+            featureList.classList.toggle('show');
+        }
+
+        function createHarmonyRow(harmonies, className) {
+    const container = document.createElement('div');
+    container.className = `harmony-row ${className}`;
+    
+    harmonies.forEach(harmony => {
+        const block = document.createElement('div');
+        block.className = 'harmony-block';
+        
+        const mainDiv = document.createElement('div');
+        mainDiv.className = 'harmony-main';
+        mainDiv.textContent = harmony.main;
+        mainDiv.onclick = () => {
+            displayChord(harmony.main);
+        };
+        
+        if (harmony.description) {
+            const tooltip = document.createElement('span');
+            tooltip.className = 'tooltip';
+            tooltip.innerHTML = harmony.description;
+            mainDiv.appendChild(tooltip);
+        }
+        
+        block.appendChild(mainDiv);
+        container.appendChild(block);
+    });
+    
+    return container;
 }
+
+function updateAdvancedHarmonies() {
+    const harmoniesContainer = document.getElementById('harmonies');
+    // Remove existing advanced-harmonies container if it exists
+    const existingAdvanced = document.querySelector('.advanced-harmonies');
+    if (existingAdvanced) {
+        existingAdvanced.remove();
+    }
+
+    // Check if any checkboxes are checked
+    const anyChecked = Array.from(document.querySelectorAll('.feature-item input[type="checkbox"]'))
+        .some(checkbox => checkbox.checked);
+
+    if (!anyChecked) return; // Don't create container if no features are selected
+
+    const advancedContainer = document.createElement('div');
+    advancedContainer.className = 'advanced-harmonies';
+    
+    const current = advancedHarmonies[currentMode];
+    
+    // Secondary Dominants
+    if (document.getElementById('secondary-dominants').checked) {
+        const harmonies = isSevenths ? current.secondaryDominants.sevenths : current.secondaryDominants.triads;
+        advancedContainer.appendChild(createHarmonyRow(harmonies, 'secondary-dominants-row'));
+    }
+    
+    // Secondary Leading Tones
+    if (document.getElementById('secondary-leading-tones').checked) {
+        const harmonies = isSevenths ? current.secondaryLeadingTones.sevenths : current.secondaryLeadingTones.triads;
+        advancedContainer.appendChild(createHarmonyRow(harmonies, 'secondary-leading-tones-row'));
+    }
+    
+    // Augmented Sixth
+    if (document.getElementById('augmented-sixth').checked) {
+        advancedContainer.appendChild(createHarmonyRow(current.augmentedSixth, 'augmented-sixth-row'));
+    }
+    
+    // Neapolitan
+    if (document.getElementById('neapolitan').checked) {
+        advancedContainer.appendChild(createHarmonyRow(current.neapolitan, 'neapolitan-row'));
+    }
+
+    // Only insert if there's at least one feature enabled
+    if (advancedContainer.children.length > 0) {
+        const keyContainer = document.querySelector('.container');
+        keyContainer.parentNode.insertBefore(advancedContainer, keyContainer);
+    }
+}
+
+
+// Add event listeners for checkboxes
+document.querySelectorAll('.feature-item input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', updateHarmonies);
+});
+
+
+function getAdvancedChord(roman, key) {
+    // First, check if it's a secondary chord (contains '/')
+    if (roman.includes('/')) {
+        const [chord, target] = roman.split('/');
+        return getSecondaryChord(chord, target, key);
+    }
+    
+    // Handle special chords
+    switch(roman) {
+        case 'It⁺⁶':
+            return getItalianSixth(key);
+        case 'Ger⁺⁶':
+            return getGermanSixth(key);
+        case 'Fr⁺⁶':
+            return getFrenchSixth(key);
+        case 'N⁶':
+            return getNeapolitan(key);
+        default:
+            return getChord(roman, key); // Fall back to regular chord function
+    }
+}
+
+function getSecondaryChord(chord, target, key) {
+    const noteArray = notes[key][currentMode];
+    const romanToIndex = {
+        'ii': 1, 'iii': 2, 'IV': 3, 'iv': 3,
+        'V': 4, 'vi': 5, 'VI': 5, 'VII': 6, 'III': 2
+    };
+    
+    const targetIndex = romanToIndex[target];
+    const targetNote = noteArray[targetIndex];
+    
+    // For V or V7 of something
+    if (chord === 'V' || chord === 'V⁷') {
+        const quality = chord === 'V' ? '' : '⁷';
+        return getDominantOfNote(targetNote) + quality;
+    }
+    
+    // For vii° or vii°7 of something
+    if (chord.startsWith('vii')) {
+        const isDim7 = chord.includes('º⁷');
+        const isHalfDim7 = chord.includes('ø⁷');
+        const quality = isDim7 ? 'dim⁷' : (isHalfDim7 ? ' Half-dim⁷' : 'dim');
+        return getLeadingToneOfNote(targetNote) + quality;
+    }
+    
+    return "Error"; // Should never reach here
+}
+
+function getDominantOfNote(note) {
+    // Returns the note a perfect 5th below the given note
+    const fifthsBelow = {
+        'C': 'G', 'G': 'D', 'D': 'A', 'A': 'E', 'E': 'B', 'B': 'F#', 'F#': 'C#',
+        'F': 'C', 'Bb': 'F', 'Eb': 'Bb', 'Ab': 'Eb', 'Db': 'Ab', 'Gb': 'Db', 'Cb': 'Gb',
+        'C#': 'G#', 'G#': 'D#', 'D#': 'A#', 'A#': 'E#'
+    };
+    return fifthsBelow[note] || note;
+}
+
+function getLeadingToneOfNote(note) {
+    // Returns the note a half step below the given note
+    const halfStepBelow = {
+        'C': 'B', 'B': 'A#', 'Bb': 'A', 'A': 'G#', 'Ab': 'G', 'G': 'F#',
+        'Gb': 'F', 'F': 'E', 'E': 'D#', 'Eb': 'D', 'D': 'C#', 'Db': 'C',
+        'C#': 'C', 'F#': 'F', 'G#': 'G'
+    };
+    return halfStepBelow[note] || note;
+}
+
+function getFlatSixth(noteArray) {
+    const fifth = noteArray[4]; // 5th scale degree
+    const flatSixth = getHalfStepAbove(fifth); // Flat 6th is a half step above the 5th
+    return flatSixth;
+}
+
+function getFlatSecond(noteArray) {
+    const second = noteArray[1]; // 2nd scale degree
+    const flatSecond = getHalfStepBelow(second); // Flat 2nd is a half step below the 2nd
+    return flatSecond;
+}
+
+function getHalfStepAbove(note) {
+    const notesWithFlats = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+    let index = notesWithFlats.indexOf(note);
+    if (index === -1) {
+        // Handle enharmonic equivalents (e.g., C# -> Db)
+        const enharmonicMap = { 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb' };
+        note = enharmonicMap[note] || note;
+        index = notesWithFlats.indexOf(note);
+    }
+    index += 1; // Move up a half step
+    if (index >= notesWithFlats.length) index = 0; // Wrap around if necessary
+    return notesWithFlats[index];
+}
+
+function getHalfStepBelow(note) {
+    const notesWithFlats = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+    let index = notesWithFlats.indexOf(note);
+    if (index === -1) {
+        // Handle enharmonic equivalents (e.g., C# -> Db)
+        const enharmonicMap = { 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb' };
+        note = enharmonicMap[note] || note;
+        index = notesWithFlats.indexOf(note);
+    }
+    index -= 1; // Move down a half step
+    if (index < 0) index = notesWithFlats.length - 1; // Wrap around if necessary
+    return notesWithFlats[index];
+}
+
+function getItalianSixth(key) {
+    const noteArray = notes[key][currentMode];
+    const flatSixth = getFlatSixth(noteArray); // Get the flat 6th scale degree
+    return flatSixth + '7(no 5)'; // Italian Sixth is a dominant 7th chord without the 5th
+}
+
+function getGermanSixth(key) {
+    const noteArray = notes[key][currentMode];
+    const flatSixth = getFlatSixth(noteArray); // Get the flat 6th scale degree
+    return flatSixth + '7'; // German Sixth is a standard dominant 7th chord
+}
+
+function getFrenchSixth(key) {
+    const noteArray = notes[key][currentMode];
+    const flatSixth = getFlatSixth(noteArray); // Get the flat 6th scale degree
+    return flatSixth + '7#11'; // French Sixth includes the #11
+}
+
+function getNeapolitan(key) {
+    const noteArray = notes[key][currentMode];
+    const flatSecond = getFlatSecond(noteArray); // Get the flat 2nd scale degree
+    const fourth = noteArray[3]; // 4th scale degree for first inversion
+    return flatSecond + '/' + fourth; // Neapolitan Sixth in first inversion
+}
+
+function flattenNote(note) {
+    const sharpToFlat = {
+        'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb'
+    };
+    return sharpToFlat[note] || note;
+}
+
+
+
+
+
 
 // Hamburger menu functionality
 const menuToggle = document.querySelector('.menu-toggle');

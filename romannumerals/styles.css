@@ -3,9 +3,7 @@ body {
     font-family: 'Andika', sans-serif;
     color: #ffffff;
     margin: 0;
-    padding: 20px;
     line-height: 1.6;
-    overflow: hidden;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -86,8 +84,8 @@ body {
     justify-content: center;
     gap: 10px;
     margin: 20px auto;
-    width: 90%;
-    max-width: 100%;
+    width: 60%;
+    min-width: 650px;
     padding: 0 20px;
     box-sizing: border-box;
 }
@@ -117,12 +115,12 @@ body {
 }
 
 .harmony-main {
+    position: relative;
     font-family: 'Crimson Pro', serif;
-    font-size: clamp(20px, 5vw, 50px);
+    font-size: clamp(30px, 2.5vw, 50px);
     margin-bottom: 5px;
     letter-spacing: 0.05em;
     cursor: pointer;
-    padding: 5px;
     border-radius: 5px;
     transition: background 0.3s;
 }
@@ -147,34 +145,39 @@ body {
     background: rgba(104, 187, 215, 0.5);
 }
 
-.harmony-alternate .tooltip {
+.harmony-alternate .tooltip,
+.harmony-main .tooltip {
     visibility: hidden;
-    background-color: rgba(0, 0, 0, 0.8);
+    font-family: 'Andika', sans-serif;
+    letter-spacing: -0em;
+    font-size: clamp(10px, 2vw, 14px);
+    background-color: rgba(0, 0, 0, 0.672);
     color: white;
     text-align: center;
     padding: 8px;
     border-radius: 6px;
     position: absolute;
     z-index: 1;
-    top: 125%;
+    top: 125%; 
     left: 50%;
     transform: translateX(-50%);
     width: max-content;
-    font-size: clamp(10px, 2vw, 14px);
     opacity: 0;
     transition: opacity 0.3s;
     white-space: normal;
 }
 
-.harmony-alternate:hover .tooltip {
+.harmony-alternate:hover .tooltip,
+.harmony-main:hover .tooltip {
     visibility: visible;
     opacity: 1;
 }
 
-.harmony-alternate .tooltip::after {
+.harmony-alternate .tooltip::after,
+.harmony-main .tooltip::after {
     content: "";
     position: absolute;
-    bottom: 100%;
+    bottom: 100%; 
     left: 50%;
     margin-left: -5px;
     border-width: 5px;
@@ -305,7 +308,7 @@ padding-bottom: 50px;
 }
 
 .logo {
-position: absolute;
+position: fixed;
 right: 0;
 bottom: 0;
 width: 25vh;
@@ -332,10 +335,11 @@ h1 {
     padding: 4px 8px;
     text-align: center;
     border-radius: 4px;
+    width: 150px;
     font-size: 1em;
     display: none;
-    position: absolute;
-    margin-top: -13vh;
+    position: fixed;
+    top: 305px;
     left: 50%;
     transform: translate(-50%);
     white-space: nowrap;
@@ -352,12 +356,12 @@ h1 {
 
 .key-text {
     position: absolute;
-    left: calc(50% - 50px);  /* Replace X with the desired percentage */
-    transform: translateX(-100%);  /* Shifts the text left by its width */
+    left: calc(50% - 50px); 
+    transform: translateX(-100%); 
     color: white;
     font-size: 24px;
     margin-top: 25px;
-    z-index: 1;  /* Ensure this is lower than .key-arrows */
+    z-index: 1;  
 }
 
 .key-arrows {
@@ -368,7 +372,7 @@ h1 {
     flex-direction: column;
     gap: 5px;
     margin-top: 20px;
-    z-index: 2;  /* Set a higher z-index */
+    z-index: 2; 
 }
 
 .key-arrow {
@@ -406,7 +410,7 @@ background: rgba(38, 232, 183, 0.479);
 display: flex;
 justify-content: center;
 align-items: center;
-font-size: 4.5vw;
+font-size: 30px;
 font-family: 'Andika', sans-serif;
 border-radius: 10px;
 color: white;
@@ -515,4 +519,28 @@ font-size: 14px;
 width: 16px;
 height: 16px;
 cursor: pointer;
+}
+
+.harmony-row {
+    display: flex;
+    justify-content: center;
+    margin: -0.9rem;
+}
+
+.advanced-harmonies {
+    width: 40%;
+    min-width: 600px;
+    background-color: #ad8fff49;
+    border-radius: 50px;
+    padding: 0.5rem;
+    gap: 10px;
+    margin: 20px auto;
+    border-top: 1px solid rgba(255, 255, 255, 0);
+}
+
+.secondary-dominants-row .harmony-main,
+.secondary-leading-tones-row .harmony-main,
+.augmented-sixth-row .harmony-main,
+.neapolitan-row .harmony-main {
+    font-size: 1.5em;
 }
