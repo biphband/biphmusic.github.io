@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Toolbox</title>
+    <link rel="icon" href="/icons/BGicon.png">
+    <style>
+        @font-face {
+            font-family: 'Zapfino';
+            src: url('fonts/Zapfino.ttf') format('truetype');
+        }
+
+        body {
+            background-color: rgb(45, 70, 119);
+            font-family: 'Andika', sans-serif;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1); 
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        .logocontainer {
+            position: relative;
+            min-height: 10vh;
+            padding-bottom: 50px;
+        }
+
+        .logo {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 25vh;
+            height: auto;
+            z-index: 10; 
+        }
+
+        .Subtitle {
+            text-align: center;
+            font-family: 'Zapfino', sans-serif;
+            color: white;
+            margin-top: -0.7em;
+            font-size: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1.Title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 30px;
+            width: 96%;
+            transform: translateX(-2.3%);
+            margin: 0 auto 20px auto; 
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
+        }
+
+        #searchInput:focus {
+            border-color: #007bff;
+        }
+
+        #toolList {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tool-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tool-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .tool-title {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .clear-button {
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #999;
+            font-size: 18px;
+        }
+
+        /* Hamburger Menu Styles */
+        .hamburger-menu {
+            position: absolute;
+            margin-left: 7px;
+            top: 20px;
+            left: 13px;
+            z-index: 1000;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 20;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s linear;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-items {
+            position: absolute;
+            top: 25px;
+            left: -250px;
+            background: linear-gradient(135deg, rgba(48, 67, 104, 0.8), rgba(20, 31, 53, 0.8));
+            width: 250px;
+            height: 90vh;
+            padding-top: 20px;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-items.show {
+            left: 0;
+            opacity: 1;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .menu-items.show a {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-items a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-items a:nth-child(1) { transition-delay: 0.1s; }
+        .menu-items a:nth-child(2) { transition-delay: 0.2s; }
+        .menu-items a:nth-child(3) { transition-delay: 0.3s; }
+        .menu-items a:nth-child(4) { transition-delay: 0.4s; }
+        .menu-items a:nth-child(5) { transition-delay: 0.5s; }
+        .menu-items a:nth-child(6) { transition-delay: 0.6s; }
+        .menu-items a:nth-child(7) { transition-delay: 0.7s; }
+        .menu-items a:nth-child(8) { transition-delay: 0.8s; }
+        .menu-items a:nth-child(9) { transition-delay: 0.9s; }
+        .menu-items a:nth-child(10) { transition-delay: 1.0s; }
+        .menu-items a:nth-child(11) { transition-delay: 1.1s; }
+
+        .menu-title {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
+    <h1 class="Title">BIPH Music</h1>
+    <h2 class="Subtitle">Toolbox</h2>
+
+    <!-- Hamburger Menu -->
+    <div class="hamburger-menu">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="menu-items" id="menu-items">
+            <div class="menu-title">BIPH Music</div>
+            <a href="https://biphmusic.github.io/">Home</a>
+            <a href="https://biphmusic.github.io/dailysightsinging/">Daily Sight Singing</a>
+            <a href="https://biphmusic.github.io/wordwall/">Word Wall</a>
+            <a href="https://biphmusic.github.io/flashcards/">Flash Cards</a>
+            <a href="https://biphmusic.github.io/dice/">Dice Simulator</a>
+            <a href="https://biphmusic.github.io/chords/">Chord Quality</a>
+            <a href="https://biphmusic.github.io/progressions/">Chord Progressions</a>
+            <a href="https://biphmusic.github.io/piano/">Web Piano</a>
+            <a href="https://biphmusic.github.io/units/">AP Units</a>
+            <a href="mailto:garrison.tubbs-biph@basischina.com">Contact</a>
+            <div class="menu-footer">© Garrison Tubbs 2025</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Narrow your search...">
+            <span id="clearSearch" class="clear-button">&times;</span>
+        </div>
+        <ul id="toolList"></ul>
+    </div>
+
+    <div class="logocontainer">        
+        <img src="BASIS logo/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
+    </div>
+
+    <script>
+        const tools = [
+            { name: "Word Wall", url: "https://biphmusic.github.io/wordwall/", keywords: "words, wall, vocabulary, vocab", description: "A tool for learning music terms." },
+            { name: "Flashcards", url: "https://biphmusic.github.io/flashcards/", keywords: "flashcards, study, quiz, vocabulary, vocab", description: "Interactive flashcards for music theory." },
+            { name: "Piano", url: "https://biphmusic.github.io/piano/", keywords: "piano, keyboard, play", description: "Virtual piano to practice melodies." },
+            { name: "Building Chords", url: "https://biphmusic.github.io/chords/", keywords: "chords, harmony, progressions", description: "Explore and learn chord structures." },
+            { name: "Modes", url: "https://biphmusic.github.io/modes/", keywords: "modes, scales, tonality", description: "Understand different musical modes." },
+            { name: "Roman Numerals", url: "https://biphmusic.github.io/romannumerals/", keywords: "roman numerals, chords, analysis", description: "Analyze chords with Roman numerals." },
+            { name: "Harmonic Progressions", url: "https://biphmusic.github.io/progressions/", keywords: "progressions, harmony, sequences", description: "Study common chord progressions." },
+            { name: "Dice", url: "https://biphmusic.github.io/dice/", keywords: "dice, random, generator", description: "Randomize various musical elements." },
+            { name: "Ear Training", url: "https://biphmusic.github.io/eartraining/", keywords: "ear training, listening, intervals", description: "Intervals, triads, seventh chords, and modes." },
+            { name: "Daily Sight Singing", url: "https://biphmusic.github.io/dailysightsinging/", keywords: "sight singing, practice, daily", description: "Daily exercises for sight singing." },
+            { name: "Recorder", url: "https://biphmusic.github.io/recorder/", keywords: "recorder, playback, audio", description: "Record and playback audio clips." },
+            { name: "Modes Quiz", url: "https://biphmusic.github.io/modesquiz/", keywords: "quiz, modes, test", description: "Test your knowledge of musical modes." },
+            { name: "Quadrants", url: "https://biphmusic.github.io/quadrants/", keywords: "quadrants, graph, visualization", description: "Visualize music concepts in quadrants." },
+            { name: "AP Units", url: "https://biphmusic.github.io/units/", keywords: "ap units, curriculum, lessons", description: "Resources for AP Music Theory units." }
+        ];
+
+        const searchInput = document.getElementById('searchInput');
+        const toolList = document.getElementById('toolList');
+        const clearSearchButton = document.getElementById('clearSearch');
+
+        function displayTools(toolsToDisplay) {
+            toolList.innerHTML = '';
+            if (toolsToDisplay.length === 0) {
+                toolList.innerHTML = '<li class="tool-item">No tools found</li>';
+                return;
+            }
+
+            toolsToDisplay.forEach(tool => {
+                const li = document.createElement('a');
+                li.className = 'tool-item';
+                li.href = tool.url;
+                li.target = "_blank";
+
+                const title = document.createElement('span');
+                title.className = 'tool-title';
+                title.textContent = tool.name;
+
+                const description = document.createElement('span');
+                description.className = 'tool-description';
+                description.textContent = tool.description;
+
+                li.appendChild(title);
+                li.appendChild(description);
+                toolList.appendChild(li);
+            });
+        }
+
+        function filterTools(searchTerm) {
+            if (!searchTerm) return tools;
+
+            const searchLower = searchTerm.toLowerCase();
+            return tools.filter(tool => 
+                tool.name.toLowerCase().includes(searchLower) || 
+                tool.keywords.toLowerCase().includes(searchLower)
+            );
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.trim();
+            const filteredTools = filterTools(searchTerm);
+            displayTools(filteredTools);
+        });
+
+        clearSearchButton.addEventListener('click', () => {
+            searchInput.value = '';
+            displayTools(tools);
+        });
+
+        displayTools(tools);
+
+        // Hamburger menu functionality
+        function toggleMenu() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const menuItems = document.querySelector('.menu-items');
+            menuToggle.classList.toggle('open');
+            menuItems.classList.toggle('show');
+        }
+
+        document.addEventListener('click', (event) => {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const menuItems = document.querySelector('.menu-items');
+            if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+                menuToggle.classList.remove('open');
+                menuItems.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
