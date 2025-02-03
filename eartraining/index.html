@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ear Training</title>
+    <link rel="icon" href="/icons/BGicon.png">
+    <style>
+@font-face {
+            font-family: 'Zapfino';
+            src: url('fonts/Zapfino.ttf') format('truetype');
+        }
+        
+        body {
+            background-color: rgb(45, 70, 119);
+            font-family: 'Andika', sans-serif;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1); 
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        .logocontainer {
+            min-height: 10vh;
+        }
+
+        .logo {
+            position: fixed;
+            right: 0px;
+            bottom: 0;
+            margin-bottom: 5px;
+            width: 25vh;
+            height: auto;
+            z-index: 10; 
+        }
+
+        .Subtitle {
+            font-family: 'Zapfino', sans-serif;
+            color: white;
+            margin-top: -0.7em;
+            font-size: 40px;
+        }
+
+        .hamburger-menu {
+            position: absolute;
+            margin-left: 7px;
+            top: 20px;
+            left: 13px;
+            z-index: 1000;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 20;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s linear;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-items {
+            position: absolute;
+            top: 25px;
+            left: -250px;
+            background: linear-gradient(135deg, rgba(48, 67, 104, 0.8), rgba(20, 31, 53, 0.8));
+            width: 250px;
+            height: 90vh;
+            padding-top: 20px;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-items.show {
+            left: 0;
+            opacity: 1;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .menu-items a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-items a:nth-child(1) { transition-delay: 0.1s; }
+.menu-items a:nth-child(2) { transition-delay: 0.2s; }
+.menu-items a:nth-child(3) { transition-delay: 0.3s; }
+.menu-items a:nth-child(4) { transition-delay: 0.4s; }
+.menu-items a:nth-child(5) { transition-delay: 0.5s; }
+.menu-items a:nth-child(6) { transition-delay: 0.6s; }
+.menu-items a:nth-child(7) { transition-delay: 0.7s; }
+.menu-items a:nth-child(8) { transition-delay: 0.8s; }
+.menu-items a:nth-child(9) { transition-delay: 0.9s; }
+.menu-items a:nth-child(10) { transition-delay: 1.0s; }
+.menu-items a:nth-child(11) { transition-delay: 1.1s; }
+
+        .menu-title {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            position:absolute;
+            margin-top: -15px;
+            width: 100%;
+            transform: translate(-50%, -50%); 
+            left: 50%;
+            text-align: center;
+            align-items: center;
+        }
+
+        #login-section {
+            position:absolute;
+            margin-top: 75px;
+            width: 100%;
+            transform: translate(-50%, -50%); 
+            left: 50%;
+            text-align: center;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            margin-top: -120px;
+            text-align: center;
+        }
+        h3 {
+            margin-top: -40px;
+            font-size: 2rem;
+            font-weight: 300;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        /* Music Mode Quiz Styles */
+        .hidden {
+            display: none;
+        }
+
+        button2 {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button {
+            background-color: #4c87af;
+            color: white;
+            padding: 10px 20px;
+            border: 0.5px solid rgba(255, 255, 255, 0.442);
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        input[type="text"], input[type="password"] {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .play-count {
+            color: #d2d2d2;
+            font-size: 0.9em;
+        }
+
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+
+        #password-section {
+            margin-top: 140px;  
+        }
+
+        .teacher-container {
+            margin-top: 350px; /*I think it's this one*/
+        }
+
+        .teacher-section {
+    position: fixed;
+    top: 115px;
+    left: 50%;
+    transform: translateX(-52%);
+    width: 100%;
+    height: calc(100vh - 250px);
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+#results-container {
+    position: relative;  
+    width: 95%;
+    margin: 0 auto;    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.student-result {
+    position: relative;
+    text-align: center;
+    width: 100%;       
+    padding: 20px;
+    margin-top: -10px;
+    margin-bottom: 50px;
+    align-items: center; 
+}
+
+.results-table {
+            width: 60%;
+            transform: translateX(35%);
+            border-collapse: collapse;
+            margin: 0 0 20px 0; /* Changed margin-top to 0 */
+            background-color: rgba(255, 255, 255, 0.05); /* Optional: adds slight contrast */
+        }
+
+.student-result:last-child {
+    margin-bottom: 0;
+}
+        
+.correct-mark {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .incorrect {
+            color: red;
+        }
+
+        .results-table th, .results-table td {
+            border: 1px solid #c8c8c886;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .results-table th {
+            background-color: #ffffff90;
+        }
+
+        
+        #answer-input {
+            padding: 5px; 
+        }
+
+        .summary-table {
+    margin-top: 2rem;
+    overflow-x: auto; /* Enable horizontal scrolling if needed */
+}
+
+.summary-table table {
+    border-collapse: collapse;
+    width: 80%;
+    min-width: max-content;
+}
+
+.summary-table th,
+.summary-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+        .section-header {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .copy-button {
+            background-color: #4c87af;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+
+        .copy-button:hover {
+            background-color: #3a6da8;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
+    <div class="hamburger-menu">
+        <button2 class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button2>
+        <div class="menu-items" id="menu-items">
+            <div class="menu-title">BIPH Music</div>
+            <a href="https://biphmusic.github.io/">Home</a>
+            <a href="https://biphmusic.github.io/dailysightsinging/">Daily Sight Singing</a>
+            <a href="https://biphmusic.github.io/wordwall/">Word Wall</a>
+            <a href="https://biphmusic.github.io/flashcards/">Flash Cards</a>
+            <a href="https://biphmusic.github.io/dice/">Dice Simulator</a>
+            <a href="https://biphmusic.github.io/chords/">Chord Quality</a>
+            <a href="https://biphmusic.github.io/progressions/">Chord Progressions</a>
+            <a href="https://biphmusic.github.io/piano/">Web Piano</a>
+            <a href="https://biphmusic.github.io/units/">AP Units</a>
+            <a href="mailto:garrison.tubbs-biph@basischina.com">Contact</a>
+            
+            <div class="menu-footer">© Garrison Tubbs 2024</div>
+        </div>
+    </div>
+
+    <h1 class="Title">BIPH Music</h1>
+    <h1 class="Subtitle">Ear Training<br></h1>
+
+    <div class="logocontainer">        
+        <img src="BASIS logo/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
+    </div>
+
+    <div class="container">
+        <div id="login-section">
+            <h2>Enter your name to begin the exercise</h2>
+            <input type="text" id="name-input" placeholder="Your name">
+            <button onclick="checkName()">Begin</button>
+            <div id="error-message" class="error"></div>
+        </div>
+
+        <div id="password-section" class="hidden">
+            <h2>Teacher Mode</h2>
+            <input type="password" id="password-input" placeholder="Enter password">
+            <button onclick="checkPassword()">Login</button>
+        </div>
+
+        <div id="quiz-section" class="hidden">
+            <div id="question-container">
+                <p id="section-header" class="section-header">Part 1: Intervals</p>
+                <p>Question <span id="question-number">1</span>/5</p>
+                <button id="play-button" onclick="playAudio()">Play Audio</button>
+                <span class="play-count" id="play-count">Plays remaining: 2</span>
+                <br><br>
+                <select id="answer-input" placeholder="Select your answer">
+                    <option value="" disabled selected>Select your answer</option>
+                </select>
+                <button onclick="submitAnswer()">Submit Answer</button>
+            </div>
+        </div>
+
+        <div id="teacher-section" class="hidden teacher-container">
+            <div class="teacher-section">
+                <h2 id="teacher-mode-title">Teacher Mode</h2>
+                <input type="file" id="json-input" accept=".json" multiple>
+                <div id="results-container"></div>
+            </div>
+        </div>
+
+    
+    
+    <script>
+        const approvedNames = ['ben', 'howard', 'terry', 'alice', 'vincent', 'tiger', 'chris', 'lucy', 'diego', 'hailey', 'eileen', 'angelina', 'serena', 'catherine', 'andrew', 'jennifer'];
+const TEACHER_PASSWORD = '18721958';
+
+const audioFiles = {
+    intervals: [
+        { file: 'Major2-1.mp3', answer: 'Major 2nd' },
+        { file: 'Major2-2.mp3', answer: 'Major 2nd' },
+        { file: 'Major2-3.mp3', answer: 'Major 2nd' },
+        { file: 'Major2-4.mp3', answer: 'Major 2nd' },
+        { file: 'Major2-5.mp3', answer: 'Major 2nd' },
+        { file: 'Major2-6.mp3', answer: 'Major 2nd' },
+        { file: 'Major2-7.mp3', answer: 'Major 2nd' },
+        { file: 'Major2-8.mp3', answer: 'Major 2nd' },
+        { file: 'Major2-9.mp3', answer: 'Major 2nd' },
+        { file: 'Major2-10.mp3', answer: 'Major 2nd' },
+        { file: 'Major3-1.mp3', answer: 'Major 3rd' },
+        { file: 'Major3-2.mp3', answer: 'Major 3rd' },
+        { file: 'Major3-3.mp3', answer: 'Major 3rd' },
+        { file: 'Major3-4.mp3', answer: 'Major 3rd' },
+        { file: 'Major3-5.mp3', answer: 'Major 3rd' },
+        { file: 'Major3-6.mp3', answer: 'Major 3rd' },
+        { file: 'Major3-7.mp3', answer: 'Major 3rd' },
+        { file: 'Major3-8.mp3', answer: 'Major 3rd' },
+        { file: 'Major6-1.mp3', answer: 'Major 6th' },
+        { file: 'Major6-2.mp3', answer: 'Major 6th' },
+        { file: 'Major6-3.mp3', answer: 'Major 6th' },
+        { file: 'Major6-4.mp3', answer: 'Major 6th' },
+        { file: 'Major6-5.mp3', answer: 'Major 6th' },
+        { file: 'Major6-6.mp3', answer: 'Major 6th' },
+        { file: 'Major6-7.mp3', answer: 'Major 6th' },
+        { file: 'Major6-8.mp3', answer: 'Major 6th' },
+        { file: 'Major6-9.mp3', answer: 'Major 6th' },
+        { file: 'Major6-10.mp3', answer: 'Major 6th' },
+        { file: 'Major7-1.mp3', answer: 'Major 7th' },
+        { file: 'Major7-2.mp3', answer: 'Major 7th' },
+        { file: 'Major7-3.mp3', answer: 'Major 7th' },
+        { file: 'Major7-4.mp3', answer: 'Major 7th' },
+        { file: 'Major7-5.mp3', answer: 'Major 7th' },
+        { file: 'Major7-6.mp3', answer: 'Major 7th' },
+        { file: 'Major7-7.mp3', answer: 'Major 7th' },
+        { file: 'Major7-8.mp3', answer: 'Major 7th' },
+        { file: 'Minor2-1.mp3', answer: 'Minor 2nd' },
+        { file: 'Minor2-2.mp3', answer: 'Minor 2nd' },
+        { file: 'Minor2-3.mp3', answer: 'Minor 2nd' },
+        { file: 'Minor2-4.mp3', answer: 'Minor 2nd' },
+        { file: 'Minor2-5.mp3', answer: 'Minor 2nd' },
+        { file: 'Minor2-6.mp3', answer: 'Minor 2nd' },
+        { file: 'Minor2-7.mp3', answer: 'Minor 2nd' },
+        { file: 'Minor2-8.mp3', answer: 'Minor 2nd' },
+        { file: 'Minor2-9.mp3', answer: 'Minor 2nd' },
+        { file: 'Minor2-10.mp3', answer: 'Minor 2nd' },
+        { file: 'Minor3-1.mp3', answer: 'Minor 3rd' },
+        { file: 'Minor3-2.mp3', answer: 'Minor 3rd' },
+        { file: 'Minor3-3.mp3', answer: 'Minor 3rd' },
+        { file: 'Minor3-4.mp3', answer: 'Minor 3rd' },
+        { file: 'Minor3-5.mp3', answer: 'Minor 3rd' },
+        { file: 'Minor3-6.mp3', answer: 'Minor 3rd' },
+        { file: 'Minor3-7.mp3', answer: 'Minor 3rd' },
+        { file: 'Minor3-8.mp3', answer: 'Minor 3rd' },
+        { file: 'Minor3-9.mp3', answer: 'Minor 3rd' },
+        { file: 'Minor3-10.mp3', answer: 'Minor 3rd' },
+        { file: 'Minor6-1.mp3', answer: 'Minor 6th' },
+        { file: 'Minor6-2.mp3', answer: 'Minor 6th' },
+        { file: 'Minor6-3.mp3', answer: 'Minor 6th' },
+        { file: 'Minor6-4.mp3', answer: 'Minor 6th' },
+        { file: 'Minor6-5.mp3', answer: 'Minor 6th' },
+        { file: 'Minor6-6.mp3', answer: 'Minor 6th' },
+        { file: 'Minor6-7.mp3', answer: 'Minor 6th' },
+        { file: 'Minor6-8.mp3', answer: 'Minor 6th' },
+        { file: 'Minor6-9.mp3', answer: 'Minor 6th' },
+        { file: 'Minor6-10.mp3', answer: 'Minor 6th' },
+        { file: 'Minor7-1.mp3', answer: 'Minor 7th' },
+        { file: 'Minor7-2.mp3', answer: 'Minor 7th' },
+        { file: 'Minor7-3.mp3', answer: 'Minor 7th' },
+        { file: 'Minor7-4.mp3', answer: 'Minor 7th' },
+        { file: 'Minor7-5.mp3', answer: 'Minor 7th' },
+        { file: 'Minor7-6.mp3', answer: 'Minor 7th' },
+        { file: 'Minor7-7.mp3', answer: 'Minor 7th' },
+        { file: 'Minor7-8.mp3', answer: 'Minor 7th' },
+        { file: 'Perfect4-1.mp3', answer: 'Perfect 4th' },
+        { file: 'Perfect4-2.mp3', answer: 'Perfect 4th' },
+        { file: 'Perfect4-3.mp3', answer: 'Perfect 4th' },
+        { file: 'Perfect4-4.mp3', answer: 'Perfect 4th' },
+        { file: 'Perfect4-5.mp3', answer: 'Perfect 4th' },
+        { file: 'Perfect4-6.mp3', answer: 'Perfect 4th' },
+        { file: 'Perfect4-7.mp3', answer: 'Perfect 4th' },
+        { file: 'Perfect4-8.mp3', answer: 'Perfect 4th' },
+        { file: 'Perfect4-9.mp3', answer: 'Perfect 4th' },
+        { file: 'Perfect4-10.mp3', answer: 'Perfect 4th' },
+        { file: 'Perfect5-1.mp3', answer: 'Perfect 5th' },
+        { file: 'Perfect5-2.mp3', answer: 'Perfect 5th' },
+        { file: 'Perfect5-3.mp3', answer: 'Perfect 5th' },
+        { file: 'Perfect5-4.mp3', answer: 'Perfect 5th' },
+        { file: 'Perfect5-5.mp3', answer: 'Perfect 5th' },
+        { file: 'Perfect5-6.mp3', answer: 'Perfect 5th' },
+        { file: 'Perfect5-7.mp3', answer: 'Perfect 5th' },
+        { file: 'Perfect5-8.mp3', answer: 'Perfect 5th' },
+        { file: 'Perfect5-9.mp3', answer: 'Perfect 5th' },
+        { file: 'Perfect8-1.mp3', answer: 'Perfect 8ve' },
+        { file: 'Perfect8-2.mp3', answer: 'Perfect 8ve' },
+        { file: 'Perfect8-3.mp3', answer: 'Perfect 8ve' },
+        { file: 'Perfect8-4.mp3', answer: 'Perfect 8ve' },
+        { file: 'Perfect8-5.mp3', answer: 'Perfect 8ve' },
+        { file: 'Perfect8-6.mp3', answer: 'Perfect 8ve' },
+        { file: 'Perfect8-7.mp3', answer: 'Perfect 8ve' },
+        { file: 'Perfect8-8.mp3', answer: 'Perfect 8ve' },
+        { file: 'Perfect8-9.mp3', answer: 'Perfect 8ve' },
+        { file: 'Tritone-1.mp3', answer: 'Tritone' },
+        { file: 'Tritone-2.mp3', answer: 'Tritone' },
+        { file: 'Tritone-3.mp3', answer: 'Tritone' },
+        { file: 'Tritone-4.mp3', answer: 'Tritone' },
+        { file: 'Tritone-5.mp3', answer: 'Tritone' },
+        { file: 'Tritone-6.mp3', answer: 'Tritone' },
+        { file: 'Tritone-7.mp3', answer: 'Tritone' },
+        { file: 'Tritone-8.mp3', answer: 'Tritone' },
+        { file: 'Tritone-9.mp3', answer: 'Tritone' },
+        { file: 'Tritone-10.mp3', answer: 'Tritone' }
+    ],
+    triads: [
+        { file: 'Augmented1.mp3', answer: 'Augmented Triad' },
+        { file: 'Augmented2.mp3', answer: 'Augmented Triad' },
+        { file: 'Augmented3.mp3', answer: 'Augmented Triad' },
+        { file: 'Augmented4.mp3', answer: 'Augmented Triad' },
+        { file: 'Augmented5.mp3', answer: 'Augmented Triad' },
+        { file: 'Augmented6.mp3', answer: 'Augmented Triad' },
+        { file: 'Augmented7.mp3', answer: 'Augmented Triad' },
+        { file: 'Augmented8.mp3', answer: 'Augmented Triad' },
+        { file: 'Diminished1.mp3', answer: 'Diminished Triad' },
+        { file: 'Diminished2.mp3', answer: 'Diminished Triad' },
+        { file: 'Diminished3.mp3', answer: 'Diminished Triad' },
+        { file: 'Diminished4.mp3', answer: 'Diminished Triad' },
+        { file: 'Diminished5.mp3', answer: 'Diminished Triad' },
+        { file: 'Diminished6.mp3', answer: 'Diminished Triad' },
+        { file: 'Major1.mp3', answer: 'Major Triad' },
+        { file: 'Major2.mp3', answer: 'Major Triad' },
+        { file: 'Major3.mp3', answer: 'Major Triad' },
+        { file: 'Major4.mp3', answer: 'Major Triad' },
+        { file: 'Major5.mp3', answer: 'Major Triad' },
+        { file: 'Major6.mp3', answer: 'Major Triad' },
+        { file: 'Major7.mp3', answer: 'Major Triad' },
+        { file: 'Major8.mp3', answer: 'Major Triad' },
+        { file: 'Major9.mp3', answer: 'Major Triad' },
+        { file: 'Minor1.mp3', answer: 'Minor Triad' },
+        { file: 'Minor2.mp3', answer: 'Minor Triad' },
+        { file: 'Minor3.mp3', answer: 'Minor Triad' },
+        { file: 'Minor4.mp3', answer: 'Minor Triad' },
+        { file: 'Minor5.mp3', answer: 'Minor Triad' },
+        { file: 'Minor6.mp3', answer: 'Minor Triad' },
+        { file: 'Minor7.mp3', answer: 'Minor Triad' }
+    ],
+    seventhChords: [
+        { file: 'Diminished7-1.mp3', answer: 'Diminished 7' },
+        { file: 'Diminished7-3.mp3', answer: 'Diminished 7' },
+        { file: 'Diminished7-4.mp3', answer: 'Diminished 7' },
+        { file: 'Diminished7-5.mp3', answer: 'Diminished 7' },
+        { file: 'Diminished7-6.mp3', answer: 'Diminished 7' },
+        { file: 'Diminished7-7.mp3', answer: 'Diminished 7' },
+        { file: 'Diminished7-8.mp3', answer: 'Diminished 7' },
+        { file: 'Dominant7-1.mp3', answer: 'Dominant 7' },
+        { file: 'Dominant7-2.mp3', answer: 'Dominant 7' },
+        { file: 'Dominant7-3.mp3', answer: 'Dominant 7' },
+        { file: 'Dominant7-4.mp3', answer: 'Dominant 7' },
+        { file: 'Dominant7-5.mp3', answer: 'Dominant 7' },
+        { file: 'Dominant7-6.mp3', answer: 'Dominant 7' },
+        { file: 'Dominant7-7.mp3', answer: 'Dominant 7' },
+        { file: 'Dominant7-8.mp3', answer: 'Dominant 7' },
+        { file: 'Dominant7-9.mp3', answer: 'Dominant 7' },
+        { file: 'Dominant7-10.mp3', answer: 'Dominant 7' },
+        { file: 'HalfDiminished7-1.mp3', answer: 'Half-Diminished 7' },
+        { file: 'HalfDiminished7-2.mp3', answer: 'Half-Diminished 7' },
+        { file: 'HalfDiminished7-3.mp3', answer: 'Half-Diminished 7' },
+        { file: 'HalfDiminished7-4.mp3', answer: 'Half-Diminished 7' },
+        { file: 'HalfDiminished7-5.mp3', answer: 'Half-Diminished 7' },
+        { file: 'HalfDiminished7-6.mp3', answer: 'Half-Diminished 7' },
+        { file: 'HalfDiminished7-7.mp3', answer: 'Half-Diminished 7' },
+        { file: 'HalfDiminished7-8.mp3', answer: 'Half-Diminished 7' },
+        { file: 'HalfDiminished7-9.mp3', answer: 'Half-Diminished 7' },
+        { file: 'Major7-1.mp3', answer: 'Major 7' },
+        { file: 'Major7-2.mp3', answer: 'Major 7' },
+        { file: 'Major7-3.mp3', answer: 'Major 7' },
+        { file: 'Major7-4.mp3', answer: 'Major 7' },
+        { file: 'Major7-5.mp3', answer: 'Major 7' },
+        { file: 'Major7-6.mp3', answer: 'Major 7' },
+        { file: 'Major7-7.mp3', answer: 'Major 7' },
+        { file: 'Major7-8.mp3', answer: 'Major 7' },
+        { file: 'Major7-9.mp3', answer: 'Major 7' },
+        { file: 'Minor7-1.mp3', answer: 'Minor 7' },
+        { file: 'Minor7-2.mp3', answer: 'Minor 7' },
+        { file: 'Minor7-3.mp3', answer: 'Minor 7' },
+        { file: 'Minor7-4.mp3', answer: 'Minor 7' },
+        { file: 'Minor7-5.mp3', answer: 'Minor 7' },
+        { file: 'Minor7-6.mp3', answer: 'Minor 7' },
+        { file: 'Minor7-7.mp3', answer: 'Minor 7' },
+        { file: 'Minor7-8.mp3', answer: 'Minor 7' }
+    ],
+    modes: [
+        { file: 'Aeolian1.mp3', answer: 'Aeolian' },
+        { file: 'Aeolian2.mp3', answer: 'Aeolian' },
+        { file: 'Aeolian3.mp3', answer: 'Aeolian' },
+        { file: 'Dorian1.mp3', answer: 'Dorian' },
+        { file: 'Dorian2.mp3', answer: 'Dorian' },
+        { file: 'Dorian3.mp3', answer: 'Dorian' },
+        { file: 'Ionian1.mp3', answer: 'Ionian' },
+        { file: 'Ionian2.mp3', answer: 'Ionian' },
+        { file: 'Locrian1.mp3', answer: 'Locrian' },
+        { file: 'Locrian2.mp3', answer: 'Locrian' },
+        { file: 'Locrian3.mp3', answer: 'Locrian' },
+        { file: 'Lydian1.mp3', answer: 'Lydian' },
+        { file: 'Lydian2.mp3', answer: 'Lydian' },
+        { file: 'Lydian3.mp3', answer: 'Lydian' },
+        { file: 'Lydian4.mp3', answer: 'Lydian' },
+        { file: 'Mixolydian1.mp3', answer: 'Mixolydian' },
+        { file: 'Mixolydian2.mp3', answer: 'Mixolydian' },
+        { file: 'Mixolydian3.mp3', answer: 'Mixolydian' },
+        { file: 'Mixolydian4.mp3', answer: 'Mixolydian' },
+        { file: 'Mixolydian5.mp3', answer: 'Mixolydian' },
+        { file: 'Mixolydian6.mp3', answer: 'Mixolydian' },
+        { file: 'Mixolydian7.mp3', answer: 'Mixolydian' },
+        { file: 'Phrygian1.mp3', answer: 'Phrygian' },
+        { file: 'Phrygian2.mp3', answer: 'Phrygian' },
+        { file: 'Phrygian3.mp3', answer: 'Phrygian' },
+        { file: 'Phrygian4.mp3', answer: 'Phrygian' },
+        { file: 'Phrygian5.mp3', answer: 'Phrygian' },
+        { file: 'Phrygian6.mp3', answer: 'Phrygian' },
+        { file: 'Phrygian7.mp3', answer: 'Phrygian' },
+        { file: 'Phrygian8.mp3', answer: 'Phrygian' }
+    ]
+};
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
+
+function generateQuestionSet(seed, section) {
+    const shuffled = [...audioFiles[section]];
+    const seededRandom = (min, max) => {
+        const x = Math.sin(hashCode(seed + max.toString()) * 10000) * 10000;
+        return min + (x - Math.floor(x)) * (max - min);
+    };
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom(0, i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return {
+        urls: shuffled.slice(0, 5).map(item => `audio/${section}/${item.file}`),
+        answers: shuffled.slice(0, 5).map(item => item.answer)
+    };
+}
+
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return hash;
+}
+
+let currentStudent = '';
+let currentSection = 0;
+let currentQuestion = 0;
+let answers = [];
+let playCount = 2;
+let audioElement = new Audio();
+let questionBank = {};
+
+// Add error handling for audio
+audioElement.addEventListener('error', function(e) {
+    console.error('Error loading audio:', e);
+    alert('Error loading audio file. Please try again.');
+});
+
+function checkName() {
+    const nameInput = document.getElementById('name-input').value.toLowerCase();
+    const errorElement = document.getElementById('error-message');
+
+    if (nameInput === 'mr. tubbs') {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('password-section').classList.remove('hidden');
+        return;
+    }
+
+    if (approvedNames.includes(nameInput)) {
+        currentStudent = nameInput;
+        questionBank[nameInput] = {
+            intervals: generateQuestionSet(nameInput, 'intervals'),
+            triads: generateQuestionSet(nameInput, 'triads'),
+            seventhChords: generateQuestionSet(nameInput, 'seventhChords'),
+            modes: generateQuestionSet(nameInput, 'modes')
+        };
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('quiz-section').classList.remove('hidden');
+        initializeQuiz();
+    } else {
+        errorElement.textContent = 'Name not found in approved list';
+    }
+}
+
+function checkPassword() {
+        const password = document.getElementById('password-input').value;
+        if (password === TEACHER_PASSWORD) {
+            document.getElementById('password-section').classList.add('hidden');
+            document.getElementById('teacher-section').classList.remove('hidden');
+            // Automatically trigger the file input dialogue when entering teacher mode
+            setTimeout(() => {
+                document.getElementById('json-input').click();
+            }, 100); // Small delay to ensure the section transition completes
+        } else {
+            alert('Incorrect password');
+        }
+    }
+
+function initializeQuiz() {
+    currentSection = 0;
+    currentQuestion = 0;
+    answers = [];
+    loadSection();
+}
+
+function loadSection() {
+    const sections = ['intervals', 'triads', 'seventhChords', 'modes'];
+    const sectionTitles = ['Intervals', 'Triads', 'Seventh Chords', 'Modes'];
+    document.getElementById('section-header').textContent = `Part ${currentSection + 1}: ${sectionTitles[currentSection]}`;
+    loadQuestion();
+}
+
+function loadQuestion() {
+    playCount = 2;
+    document.getElementById('question-number').textContent = currentQuestion + 1;
+    document.getElementById('play-count').textContent = `Plays remaining: ${playCount}`;
+    document.getElementById('play-button').disabled = false;
+    document.getElementById('answer-input').innerHTML = '<option value="" disabled selected>Select your answer</option>';
+
+    const sections = ['intervals', 'triads', 'seventhChords', 'modes'];
+    const section = sections[currentSection];
+    const possibleAnswers = Array.from(new Set(audioFiles[section].map(file => file.answer)));
+    
+    // Define correct order of options for each section
+    const orderedOptions = {
+        intervals: [
+            'Minor 2nd',
+            'Major 2nd',
+            'Minor 3rd',
+            'Major 3rd',
+            'Perfect 4th',
+            'Tritone',
+            'Perfect 5th',
+            'Minor 6th',
+            'Major 6th',
+            'Minor 7th',
+            'Major 7th',
+            'Perfect 8ve'
+        ],
+        triads: [
+            'Major Triad',
+            'Minor Triad',
+            'Augmented Triad',
+            'Diminished Triad'
+        ],
+        seventhChords: [
+            'Major 7',
+            'Dominant 7',
+            'Minor 7',
+            'Half-Diminished 7',
+            'Diminished 7'
+        ],
+        modes: [
+            'Ionian',
+            'Dorian',
+            'Phrygian',
+            'Lydian',
+            'Mixolydian',
+            'Aeolian',
+            'Locrian'
+        ]
+    };
+
+    // Use ordered options for the dropdown menu
+    orderedOptions[section].forEach(answer => {
+        const option = document.createElement('option');
+        option.value = answer;
+        option.textContent = answer;
+        document.getElementById('answer-input').appendChild(option);
+    });
+
+    audioElement.src = questionBank[currentStudent][section].urls[currentQuestion];
+    // Preload the audio
+    audioElement.load();
+}
+
+function playAudio() {
+    if (playCount > 0) {
+        audioElement.currentTime = 0; // Reset audio to start
+        audioElement.play()
+            .catch(e => {
+                console.error('Error playing audio:', e);
+                alert('Error playing audio file. Please try again.');
+            });
+        playCount--;
+        document.getElementById('play-count').textContent = `Plays remaining: ${playCount}`;
+        if (playCount === 0) {
+            document.getElementById('play-button').disabled = true;
+        }
+    }
+}
+
+function submitAnswer() {
+    const answerInput = document.getElementById('answer-input');
+    const answer = answerInput.value.trim();
+
+    if (!answer) {
+        alert('Please enter an answer before proceeding.');
+        return;
+    }
+
+    answers.push(answer);
+
+    if (currentQuestion < 4) {
+        currentQuestion++;
+        loadQuestion();
+    } else {
+        if (currentSection < 3) {
+            currentSection++;
+            currentQuestion = 0;
+            loadSection();
+        } else {
+            finishQuiz();
+        }
+    }
+}
+
+function finishQuiz() {
+    const resultData = {
+        student: capitalizeFirstLetter(currentStudent),
+        date: new Date().toISOString().split('T')[0],
+        answers: answers,
+        questionSet: questionBank[currentStudent]
+    };
+
+    // Encode the JSON data using Base64
+    const jsonString = JSON.stringify(resultData, null, 2);
+    const encodedData = btoa(jsonString); // Base64 encode
+
+    // Create a Blob with the encoded data
+    const blob = new Blob([encodedData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary anchor element for downloading
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${capitalizeFirstLetter(currentStudent)} - ${resultData.date}.json`;
+    document.body.appendChild(a);
+
+    // Programmatically trigger the download
+    a.click();
+
+    // Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // Reset the quiz interface
+    document.getElementById('quiz-section').classList.add('hidden');
+    document.getElementById('login-section').classList.remove('hidden');
+    document.getElementById('name-input').value = '';
+}
+
+function checkAnswers() {
+    const fileInput = document.getElementById('json-input');
+    const resultsContainer = document.getElementById('results-container');
+    resultsContainer.innerHTML = '';
+
+    if (fileInput.files.length === 0) {
+        alert('Please select at least one JSON file to check.');
+        return;
+    }
+
+    const studentOrder = [
+        'Ben', 'Howard', 'Terry', 'Alice', 'Vincent', 'Tiger',
+        'Chris', 'Lucy', 'Diego', 'Hailey', 'Eileen', 'Angelina',
+        'Serena', 'Catherine', 'Andrew', 'Jennifer'
+    ];
+
+    const files = Array.from(fileInput.files);
+    const results = [];
+
+    let filesProcessed = 0;
+
+    files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const decodedData = atob(e.target.result);
+                const submission = JSON.parse(decodedData);
+                results.push(submission);
+
+                filesProcessed++;
+                if (filesProcessed === files.length) {
+                    displaySortedResults(results);
+                }
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+                alert(`Error parsing file: ${file.name}`);
+                filesProcessed++;
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    function displaySortedResults(results) {
+    // Sort results according to studentOrder
+    results.sort((a, b) => {
+        const indexA = studentOrder.indexOf(a.student);
+        const indexB = studentOrder.indexOf(b.student);
+        return indexA - indexB;
+    });
+
+    // Clear existing results
+    resultsContainer.innerHTML = '';
+
+    // Update the title to "Student Results"
+    document.getElementById('teacher-mode-title').textContent = 'Student Results';
+
+    // Display individual results with "Copy" buttons
+    results.forEach(submission => {
+        const correctAnswers = [
+            ...submission.questionSet.intervals.answers,
+            ...submission.questionSet.triads.answers,
+            ...submission.questionSet.seventhChords.answers,
+            ...submission.questionSet.modes.answers
+        ];
+        let score = 0;
+
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'student-result';
+        resultDiv.innerHTML = `
+            <h4>${submission.student}</h4>
+            <p>Date: ${submission.date}</p>
+            <table class="results-table">
+                <tr>
+                    <th>#</th>
+                    <th>Student Answer</th>
+                    <th>Correct Answer</th>
+                </tr>
+                ${submission.answers.map((answer, index) => {
+                    const isCorrect = answer.toLowerCase() === correctAnswers[index].toLowerCase();
+                    if (isCorrect) score++;
+                    return `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td class="${isCorrect ? '' : 'incorrect'}">${answer} ${isCorrect ? '<span class="correct-mark">√</span>' : ''}</td>
+                            <td>${correctAnswers[index]}</td>
+                        </tr>
+                    `;
+                }).join('')}
+            </table>
+            <p>Score: ${score}/20 (${(score / 20 * 100).toFixed(1)}%)</p>
+            <button class="copy-button" onclick="copyToClipboard(this)">Copy</button>
+        `;
+        resultsContainer.appendChild(resultDiv);
+    });
+
+    // Create summary spreadsheet only if multiple files are selected
+    if (results.length > 1) {
+        const summaryDiv = document.createElement('div');
+        summaryDiv.className = 'summary-table';
+        summaryDiv.style.marginTop = '2rem';
+        summaryDiv.style.overflowX = 'auto';
+
+        // Create a lookup object for quick access to scores
+        const scoreMap = new Map(results.map(r => {
+            const score = r.answers.reduce((acc, ans, idx) =>
+                acc + (ans.toLowerCase() === [
+                    ...r.questionSet.intervals.answers,
+                    ...r.questionSet.triads.answers,
+                    ...r.questionSet.seventhChords.answers,
+                    ...r.questionSet.modes.answers
+                ][idx].toLowerCase() ? 1 : 0), 0);
+            return [r.student, (score / 20 * 100).toFixed(1)];
+        }));
+    
+        const table = document.createElement('table');
+        table.style.borderCollapse = 'collapse';
+        table.style.width = '100%';
+        table.style.minWidth = 'max-content';
+
+        // Names row
+        const nameRow = document.createElement('tr');
+        studentOrder.forEach(student => {
+            const th = document.createElement('th');
+            th.style.border = '1px solid #ccc';
+            th.style.padding = '8px';
+            th.textContent = student;
+            nameRow.appendChild(th);
+        });
+
+        // Scores row
+        const scoreRow = document.createElement('tr');
+        studentOrder.forEach(student => {
+            const td = document.createElement('td');
+            td.style.border = '1px solid #ccc';
+            td.style.padding = '8px';
+            td.style.textAlign = 'center';
+            const score = scoreMap.get(student);
+            td.textContent = score ? `${score}%` : 'N/A';
+            scoreRow.appendChild(td);
+        });
+
+        table.appendChild(nameRow);
+        table.appendChild(scoreRow);
+
+        // Add "Copy" button for the summary table
+        const copyButton = document.createElement('button');
+        copyButton.className = 'copy-button';
+        copyButton.textContent = 'Copy';
+        copyButton.onclick = () => copyTableToClipboard(table);
+
+        summaryDiv.appendChild(table);
+        summaryDiv.appendChild(copyButton);
+        resultsContainer.appendChild(summaryDiv);
+    }
+    }
+}
+
+// Function to copy individual student results
+function copyToClipboard(button) {
+    const studentResultDiv = button.parentElement;
+    
+    // Create a temporary container
+    const tempDiv = document.createElement('div');
+    
+    // Clone the content except the copy button
+    Array.from(studentResultDiv.childNodes).forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE && !node.classList?.contains('copy-button')) {
+            const clone = node.cloneNode(true);
+            tempDiv.appendChild(clone);
+        }
+    });
+    
+    // Create a blob with HTML content
+    const blob = new Blob([`
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; }
+                .student-result { margin: 1rem; }
+                .results-table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 1rem 0;
+                }
+                .results-table th,
+                .results-table td {
+                    border: 1px solid #ccc;
+                    padding: 8px;
+                    text-align: left;
+                }
+                .results-table th {
+                    background-color: #f5f5f5;
+                }
+                .incorrect {
+                    color: #dc2626;
+                }
+                .correct-mark {
+                    color: #16a34a;
+                    margin-left: 4px;
+                }
+            </style>
+        </head>
+        <body>
+            ${tempDiv.innerHTML}
+        </body>
+        </html>
+    `], { type: 'text/html' });
+
+    // Create a ClipboardItem
+    const clipboardItem = new ClipboardItem({
+        'text/html': blob
+    });
+
+    // Copy to clipboard
+    navigator.clipboard.write([clipboardItem]).then(() => {
+        alert('Copied to clipboard with formatting!');
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        
+        // Fallback to plain text if HTML copying fails
+        const plainText = Array.from(studentResultDiv.childNodes)
+            .filter(node => node.nodeType === Node.ELEMENT_NODE && !node.classList?.contains('copy-button'))
+            .map(node => node.textContent.trim())
+            .join('\n');
+        
+        navigator.clipboard.writeText(plainText).then(() => {
+            alert('Copied to clipboard (plain text only)!');
+        }).catch(err => {
+            console.error('Failed to copy plain text: ', err);
+        });
+    });
+}
+
+// Function to copy the summary table
+function copyTableToClipboard(table) {
+    let textToCopy = '';
+    Array.from(table.rows).forEach(row => {
+        const rowData = Array.from(row.cells).map(cell => cell.textContent.trim());
+        textToCopy += rowData.join('\t') + '\n';
+    });
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('Summary table copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy table: ', err);
+    });
+}
+
+// Add event listeners for "Copy" buttons after creating them
+document.querySelectorAll('.copy-button').forEach(button => {
+    button.addEventListener('click', () => {
+        copyToClipboard(button);
+    });
+});
+
+
+// Add keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Get the currently focused element
+    const activeElement = document.activeElement;
+    const nameInput = document.getElementById('name-input');
+    const passwordInput = document.getElementById('password-input');
+    const answerInput = document.getElementById('answer-input');
+
+    // Handle Enter key
+    if (e.key === 'Enter') {
+        if (activeElement === nameInput || (!nameInput.value && !document.getElementById('login-section').classList.contains('hidden'))) {
+            checkName();
+            e.preventDefault();
+        } else if (activeElement === passwordInput || (!passwordInput.value && !document.getElementById('password-section').classList.contains('hidden'))) {
+            checkPassword();
+            e.preventDefault();
+        } else if (!document.getElementById('quiz-section').classList.contains('hidden')) {
+            submitAnswer();
+            e.preventDefault();
+        }
+    }
+
+    // Handle Space key for audio playback
+    else if (e.key === ' ' || e.key === 'Spacebar') {
+        // Only prevent default if we're not in an input field
+        if (activeElement.tagName !== 'INPUT' && !document.getElementById('quiz-section').classList.contains('hidden')) {
+            e.preventDefault();
+            playAudio();
+        }
+    }
+
+    // Handle arrow keys for datalist navigation
+    else if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !document.getElementById('quiz-section').classList.contains('hidden')) {
+        const sections = ['intervals', 'triads', 'seventhChords', 'modes'];
+        const section = sections[currentSection];
+        const orderedOptions = {
+            intervals: [
+                'Minor 2nd',
+                'Major 2nd',
+                'Minor 3rd',
+                'Major 3rd',
+                'Perfect 4th',
+                'Tritone',
+                'Perfect 5th',
+                'Minor 6th',
+                'Major 6th',
+                'Minor 7th',
+                'Major 7th',
+                'Perfect 8ve'
+            ],
+            triads: [
+                'Major Triad',
+                'Minor Triad',
+                'Augmented Triad',
+                'Diminished Triad'
+            ],
+            seventhChords: [
+                'Major 7',
+                'Dominant 7',
+                'Minor 7',
+                'Half-Diminished 7',
+                'Diminished 7'
+            ],
+            modes: [
+                'Ionian',
+                'Dorian',
+                'Phrygian',
+                'Lydian',
+                'Mixolydian',
+                'Aeolian',
+                'Locrian'
+            ]
+        };
+
+        const currentValue = answerInput.value;
+        const options = orderedOptions[section];
+        let currentIndex = options.indexOf(currentValue);
+
+        if (e.key === 'ArrowDown') {
+            currentIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % options.length;
+        } else {
+            currentIndex = currentIndex === -1 ? options.length - 1 : (currentIndex - 1 + options.length) % options.length;
+        }
+
+        answerInput.value = options[currentIndex];
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-check answers when files are selected
+    document.getElementById('json-input').addEventListener('change', function(e) {
+        checkAnswers();
+    });
+});
+
+// Prevent form submission on enter
+document.addEventListener('submit', function(e) {
+    e.preventDefault();
+});
+
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.target.id === 'password-section' &&
+            !mutation.target.classList.contains('hidden')) {
+            document.getElementById('password-input').focus();
+        }
+    });
+});
+
+        observer.observe(document.getElementById('password-section'), {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+
+        // Add input event listeners to handle auto-completion
+        document.getElementById('answer-input').addEventListener('input', function(e) {
+            const value = e.target.value;
+            const modes = ['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Mixolydian', 'Aeolian', 'Locrian'];
+            
+            // Auto-complete if partial match is found
+            const match = modes.find(mode => 
+                mode.toLowerCase().startsWith(value.toLowerCase())
+            );
+            
+            if (match && value.length > 0) {
+                e.target.value = match;
+            }
+        });
+
+    // Hamburger menu functionality
+    const menuToggle = document.querySelector('.menu-toggle');
+    const menuItems = document.querySelector('.menu-items');
+    
+    menuToggle.addEventListener('click', () => {
+        menuToggle.classList.toggle('open');
+        menuItems.classList.toggle('show');
+    });
+    
+    // Close the menu when clicking outside
+    document.addEventListener('click', (event) => {
+        // Check if the click was outside the menu and the toggle button
+        if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+            menuToggle.classList.remove('open');
+            menuItems.classList.remove('show');
+        }
+    });
+    </script>
+</body>
+</html>
