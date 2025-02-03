@@ -284,7 +284,8 @@
         }
 
         .teacher-container {
-            margin-top: 350px; /*I think it's this one*/
+            margin-top: 350px; 
+            align-items: center;
         }
 
         .teacher-section {
@@ -296,6 +297,7 @@
     height: calc(100vh - 250px);
     overflow-y: auto;
     scroll-behavior: smooth;
+    align-items: center;
 }
 
 #results-container {
@@ -318,12 +320,11 @@
 }
 
 .results-table {
-            width: 60%;
-            transform: translateX(35%);
-            border-collapse: collapse;
-            margin: 0 0 20px 0; /* Changed margin-top to 0 */
-            background-color: rgba(255, 255, 255, 0.05); /* Optional: adds slight contrast */
-        }
+    width: 420px;
+    border-collapse: collapse;
+    margin: 0 auto 20px auto;  /* This centers the table horizontally */
+    background-color: rgba(255, 255, 255, 0.05);
+}
 
 .student-result:last-child {
     margin-bottom: 0;
