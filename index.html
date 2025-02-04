@@ -289,7 +289,7 @@
 
     <div class="container">
         <div class="countdown" id="upcoming-dates"></div>
-        <p><h2>Our supplemental activities for the day:</h2></p>
+        <p><h2>Our review activities for today:</h2></p>
         <div class="grid">
             <div class="grid-item" onclick="window.open('https://biphmusic.github.io/dailysightsinging/', '_blank')">
                 <img src="images/sightsinging.png" alt="Sight Singing">
@@ -370,7 +370,7 @@
             const mockDaysLeft = Math.ceil((mockExamDate - now) / (1000 * 60 * 60 * 24));
             const apDaysLeft = Math.ceil((apExamDate - now) / (1000 * 60 * 60 * 24));
 
-            return `<h2>Upcoming Dates of Importance</h2>
+            return `<h2>Dates of Importance</h2>
                     <p><strong>Mock Exam</strong>: February 19th <span style="opacity: 0.5; font-size: 0.8em;">(in ${mockDaysLeft} days)</span></p>
                     <p><strong>AP Exam</strong>: May 12th <span style="opacity: 0.5; font-size: 0.8em;">(in ${apDaysLeft} days)</span></p>
                     <br><br>`; // Added extra line breaks for more space
