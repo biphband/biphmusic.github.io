@@ -283,6 +283,7 @@
             font-size: 1rem;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-top: 10px; /* Added margin to create space above the button */
         }
 
         .submit-button:hover {
@@ -345,6 +346,17 @@
             color: white;
             font-size: 0.9rem;
             cursor: pointer;
+            width: 60px; /* Set a fixed width to prevent size change */
+            text-align: center; /* Center the text */
+            opacity: 1; /* Ensure the button is fully visible */
+        }
+
+        .copy-text {
+            transition: opacity 1.0s; /* Fade transition for text */
+        }
+
+        .copy-text.fade {
+            opacity: 0; /* Start fading out */
         }
 
         .copy-button:hover {
@@ -384,6 +396,10 @@
         .duplicate-input {
             background-color: rgba(255, 255, 0, 0.2) !important;
         }
+
+        .invalid-input {
+            outline: 2px solid rgba(255, 0, 0, 0.589);
+        }
     </style>
 </head>
 <body>
@@ -418,9 +434,9 @@
 
     <div class="logincontainer">
         <div id="login-section" class="login-section">
-            <h2>Enter your name to begin the quiz</h2>
+            <h2>Enter your name to begin</h2>
             <input type="text" id="name-input" placeholder="Your name" autofocus>
-            <button onclick="checkName()">Start Quiz</button>
+            <button onclick="checkName()">Begin</button>
             <div id="error-message" class="error"></div>
         </div>
 
@@ -552,71 +568,126 @@
 
         function handleInput(input, index) {
             const value = input.value.toUpperCase();
-            const letterIndex = value.charCodeAt(0) - 65;
+            const currentLetter = value.charAt(0);
 
+            // Reset all inputs and buttons to their initial state first
+            const allInputs = document.querySelectorAll('.answer-input');
             const buttons = document.querySelectorAll('.word-bank button');
+            
+            allInputs.forEach(input => {
+                input.classList.remove('duplicate-input');
+                input.classList.remove('invalid-input'); // Reset invalid input class
+            });
+            
             buttons.forEach(button => {
-                const buttonLetterIndex = button.textContent.charCodeAt(0) - 65;
-
-                // Reset all buttons first
                 button.classList.remove('used');
                 button.classList.remove('duplicate');
                 button.removeAttribute('data-tooltip');
                 button.style.opacity = '1';
                 button.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
                 button.style.color = 'white';
+            });
 
-                // Check if this term has been used anywhere in the quiz
-                const term = button.dataset.term;
-                const isUsed = answers.some(answer => answer === term);
+            // Find duplicate letters in inputs and check for invalid letters
+            const letterCounts = {};
+            const letterPositions = {};
 
-                if (isUsed) {
-                    button.classList.add('used');
-                    button.style.opacity = '0.4';
-                    button.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                    button.style.color = 'rgba(255, 255, 255, 0.4)';
+            allInputs.forEach((input, idx) => {
+                const letter = input.value.toUpperCase().charAt(0);
+                if (letter) {
+                    // Check if letter is valid (within A-Z and within the range of available terms)
+                    const letterIndex = letter.charCodeAt(0) - 65;
+                    const isValidLetter = letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length;
+                    
+                    if (!isValidLetter) {
+                        input.classList.add('invalid-input');
+                    }
+                    
+                    if (isValidLetter) {
+                        if (!letterCounts[letter]) {
+                            letterCounts[letter] = 0;
+                            letterPositions[letter] = [];
+                        }
+                        letterCounts[letter]++;
+                        letterPositions[letter].push(idx);
+                    }
                 }
             });
 
-            if (letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length) {
-                const selectedTerm = questionBank[currentStudent].terms[letterIndex];
-                answers[index] = selectedTerm;
+            // Handle duplicates and used letters
+            Object.entries(letterCounts).forEach(([letter, count]) => {
+                const letterIndex = letter.charCodeAt(0) - 65;
+                if (letterIndex >= 0 && letterIndex < buttons.length) {
+                    const button = buttons[letterIndex];
+                    
+                    if (count > 1) {
+                        // Handle duplicates
+                        letterPositions[letter].forEach(position => {
+                            const duplicateInput = document.querySelector(`#answer-${position}`);
+                            duplicateInput.classList.add('duplicate-input');
+                        });
 
-                // Handle duplicate logic
-                if (!usedTerms[selectedTerm]) {
-                    usedTerms[selectedTerm] = [];
+                        button.classList.add('duplicate');
+                        button.setAttribute('data-tooltip', 
+                            `Duplicate response in questions: ${letterPositions[letter].map(pos => pos + 1).join(', ')}`
+                        );
+                    } else {
+                        // Gray out single-use letters
+                        button.classList.add('used');
+                        button.style.opacity = '0.4';
+                        button.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                        button.style.color = 'rgba(255, 255, 255, 0.4)';
+                    }
                 }
-                usedTerms[selectedTerm].push(parseInt(index) + 1);
+            });
 
-                if (usedTerms[selectedTerm].length > 1) {
-                    buttons[letterIndex].classList.add('duplicate');
-                    buttons[letterIndex].setAttribute('data-tooltip', `Already used in question(s): ${usedTerms[selectedTerm].join(', ')}`);
-
-                    // Highlight duplicate input fields
-                    usedTerms[selectedTerm].forEach(qIndex => {
-                        const duplicateInput = document.querySelector(`#answer-${qIndex - 1}`);
-                        duplicateInput.classList.add('duplicate-input');
-                    });
+            // Update answers array
+            if (currentLetter) {
+                const letterIndex = currentLetter.charCodeAt(0) - 65;
+                if (letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length) {
+                    answers[index] = questionBank[currentStudent].terms[letterIndex];
                 } else {
-                    buttons[letterIndex].classList.remove('duplicate');
-                    buttons[letterIndex].removeAttribute('data-tooltip');
+                    answers[index] = '';
+                    // Add invalid input highlighting for current input
+                    input.classList.add('invalid-input');
                 }
-
-                // Immediately gray out the button for the selected term
-                buttons[letterIndex].classList.add('used');
-                buttons[letterIndex].style.opacity = '0.4';
-                buttons[letterIndex].style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                buttons[letterIndex].style.color = 'rgba(255, 255, 255, 0.4)';
             } else {
                 answers[index] = '';
             }
+
+            // Update used terms count for submit validation
+            usedTerms = {};
+            allInputs.forEach((input, idx) => {
+                const letter = input.value.toUpperCase().charAt(0);
+                if (letter) {
+                    const letterIndex = letter.charCodeAt(0) - 65;
+                    if (letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length) {
+                        const term = questionBank[currentStudent].terms[letterIndex];
+                        if (!usedTerms[term]) {
+                            usedTerms[term] = [];
+                        }
+                        usedTerms[term].push(idx + 1);
+                    }
+                }
+            });
         }
 
         function submitQuiz() {
-            const unanswered = answers.some(answer => !answer);
-            if (unanswered) {
-                alert('Please answer all questions before submitting.');
-                return;
+            const hasBlankAnswers = [...document.querySelectorAll('.answer-input')].some(input => input.value.trim() === '');
+            const duplicateAnswers = Object.keys(usedTerms).filter(term => usedTerms[term].length > 1);
+
+            if (hasBlankAnswers && duplicateAnswers.length > 0) {
+                if (!confirm('There are blank answers and duplicate responses.\nWould you still like to submit?')) {
+                    return; // User chose not to submit, exit the function
+                }
+            } else if (hasBlankAnswers) {
+                if (!confirm('There are some questions left blank.\nWould you still like to submit?')) {
+                    return; // User chose not to submit, exit the function
+                }
+            } else if (duplicateAnswers.length > 0) {
+                if (!confirm('There are duplicate responses \n(each word should only be used once).\n\nWould you still like to submit?')) {
+                    return; // User chose not to submit, exit the function
+                }
             }
 
             finishQuiz();
@@ -626,6 +697,8 @@
             const resultData = {
                 student: capitalizeFirstLetter(currentStudent),
                 date: new Date().toISOString().split('T')[0],
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+                exercise: "Vocab Quiz",
                 answers: Array.from({ length: 26 }, (_, index) => answers[index] || ""),
                 questionSet: questionBank[currentStudent],
                 termsToReview: []
@@ -657,7 +730,9 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${capitalizeFirstLetter(currentStudent)} - ${resultData.date}.json`;
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            a.download = `${capitalizeFirstLetter(currentStudent)} - Vocab Quiz - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -727,8 +802,8 @@
                     const resultDiv = document.createElement('div');
                     resultDiv.className = 'student-result';
                     resultDiv.innerHTML = `
-                        <h4>${submission.student}</h4>
-                        <p>Date: ${submission.date}</p>
+                        <h4>${submission.student} - ${submission.exercise}</h4>
+                        <p>Date: ${submission.date} at ${submission.time}</p>
                         <table class="results-table">
                             <tr>
                                 <th>#</th>
@@ -753,7 +828,9 @@
                         <ul>
                             ${submission.termsToReview.map(item => `<li>${item.term} - ${item.definition}</li>`).join('')}
                         </ul>
-                        <button class="copy-button" onclick="copyToClipboard(this)">Copy</button>
+                        <button class="copy-button" onclick="copyToClipboard(this)">
+                            <span class="copy-text">Copy</span>
+                        </button>
                     `;
                     resultsContainer.appendChild(resultDiv);
                 });
@@ -824,8 +901,7 @@
             // Add terms to review to the copied content
             const termsToReview = Array.from(studentResultDiv.querySelectorAll('ul')).map(ul => ul.innerHTML).join('<br>');
 
-            const blob = new Blob([`
-                <html>
+            const blob = new Blob([`                <html>
                 <head>
                     <style>
                         body { font-family: Arial, sans-serif; }
@@ -855,8 +931,6 @@
                 </head>
                 <body>
                     ${tempDiv.innerHTML}
-                    <p>Terms to review:</p>
-                    <ul>${termsToReview}</ul>
                 </body>
                 </html>
             `], { type: 'text/html' });
@@ -866,7 +940,13 @@
             });
 
             navigator.clipboard.write([clipboardItem]).then(() => {
-                alert('Copied to clipboard with formatting!');
+                const textSpan = button.querySelector('.copy-text');
+                textSpan.textContent = '√';
+                textSpan.classList.add('fade'); // Add fade class to start fading
+                setTimeout(() => {
+                    textSpan.classList.remove('fade'); // Remove fade class after 2 seconds
+                    textSpan.textContent = 'Copy'; // Change text back to "Copy"
+                }, 1500); // Wait for 2 seconds before changing back
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
                 // Fallback to plain text
@@ -876,7 +956,8 @@
                     .join('\n');
 
                 navigator.clipboard.writeText(plainText).then(() => {
-                    alert('Copied to clipboard (plain text only)!');
+                    const textSpan = button.querySelector('.copy-text');
+                    textSpan.textContent = '√';
                 }).catch(err => {
                     console.error('Failed to copy plain text: ', err);
                 });
@@ -921,11 +1002,20 @@
             const activeElement = document.activeElement;
             if (activeElement.classList.contains('answer-input')) {
                 const currentIndex = parseInt(activeElement.id.split('-')[1]);
-                if (event.key === 'Tab' || event.key === 'Enter') {
+                if (event.key === 'Tab') {
                     event.preventDefault(); // Prevent default tab behavior
-                    const nextInput = document.getElementById(`answer-${currentIndex + 1}`);
-                    if (nextInput) {
-                        nextInput.focus(); // Move focus to the next input
+                    if (event.shiftKey) {
+                        // Shift + Tab functionality
+                        const previousInput = document.getElementById(`answer-${currentIndex - 1}`);
+                        if (previousInput) {
+                            previousInput.focus(); // Move focus to the previous input
+                        }
+                    } else {
+                        // Regular Tab functionality
+                        const nextInput = document.getElementById(`answer-${currentIndex + 1}`);
+                        if (nextInput) {
+                            nextInput.focus(); // Move focus to the next input
+                        }
                     }
                 }
             }
