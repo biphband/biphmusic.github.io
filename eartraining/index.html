@@ -906,12 +906,23 @@ function finishQuiz() {
         student: capitalizeFirstLetter(currentStudent),
         date: new Date().toISOString().split('T')[0],
         answers: answers,
-        questionSet: questionBank[currentStudent]
+        questionSet: questionBank[currentStudent],
+        exercise: "Ear Training",
+        time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
     };
 
     // Encode the JSON data using Base64
     const jsonString = JSON.stringify(resultData, null, 2);
     const encodedData = btoa(jsonString); // Base64 encode
+
+    // Update the filename format with abbreviated month
+    const date = new Date();
+    const options = { month: 'short', day: 'numeric' };
+    const formattedDate = date.toLocaleDateString('en-US', options);
+    const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).replace(':', '_');
+    
+    // Create the filename with the new format
+    const filename = `${capitalizeFirstLetter(currentStudent)} - Ear Training - ${formattedDate} - ${formattedTime}.json`;
 
     // Create a Blob with the encoded data
     const blob = new Blob([encodedData], { type: 'application/json' });
@@ -920,7 +931,7 @@ function finishQuiz() {
     // Create a temporary anchor element for downloading
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${capitalizeFirstLetter(currentStudent)} - ${resultData.date}.json`;
+    a.download = filename; // Use the new filename format
     document.body.appendChild(a);
 
     // Programmatically trigger the download
@@ -1005,8 +1016,8 @@ function checkAnswers() {
         const resultDiv = document.createElement('div');
         resultDiv.className = 'student-result';
         resultDiv.innerHTML = `
-            <h4>${submission.student}</h4>
-            <p>Date: ${submission.date}</p>
+            <h4>${submission.student} - ${submission.exercise}</h4>
+            <p>Date: ${submission.date} at ${submission.time}</p>
             <table class="results-table">
                 <tr>
                     <th>#</th>
@@ -1200,6 +1211,16 @@ document.addEventListener('keydown', function(e) {
     const passwordInput = document.getElementById('password-input');
     const answerInput = document.getElementById('answer-input');
 
+    // Handle Tab key
+    if (e.key === 'Tab') {
+        // Check if the focused element is not an input
+        if (activeElement.tagName !== 'INPUT') {
+            // If no input is focused, focus on the name input
+            nameInput.focus();
+            e.preventDefault(); // Prevent default tab behavior
+        }
+    }
+
     // Handle Enter key
     if (e.key === 'Enter') {
         if (activeElement === nameInput || (!nameInput.value && !document.getElementById('login-section').classList.contains('hidden'))) {
@@ -1307,20 +1328,7 @@ const observer = new MutationObserver(function(mutations) {
             attributeFilter: ['class']
         });
 
-        // Add input event listeners to handle auto-completion
-        document.getElementById('answer-input').addEventListener('input', function(e) {
-            const value = e.target.value;
-            const modes = ['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Mixolydian', 'Aeolian', 'Locrian'];
-            
-            // Auto-complete if partial match is found
-            const match = modes.find(mode => 
-                mode.toLowerCase().startsWith(value.toLowerCase())
-            );
-            
-            if (match && value.length > 0) {
-                e.target.value = match;
-            }
-        });
+
 
     // Hamburger menu functionality
     const menuToggle = document.querySelector('.menu-toggle');
