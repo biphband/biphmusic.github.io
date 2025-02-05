@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sheet Music Composer</title>
+    <link rel="icon" href="/icons/BGicon.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Zapfino';
+            src: url('fonts/Zapfino.ttf') format('truetype');
+        }
+
+        body {
+            background-color: rgb(45, 70, 119);
+            font-family: 'Andika', sans-serif;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            user-select: none;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        .hamburger-menu {
+            position: absolute;
+            top: 20px;
+            left: 13px;
+            z-index: 1000;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s linear;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-items {
+            position: absolute;
+            top: 25px;
+            left: -250px;
+            background: linear-gradient(135deg, rgba(48, 67, 104, 0.8), rgba(20, 31, 53, 0.8));
+            width: 250px;
+            height: 90vh;
+            padding-top: 20px;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-items.show {
+            left: 0;
+            opacity: 1;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .menu-items.show a {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-items a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-items a:nth-child(1) { transition-delay: 0.1s; }
+        .menu-items a:nth-child(2) { transition-delay: 0.2s; }
+        .menu-items a:nth-child(3) { transition-delay: 0.3s; }
+        .menu-items a:nth-child(4) { transition-delay: 0.4s; }
+        .menu-items a:nth-child(5) { transition-delay: 0.5s; }
+        .menu-items a:nth-child(6) { transition-delay: 0.6s; }
+        .menu-items a:nth-child(7) { transition-delay: 0.7s; }
+        .menu-items a:nth-child(8) { transition-delay: 0.8s; }
+        .menu-items a:nth-child(9) { transition-delay: 0.9s; }
+        .menu-items a:nth-child(10) { transition-delay: 1.0s; }
+        .menu-items a:nth-child(11) { transition-delay: 1.1s; }
+
+        .menu-title {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        h1.Title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        h1.Subtitle {
+            font-family: 'Zapfino', sans-serif;
+            color: white;
+            margin-top: -0.7em;
+            font-size: 40px;
+            text-align: center;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 900;
+        }
+
+        .toolbar button {
+            margin: 5px;
+            padding-top: 5px;
+            background-color: rgba(255, 255, 255, 0.816);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .toolbar button:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .toolbar button img {
+            width: 50px;
+            height: 45px;
+        }
+
+        .floating-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .floating-controls button {
+            padding: 5px;
+            background-color: rgba(255, 255, 255, 0.816);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .floating-controls button:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .floating-controls button img {
+            width: 40px;
+            height: 35px;
+        }
+
+        .note-size-controls {
+            position: fixed;
+            top: 60px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .note-size-controls button {
+            font-size: 16px;
+        }
+
+        .pencil-settings {
+            display: none;
+            margin-top: -55px;
+            top: 0px;
+            z-index: 1000;
+        }
+
+        .pencil-settings label {
+            margin-right: 10px;
+            z-index: 1000;
+        }
+
+        .pencil-settings.active {
+            display: block;
+            z-index: 1000;
+        }
+
+        .canvas-wrapper {
+            max-width: 100%;
+            height: auto;
+            overflow: auto;
+            margin-top: 20px;
+            margin-bottom: 60px;
+        }
+
+        #canvas-container {
+            height: auto;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+
+        .logocontainer {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            width: 25vh;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
+    <div class="hamburger-menu">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="menu-items" id="menu-items">
+            <div class="menu-title">BIPH Music</div>
+            <a href="https://biphmusic.github.io/">Home</a>
+            <a href="https://biphmusic.github.io/dailysightsinging/">Daily Sight Singing</a>
+            <a href="https://biphmusic.github.io/wordwall/">Word Wall</a>
+            <a href="https://biphmusic.github.io/flashcards/">Flash Cards</a>
+            <a href="https://biphmusic.github.io/dice/">Dice Simulator</a>
+            <a href="https://biphmusic.github.io/chords/">Chord Quality</a>
+            <a href="https://biphmusic.github.io/progressions/">Chord Progressions</a>
+            <a href="https://biphmusic.github.io/piano/">Web Piano</a>
+            <a href="https://biphmusic.github.io/units/">AP Units</a>
+            <a href="mailto:garrison.tubbs-biph@basischina.com">Contact</a>
+            <div class="menu-footer">© Garrison Tubbs 2024</div>
+        </div>
+    </div>
+
+    <h1 class="Title">BIPH Music</h1>
+    <h1 class="Subtitle">Notation</h1>
+
+    <div class="container">
+        <div class="note-size-controls" style="text-align: center;">
+            <button onclick="adjustNoteSize(-0.1)">-</button>
+            <span id="noteSize">1.0x</span>
+            <button onclick="adjustNoteSize(0.1)">+</button>
+        </div>
+        <div class="floating-controls">
+            <button id="undoButton" class="undo-button" onclick="undo()">
+                <img src="icons/undo.png" alt="Undo">
+            </button>
+            <button onclick="exportImage()">
+                <img src="icons/download.png" alt="Export">
+            </button>
+        </div>
+
+        <div class="canvas-wrapper">
+            <div id="canvas-container">
+                <canvas id="canvas"></canvas>
+            </div>
+        </div>
+
+        <div class="pencil-settings" id="pencilSettings" style="text-align: center;">
+            <label for="lineThickness">Line Thickness:</label>
+            <input type="range" id="lineThickness" min="1" max="20" value="5">
+            <label for="lineColor">Line Color:</label>
+            <input type="color" id="lineColor" value="#000000">
+        </div>
+
+        <div class="toolbar">
+            <button onclick="addNote('whole')">
+                <img src="icons/whole.png" alt="Whole Note">
+            </button>
+            <button onclick="addNote('half')">
+                <img src="icons/half.png" alt="Half Note">
+            </button>
+            <button onclick="addNote('quarter')">
+                <img src="icons/quarter.png" alt="Quarter Note">
+            </button>
+            <button onclick="togglePencilTool()">
+                <img src="icons/pencil.png" alt="Pencil Tool">
+            </button>
+            <button onclick="addText()">
+                <img src="icons/text.png" alt="Add Text">
+            </button>
+            <button onclick="deleteSelected()">
+                <img src="icons/delete.png" alt="Delete Selected">
+            </button>
+        </div>
+    </div>
+
+    <div class="logocontainer">
+        <img src="BASIS logo/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
+    </div>
+
+    <script>
+        const canvas = new fabric.Canvas('canvas', {
+            width: window.innerWidth,
+            height: 400,
+            backgroundColor: '#ffffff',
+            isDrawingMode: false
+        });
+
+        let drawingPaths = [];
+        let isDrawingMode = false;
+        let backgroundImageLoaded = false;
+        let noteScaleFactor = 1;
+        let undoStack = [];
+        let redoStack = [];
+
+// Load the background sheet music and adjust canvas size
+fabric.Image.fromURL('images/example1.png', function(img) {
+    const imageWidth = img.width; // Width of the image (1081px in this case)
+    const canvasWidth = canvas.width; // Width of the canvas
+
+    // Calculate the zoom level to fit the image width to the canvas width
+    let zoomLevel = canvasWidth / imageWidth;
+
+    // Apply constraints to the zoom level
+    const minZoom = 0.68;
+    const maxZoom = 1;
+    zoomLevel = Math.max(minZoom, Math.min(maxZoom, zoomLevel));
+
+    img.scaleToWidth(canvas.width); // Scale the image to fit the canvas width
+    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+        scaleX: zoomLevel,
+        scaleY: zoomLevel
+    });
+
+    // Set the canvas zoom to ensure the full image is visible
+    canvas.setZoom(zoomLevel);
+
+    backgroundImageLoaded = true;
+});
+
+// Ensure canvas adjusts on window resize
+window.addEventListener('resize', () => {
+    canvas.setWidth(window.innerWidth);
+
+    if (backgroundImageLoaded) {
+        const backgroundImage = canvas.backgroundImage;
+        const imageWidth = backgroundImage.width; // Original width of the image
+        const canvasWidth = canvas.width; // Current width of the canvas
+
+        // Recalculate the zoom level
+        let zoomLevel = canvasWidth / imageWidth;
+
+        // Apply constraints to the zoom level
+        const minZoom = 0.68;
+        const maxZoom = 1;
+        zoomLevel = Math.max(minZoom, Math.min(maxZoom, zoomLevel));
+
+        backgroundImage.scaleX = zoomLevel;
+        backgroundImage.scaleY = zoomLevel;
+
+        // Apply the new zoom level
+        canvas.setZoom(zoomLevel);
+        canvas.renderAll();
+    }
+});
+
+        // Zoom functionality
+        canvas.on('mouse:wheel', function(opt) {
+            let delta = opt.e.deltaY;
+            let zoom = canvas.getZoom();
+            zoom *= 0.999 ** delta;
+            if (zoom > 20) zoom = 20;
+            if (zoom < 0.01) zoom = 0.01;
+
+            const point = {
+                x: opt.e.offsetX,
+                y: opt.e.offsetY
+            };
+
+            canvas.zoomToPoint(point, zoom);
+            opt.e.preventDefault();
+            opt.e.stopPropagation();
+        });
+
+        // Create compound path for note head (outer oval with inner transparent oval)
+        function createNoteHead(angle = 30) {
+            const outerOval = new fabric.Ellipse({
+                rx: 12 * noteScaleFactor,
+                ry: 8 * noteScaleFactor,
+                fill: 'black'
+            });
+
+            const innerOval = new fabric.Ellipse({
+                rx: 8 * noteScaleFactor,
+                ry: 5 * noteScaleFactor,
+                fill: 'white',
+                angle: -30,
+                left: 2.5 * noteScaleFactor,
+                top: 8 * noteScaleFactor
+            });
+
+            return new fabric.Group([outerOval, innerOval], {
+                left: 100,
+                top: 100,
+                originX: 'center',
+                originY: 'center',
+                scaleX: noteScaleFactor,
+                scaleY: noteScaleFactor
+            });
+        }
+
+        // Musical symbols definitions
+        function createNote(type) {
+            const noteHead = createNoteHead();
+
+            if (type === 'whole') {
+                return noteHead;
+            } else if (type === 'half') {
+                const halfNoteHead = new fabric.Ellipse({
+                    rx: 12 * noteScaleFactor,
+                    ry: 8 * noteScaleFactor,
+                    fill: 'black',
+                    angle: -5,
+                    left: 100 * noteScaleFactor,
+                    top: 90 * noteScaleFactor
+                });
+
+                const innerHalfNoteHead = new fabric.Ellipse({
+                    rx: 8 * noteScaleFactor,
+                    ry: 5.5 * noteScaleFactor,
+                    angle: -25,
+                    fill: 'white',
+                    left: 103.2 * noteScaleFactor,
+                    top: 95.5 * noteScaleFactor
+                });
+
+                const stem = new fabric.Rect({
+                    left: 122.5 * noteScaleFactor,
+                    top: 37 * noteScaleFactor,
+                    width: 2 * noteScaleFactor,
+                    height: 60 * noteScaleFactor,
+                    fill: 'black'
+                });
+
+                return new fabric.Group([halfNoteHead, innerHalfNoteHead, stem], {
+                    left: 100,
+                    top: 100,
+                    originX: 'center',
+                    originY: 'center',
+                    scaleX: noteScaleFactor,
+                    scaleY: noteScaleFactor
+                });
+            } else if (type === 'quarter') {
+                const quarterNoteHead = new fabric.Ellipse({
+                    angle: -20,
+                    rx: 12 * noteScaleFactor,
+                    ry: 8 * noteScaleFactor,
+                    fill: 'black',
+                    left: 100 * noteScaleFactor,
+                    top: 90 * noteScaleFactor
+                });
+                const stem = new fabric.Rect({
+                    left: 123.7 * noteScaleFactor,
+                    top: 32 * noteScaleFactor,
+                    width: 2 * noteScaleFactor,
+                    height: 60 * noteScaleFactor,
+                    fill: 'black'
+                });
+                return new fabric.Group([quarterNoteHead, stem], {
+                    left: 100,
+                    top: 45,
+                    scaleX: noteScaleFactor,
+                    scaleY: noteScaleFactor
+                });
+            }
+            return noteHead;
+        }
+
+        function addNote(type) {
+            const note = createNote(type);
+            note.set({
+                cornerSize: 8,
+                transparentCorners: false,
+                cornerColor: 'rgba(102,153,255,0.8)',
+                borderColor: 'rgba(102,153,255,0.8)',
+                cornerStyle: 'circle'
+            });
+
+            canvas.add(note);
+            canvas.setActiveObject(note);
+            saveState();
+            canvas.renderAll();
+        }
+
+        function deleteSelected() {
+            const activeObjects = canvas.getActiveObjects();
+            if (activeObjects.length > 0) {
+                activeObjects.forEach(obj => canvas.remove(obj));
+                saveState();
+                canvas.discardActiveObject().renderAll();
+            }
+        }
+
+        function exportImage() {
+            const originalZoom = canvas.getZoom();
+            canvas.setZoom(1); // Reset zoom to original framing
+
+            const dataURL = canvas.toDataURL({
+                format: 'png',
+                quality: 1
+            });
+
+            canvas.setZoom(originalZoom); // Restore zoom level
+
+            const link = document.createElement('a');
+            link.download = 'sheet-music-composition.png';
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Pencil tool functionality
+        const pencilSettings = document.getElementById('pencilSettings');
+        const lineThicknessInput = document.getElementById('lineThickness');
+        const lineColorInput = document.getElementById('lineColor');
+
+        function togglePencilTool() {
+            isDrawingMode = !isDrawingMode;
+            canvas.isDrawingMode = isDrawingMode;
+            pencilSettings.classList.toggle('active', isDrawingMode);
+            document.getElementById('undoButton').classList.toggle('active', isDrawingMode);
+
+            if (isDrawingMode) {
+                canvas.freeDrawingBrush.width = parseInt(lineThicknessInput.value, 10);
+                canvas.freeDrawingBrush.color = lineColorInput.value;
+            }
+        }
+
+        // Add path tracking
+        canvas.on('path:created', function(e) {
+            drawingPaths.push(e.path);
+            saveState();
+        });
+
+        // Undo/Redo functionality
+        function saveState() {
+            undoStack.push(JSON.stringify(canvas.toJSON()));
+            redoStack = [];
+        }
+
+        function undo() {
+            if (undoStack.length > 0) {
+                redoStack.push(undoStack.pop());
+                loadCanvasFromJSON(undoStack[undoStack.length - 1]);
+            }
+        }
+
+        function redo() {
+            if (redoStack.length > 0) {
+                undoStack.push(redoStack.pop());
+                loadCanvasFromJSON(undoStack[undoStack.length - 1]);
+            }
+        }
+
+        function loadCanvasFromJSON(json) {
+            canvas.loadFromJSON(json, () => {
+                canvas.renderAll();
+            });
+        }
+
+        function addText() {
+    const text = new fabric.IText('Type here...', {
+        left: canvas.width / 2,
+        top: canvas.height / 2 + 50,
+        fontSize: 32,
+        fill: 'black',
+        cornerSize: 8,
+        transparentCorners: false,
+        cornerColor: 'rgba(102,153,255,0.8)',
+        borderColor: 'rgba(102,153,255,0.8)',
+        cornerStyle: 'circle',
+        originX: 'center',
+        originY: 'center',
+        hasControls: true, // Ensure controls are enabled
+        editable: true,    // Ensure the text is editable
+    });
+
+    canvas.add(text);
+    canvas.setActiveObject(text);
+    text.enterEditing(); // Enter editing mode immediately
+    text.selectAll();    // Select all text for quick replacement
+
+    // Ensure proper rendering and focus
+    canvas.renderAll();
+    text.on('editing:entered', () => {
+        canvas.selection = false; // Disable global selection while editing
+    });
+    text.on('editing:exited', () => {
+        canvas.selection = true; // Re-enable global selection after editing
+        saveState();             // Save state after editing is done
+    });
+
+    saveState(); // Save state when adding the text object
+}
+
+        function disableDrawingModes() {
+            if (isDrawingMode) {
+                isDrawingMode = false;
+                canvas.isDrawingMode = false;
+                pencilSettings.classList.remove('active');
+                document.getElementById('undoButton').classList.remove('active');
+            }
+        }
+
+        // Modify toolbar button event handlers
+        const originalAddNote = addNote;
+        addNote = function(type) {
+            disableDrawingModes();
+            originalAddNote(type);
+        };
+
+        const originalAddText = addText;
+        addText = function() {
+            disableDrawingModes();
+            originalAddText();
+        };
+
+        // Note size adjustment
+        const noteSizeDisplay = document.getElementById('noteSize');
+
+        function adjustNoteSize(delta) {
+            noteScaleFactor += delta;
+            noteScaleFactor = Math.max(0.5, Math.min(2, noteScaleFactor)); // Clamp between 0.5x and 2x
+            noteSizeDisplay.textContent = `${noteScaleFactor.toFixed(1)}x`;
+
+            // Update existing notes
+            canvas.forEachObject(obj => {
+                if (obj.type === 'group') { // Assuming notes are grouped objects
+                    obj.scaleX = noteScaleFactor;
+                    obj.scaleY = noteScaleFactor;
+                }
+            });
+
+            canvas.renderAll();
+        }
+
+        // Pan functionality
+        let isDragging = false;
+        let lastPosX;
+        let lastPosY;
+
+        canvas.on('mouse:down', function(opt) {
+            if (!isDrawingMode) {
+                if (opt.target) {
+                    canvas.setActiveObject(opt.target);
+                } else {
+                    isDragging = true;
+                    lastPosX = opt.e.clientX;
+                    lastPosY = opt.e.clientY;
+                }
+            }
+        });
+
+        canvas.on('mouse:move', function(opt) {
+            if (!isDrawingMode && isDragging) {
+                const deltaX = opt.e.clientX - lastPosX;
+                const deltaY = opt.e.clientY - lastPosY;
+
+                const vpt = canvas.viewportTransform;
+                vpt[4] += deltaX;
+                vpt[5] += deltaY;
+
+                canvas.requestRenderAll();
+
+                lastPosX = opt.e.clientX;
+                lastPosY = opt.e.clientY;
+            }
+        });
+
+        canvas.on('mouse:up', function() {
+            isDragging = false;
+        });
+
+        window.addEventListener('keydown', function(e) {
+    const activeObject = canvas.getActiveObject();
+
+    // Check if an IText object is currently in editing mode
+    if (activeObject && activeObject.isEditing) {
+        return; // Allow the IText object to handle its own key events
+    }
+
+    // Handle global shortcuts only when no text is being edited
+    if (e.key === 'Escape' && isDrawingMode) {
+        togglePencilTool();
+        e.preventDefault();
+    } else if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
+        canvas.discardActiveObject();
+        canvas.forEachObject(obj => canvas.setActiveObject(obj));
+        canvas.renderAll();
+        e.preventDefault();
+    } else if (e.key === 'z' && (e.metaKey || e.ctrlKey)) {
+        undo();
+        e.preventDefault();
+    } else if (e.key === 'y' && (e.metaKey || e.ctrlKey)) {
+        redo();
+        e.preventDefault();
+    } else if (e.key === 'c' && (e.metaKey || e.ctrlKey)) {
+        copySelection();
+        e.preventDefault();
+    } else if (e.key === 'v' && (e.metaKey || e.ctrlKey)) {
+        pasteSelection();
+        e.preventDefault();
+    } else if (canvas.getActiveObject()) {
+        const moveDistance = e.altKey ? 10 : 1; // Faster movement with option key
+
+        switch (e.key) {
+            case 'ArrowUp':
+                activeObject.top -= moveDistance;
+                break;
+            case 'ArrowDown':
+                activeObject.top += moveDistance;
+                break;
+            case 'ArrowLeft':
+                activeObject.left -= moveDistance;
+                break;
+            case 'ArrowRight':
+                activeObject.left += moveDistance;
+                break;
+            case 'x': // Rotate the object 180 degrees
+            case 'X':
+                if (activeObject.angle === 0) {
+                    activeObject.top += 50; // Move down 50px
+                } else if (activeObject.angle === 180) {
+                    activeObject.top -= 50; // Move up 50px
+                }
+                activeObject.angle += 180; // Rotate by 180 degrees
+                if (activeObject.angle >= 360) {
+                    activeObject.angle = 0; // Reset to 0 degrees if it reaches 360
+                }
+                break;
+        }
+        activeObject.setCoords(); // Update the object's coordinates
+        saveState();
+        canvas.renderAll();
+        e.preventDefault(); // Prevent default arrow key behavior
+    }
+
+    // New hotkey functionality
+    if (e.key === '1') {
+        addNote('quarter'); // Add quarter note
+        e.preventDefault();
+    } else if (e.key === '2') {
+        addNote('half'); // Add half note
+        e.preventDefault();
+    } else if (e.key === '4') {
+        addNote('whole'); // Add whole note
+        e.preventDefault();
+    } else if (e.key === 'p') {
+        togglePencilTool(); // Toggle pencil tool
+        e.preventDefault();
+    } else if (e.key === 't') {
+        addText(); // Add text
+        e.preventDefault();
+    } else if ((e.key === 's' || e.key === 'S') && (e.metaKey || e.ctrlKey)) {
+        exportImage(); // Export/save image
+        e.preventDefault();
+    } else if ((e.key === '+' || e.key === '=') && (e.metaKey || e.ctrlKey)) {
+        adjustNoteSize(0.1); // Increase note size
+        e.preventDefault();
+    } else if ((e.key === '-' && (e.metaKey || e.ctrlKey))) {
+        adjustNoteSize(-0.1); // Decrease note size
+        e.preventDefault();
+    }
+});
+
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                const activeObjects = canvas.getActiveObjects();
+                if (activeObjects.length > 0) {
+                    activeObjects.forEach(obj => canvas.remove(obj));
+                    saveState();
+                    canvas.discardActiveObject().renderAll();
+                    e.preventDefault();
+                }
+            }
+        });
+
+        // Copy/Paste functionality
+        let copiedObjects = [];
+
+        function copySelection() {
+            const activeObjects = canvas.getActiveObjects();
+            if (activeObjects.length > 0) {
+                copiedObjects = activeObjects.map(obj => fabric.util.object.clone(obj));
+            }
+        }
+
+        function pasteSelection() {
+            if (copiedObjects.length > 0) {
+                const newObjects = copiedObjects.map(obj => {
+                    const clonedObj = fabric.util.object.clone(obj);
+                    clonedObj.set({
+                        left: clonedObj.left + 10,
+                        top: clonedObj.top + 10,
+                        selectable: true, // Ensure pasted objects are selectable
+                        evented: true // Ensure pasted objects respond to events
+                    });
+                    return clonedObj;
+                });
+
+                canvas.discardActiveObject();
+                canvas.add(...newObjects);
+                canvas.setActiveObject(new fabric.ActiveSelection(newObjects, { canvas: canvas }));
+                saveState();
+                canvas.renderAll();
+            }
+        }
+
+        // Fix disappearing objects issue
+        canvas.on('object:modified', function() {
+            canvas.renderAll();
+        });
+
+        // Hamburger menu functionality
+        const menuToggle = document.querySelector('.menu-toggle');
+        const menuItems = document.querySelector('.menu-items');
+
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('open');
+            menuItems.classList.toggle('show');
+        });
+
+        // Close the menu when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+                menuToggle.classList.remove('open');
+                menuItems.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
