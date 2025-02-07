@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dropzone {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 150, 136, 0.2);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #009688;
+            z-index: 1000;
+        }
+
+        .dropzone.active {
+            display: flex;
+        }
+
+        .checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .student {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+            border-radius: 50px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .student.found {
+            opacity: 1;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .check-circle {
+            width: 30px;
+            height: 30px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .found .check-circle {
+            transform: scale(1);
+        }
+
+        .check-mark {
+            color: white;
+            font-size: 18px;
+        }
+
+        .popup {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background: #009688;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1001;
+        }
+
+        .popup.show {
+            transform: translateX(-50%) scale(1);
+        }
+
+        .popup .check-circle {
+            background: white;
+            margin-left: 15px;
+            transform: scale(1);
+        }
+
+        .popup .check-mark {
+            color: #009688;
+        }
+    </style>
+</head>
+<body>
+    <div class="dropzone" id="dropzone">
+        Drop files here
+    </div>
+    <div class="checklist" id="checklist"></div>
+    <div class="popup" id="popup">
+        All files are in!
+        <div class="check-circle">
+            <div class="check-mark">✓</div>
+        </div>
+    </div>
+
+    <audio id="chime" src="audio/chime.mp3"></audio>
+
+    <script>
+        const students = ["Ben", "Howard", "Terry", "Alice", "Vincent", "Tiger", "Chris", "Lucy", "Diego", "Hailey", "Eileen", "Angelina", "Serena", "Catherine", "Andrew", "Jennifer"];
+        const foundFiles = new Set();
+
+        function createStudentElement(name) {
+            const div = document.createElement('div');
+            div.className = 'student';
+            div.id = `student-${name.toLowerCase()}`;
+            
+            const checkCircle = document.createElement('div');
+            checkCircle.className = 'check-circle';
+            
+            const checkMark = document.createElement('div');
+            checkMark.className = 'check-mark';
+            checkMark.textContent = '✓';
+            
+            checkCircle.appendChild(checkMark);
+            div.appendChild(checkCircle);
+            div.appendChild(document.createTextNode(name));
+            
+            // Add click handler for toggling
+            div.addEventListener('click', () => {
+                if (div.classList.contains('found')) {
+                    div.classList.remove('found');
+                    foundFiles.delete(name.toLowerCase());
+                } else {
+                    div.classList.add('found');
+                    foundFiles.add(name.toLowerCase());
+                    document.getElementById('chime').play();
+                }
+                checkAllFilesFound();
+            });
+            
+            return div;
+        }
+
+        function initializeChecklist() {
+            const checklist = document.getElementById('checklist');
+            students.forEach(student => {
+                checklist.appendChild(createStudentElement(student));
+            });
+        }
+
+        function checkAllFilesFound() {
+            if (foundFiles.size === students.length) {
+                document.getElementById('popup').classList.add('show');
+            } else {
+                document.getElementById('popup').classList.remove('show');
+            }
+        }
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                const filename = file.name.toLowerCase();
+                students.forEach(student => {
+                    if (filename.includes(student.toLowerCase())) {
+                        const studentElement = document.getElementById(`student-${student.toLowerCase()}`);
+                        if (!studentElement.classList.contains('found')) {
+                            studentElement.classList.add('found');
+                            foundFiles.add(student.toLowerCase());
+                            document.getElementById('chime').play();
+                        }
+                    }
+                });
+            });
+            
+            checkAllFilesFound();
+        }
+
+        // Drag and drop handlers
+        document.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            document.getElementById('dropzone').classList.add('active');
+        });
+
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        document.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            if (e.relatedTarget === null) {
+                document.getElementById('dropzone').classList.remove('active');
+            }
+        });
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            document.getElementById('dropzone').classList.remove('active');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        document.getElementById('chime').volume = 0.1; // Set volume to 50%
+
+        initializeChecklist();
+    </script>
+</body>
+</html>
