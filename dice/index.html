@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Simulator</title>
+    <link rel="icon" href="/icons/BGicon.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Zapfino';
+            src: url('fonts/Zapfino.ttf') format('truetype');
+        }
+
+        body {
+            background-color: rgb(45, 70, 119);
+            font-family: 'Andika', sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1); 
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        .logocontainer {
+    position: relative;
+    /* Ensure the container has a defined height */
+    height: 100vh; /* Adjust as needed */
+}
+
+.logo {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 25vh; /* Adjust for size */
+    height: auto; /* Maintain aspect ratio */
+    z-index: 10; /* Ensure it is above other content */
+}
+
+        .Subtitle {
+            font-family: 'Zapfino', sans-serif;
+            color: white;
+            margin-top: -0.7em;
+            font-size: 3.5vw;
+            text-align: center;
+            text-decoration: none;
+            min-width: fit-content;
+            white-space: nowrap;
+        }
+
+        /* top-left die icon */
+        #selected-die-top-left {
+    position: fixed;
+    top: 58px;
+    left: 22px;
+}
+
+/* Center-justified text for the selected die */
+#selected-die-center-screen {
+    font-size: 20px;
+    color: white;
+    margin-top: 0vh;
+    text-align: center;
+    font-family: 'Andika', sans-serif;
+}
+
+
+        .selected-die-container {
+            position: fixed;
+            top: 58px;
+            left: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .selected-die {
+            position: relative;
+            opacity:0;
+        }
+
+        .arrow-down {
+    width: 20px;
+    height: 20px;
+    position: relative;
+    margin-top: 50px;
+    margin-left: -50px;
+    transition: transform 0.1s;
+}
+
+.arrow-down::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 8px;
+    width: 8px;
+    border-style: solid;
+    border-width: 2px 2px 0 0;
+    border-color: white;
+    transform: rotate(135deg);
+}
+
+.arrow-down.rotated {
+    transform: translateX(-10px) rotate(180deg);
+}
+
+.more-dice-text {
+    opacity: 0;
+    margin-left: 40px;
+    margin-top: -20px;
+    transition: opacity 0.3s ease;
+}
+
+.selected-die-container:hover .more-dice-text {
+    opacity: 1;
+}
+
+.selected-die-container.menu-open .more-dice-text {
+    opacity: 0;
+}
+
+        .dice-icons {
+            position: fixed;
+            top: 150px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            background: linear-gradient(to right, rgba(17, 35, 78, 0.347) 0%, rgba(17, 35, 78, 0.347) 65%, rgba(255, 255, 255, 0) 100%);
+        }
+
+        .dice-icons.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .dice-icon-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.dice-icon-container:hover {
+            transform: scale(1.05);
+        }
+
+.dice-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 0px;
+    transform: translate(-50px, -50px) rotate(-180deg);
+    opacity: 0;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.dice-name {
+    font-size: 14px;
+    margin-left: 5px;
+    white-space: nowrap;
+    opacity: 0; /* Initially hidden */
+    width: 20vh;
+    transition: opacity 0.5s ease; /* Fade-in transition */
+}
+
+.dice-icons.show .dice-name {
+    opacity: 1;
+}
+
+        #result {
+            font-size: 48px;
+            margin: -60px 0;
+            min-height: 60px;
+            text-align: center;
+            background-color: rgba(15, 22, 33, 0.441);
+            border-radius: 10px;
+            padding: 10px 20px;
+            width: 60%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease-out;
+        }
+
+        .roll-dice-button {
+    font-size: 1.2rem;
+    padding: 12px 24px;
+    background-color: var(--dice-color, #4575a0); /* Default to #4575a0 if --dice-color is not set */
+    margin-top: 80px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.roll-dice-button:hover {
+    filter: brightness(1.1);
+}
+
+.roll-dice-button:active {
+    filter: brightness(0.9);
+}
+
+
+
+        @keyframes subtlePulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+
+        .subtle-pulse {
+            animation: subtlePulse 0.2s ease-out;
+        }
+
+        /* 3D DICE STUFF */
+
+        #dicecontainer {
+        width: 300px;
+        height: 300px;
+        position: relative;
+        margin: 0 auto;
+    }
+
+
+
+        /* Styles for the hamburger menu (existing styles) */
+        .hamburger-menu {
+            position: absolute;
+            margin-left: 7px;
+            top: 20px;
+            left: 13px;
+            z-index: 1000;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 20;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s linear;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-items {
+            position: absolute;
+            top: 25px;
+            left: -250px;
+            background: linear-gradient(135deg, rgba(48, 67, 104, 0.7), rgba(20, 31, 53, 0.6));
+            /* background: rgba(35, 47, 70, 0.951); */
+            width: 250px;
+            height: 90vh;
+            padding-top: 20px;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-items.show {
+            left: 0;
+            opacity: 1;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .menu-items.show a {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-items a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-items a:nth-child(1) { transition-delay: 0.1s; }
+.menu-items a:nth-child(2) { transition-delay: 0.2s; }
+.menu-items a:nth-child(3) { transition-delay: 0.3s; }
+.menu-items a:nth-child(4) { transition-delay: 0.4s; }
+.menu-items a:nth-child(5) { transition-delay: 0.5s; }
+.menu-items a:nth-child(6) { transition-delay: 0.6s; }
+.menu-items a:nth-child(7) { transition-delay: 0.7s; }
+.menu-items a:nth-child(8) { transition-delay: 0.8s; }
+.menu-items a:nth-child(9) { transition-delay: 0.9s; }
+.menu-items a:nth-child(10) { transition-delay: 1.0s; }
+
+        .menu-title {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
+    <div class="hamburger-menu">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="menu-items" id="menu-items">
+            <div class="menu-title">BIPH Music</div>
+            <a href="https://biphmusic.github.io/">Home</a>
+            <a href="https://biphmusic.github.io/units/">AP Units</a>
+            <a href="https://biphmusic.github.io/flashcards/">Flash Cards</a>
+            <a href="https://biphmusic.github.io/dice/">Dice Simulator</a>
+            <a href="https://biphmusic.github.io/piano/">Web Piano</a>
+            <a href="https://biphmusic.github.io/wordwall/">Word Wall</a>
+            <a href="mailto:garrison.tubbs-biph@basischina.com">Contact</a>
+            
+            <div class="menu-footer">© Garrison Tubbs 2024</div>
+        </div>
+    </div>
+
+    <h1 class="Title">BIPH Music</h1>
+    <h1 class="Subtitle">Dice Simulator</h1>
+
+    <div class="container">
+        <img src="BASIS logo/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
+    </div>
+
+    <div class="selected-die-container" onclick="toggleDiceMenu()">
+        <div class="arrow-down" id="arrow"></div>
+        <div class="more-dice-text">More Dice</div>
+    </div>
+
+    <div class="selected-die-container" id="selected-die-top-left">
+        <div id="selected-die-icon"></div>
+    </div>
+
+    <div class="selected-die-center-screen" id="selected-die-center-screen"></div>
+
+    <div class="dice-icon-container">
+        <div class="dice-icon"></div> <!-- Icon element -->
+    </div>
+
+    <div class="dice-icons" id="dice-icons"></div>
+    <div class="selected-die" id="selected-die"></div>
+    <div id="result">-</div>
+    <button class="roll-dice-button" onclick="rollDice()">Roll Dice</button>
+
+    <div id="dicecontainer">
+    </div>
+
+
+    <script>
+
+
+let scene, camera, renderer, dice;
+let isRolling = false;
+let selectedDice = "Solfege";
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    
+    renderer = new THREE.WebGLRenderer({ 
+        antialias: true,
+        alpha: true
+    });
+    
+    renderer.setSize(300, 300);
+    renderer.setClearColor(0x000000, 0);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    
+    document.getElementById('dicecontainer').prepend(renderer.domElement);
+
+    const geometry = new THREE.IcosahedronGeometry(2, 0);
+    
+    let diceColor = getDiceColor(selectedDice);
+
+    const faceMaterial = new THREE.MeshPhongMaterial({ 
+        color: diceColor,
+        shininess: 8,
+        specular: 0xBBBB
+    });
+
+    const edgeMaterial = new THREE.LineBasicMaterial({ 
+        color: 0x0,
+    });
+
+    dice = new THREE.Mesh(geometry, faceMaterial);
+    scene.add(dice);
+
+    const edges = new THREE.EdgesGeometry(geometry);
+    const line = new THREE.LineSegments(edges, edgeMaterial);
+    dice.add(line);
+
+    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.5);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0xFFFFFF, 1);
+    pointLight.position.set(10, 10, 10);
+    scene.add(pointLight);
+
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    dice.castShadow = true;
+
+    const planeGeometry = new THREE.PlaneGeometry(10, 10);
+    const planeMaterial = new THREE.ShadowMaterial({ opacity: 0.3 });
+    const shadowPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+    shadowPlane.position.y = -2;
+    shadowPlane.rotateX(-Math.PI / 2);
+    shadowPlane.receiveShadow = true;
+    scene.add(shadowPlane);
+
+    pointLight.castShadow = true;
+    pointLight.shadow.mapSize.width = 512;
+    pointLight.shadow.mapSize.height = 512;
+    pointLight.shadow.camera.near = 1;
+    pointLight.shadow.camera.far = 30;
+    pointLight.shadow.bias = -0.001;
+    pointLight.shadow.radius = 8;
+
+    pointLight.position.set(0, 10, 0);
+
+    camera.position.z = 7;
+    camera.position.y = 3;
+    camera.lookAt(scene.position);
+
+    animate();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    if (!isRolling) {
+        dice.rotation.x += 0.01;
+        dice.rotation.y += 0.01;
+    }
+    renderer.render(scene, camera);
+}
+
+function update3DDiceColor() {
+    if (dice) {
+        let diceColor = getDiceColor(selectedDice);
+        dice.material.color.setHex(parseInt(diceColor.slice(1), 16));
+    }
+}
+
+function getDiceColor(diceName) {
+    const diceColors = ['#3498db', '#ffffff', '#9b59b6', '#d4ab0d', '#1abc9c', '#e67e22', '#e74c3c', '#808080'];
+    const index = Object.keys(diceResults).indexOf(diceName);
+    return diceColors[index % diceColors.length];
+}
+
+window.onload = function() {
+    init();
+    updateSelectedDieIcon();
+    updateSelectedDieText();
+    rollDice();
+    animatetopleftDice();
+};
+
+const diceResults = {
+    "Solfege": ["Do", "Re", "Mi", "Fa", "Sol", "La", "Ti", "Do"],
+    "White Keys": ["C", "D", "E", "F", "G", "A", "B", "C"],
+    "Major Roman Numerals": ["I", "ii", "iii", "IV", "V", "vi", "vii", "I"],
+    "Minor Roman Numerals": ["i", "iiº", "III", "iv", "V", "v", "VI", "VII", "viiº"],
+    "Secondary Function": ["V/ii", "V/iii", "V/IV", "V/V", "V/vi", "vii/ii", "vii/iii", "vii/IV", "vii/V", "vii/vi"],
+    "All Notes": ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"],
+    "Key Signatures": ["C Major", "C# Major", "D Major", "Db Major", "Eb Major", "E Major", "F Major", "F# Major", "Gb Major", "G Major", "Ab Major", "A Major", "Bb Major", "B Major", "Cb Major"],
+    "# of Accidentals": ["0 Accidentals", "1 Sharp", "2 Sharps", "3 Sharps", "4 Sharps", "5 Sharps", "6 Sharps", "7 Sharps", "1 Flat", "2 Flats", "3 Flats", "4 Flats", "5 Flats", "6 Flats", "7 Flats"]
+};
+
+function createDiceIcon(diceName, color) {
+    const sides = diceName === "Secondary Function" ? 10 : 
+                  diceName === "All Notes" ? 12 : 
+                  diceName === "Minor Roman Numerals" ? 9 :
+                  diceName.startsWith("Key") || diceName.startsWith("#") ? 15 : 8;
+    const container = document.createElement('div');
+    container.className = 'dice-icon-container';
+    container.onclick = () => selectDice(diceName);
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute('class', 'dice-icon');
+    svg.setAttribute('viewBox', '0 0 100 100');
+
+    let shape;
+    if (sides === 8) {
+        shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        shape.setAttribute('points', '50,5 95,50 50,95 5,50');
+    } else if (sides === 9) {
+        shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        shape.setAttribute('points', '13,10 88,10 88,85 13,85');
+    } else if (sides === 10) {
+        shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        shape.setAttribute('points', '50,5 90,20 95,60 75,90 25,90 5,60 10,20');
+    } else if (sides === 12) {
+        shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        shape.setAttribute('points', '50,5 90,25 90,75 50,95 10,75 10,25');
+    } else if (sides === 15) {
+        shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        const generatePolygonPoints = (sides, radius, centerX, centerY) => {
+            const points = [];
+            for (let i = 0; i < sides; i++) {
+                const angle = (i * 2 * Math.PI) / sides;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                points.push(`${x},${y}`);
+            }
+            return points.join(' ');
+        };
+        const points = generatePolygonPoints(8, 45, 50, 50);
+        shape.setAttribute('points', points);
+    }
+    shape.setAttribute('fill', color);
+    svg.appendChild(shape);
+
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute('x', '50');
+    text.setAttribute('y', '60');
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', 'white');
+    text.setAttribute('font-size', '30');
+    text.textContent = `D${sides}`;
+
+    switch(diceName) {
+        case "Solfege":
+            text.textContent = "Do";
+            break;
+        case "White Keys":
+            text.textContent = "C";
+            text.setAttribute('fill', 'black');
+            break;
+        case "Major Roman Numerals":
+            text.textContent = "IV";
+            break;
+        case "Minor Roman Numerals":
+            text.textContent = "iv";
+            break;
+        case "Secondary Function":
+            text.textContent = "V/V";
+            break;
+        case "All Notes":
+            text.textContent = "E♭";
+            break;
+        case "Key Signatures":
+            text.textContent = "Key";
+            break;
+        case "# of Accidentals":
+            text.textContent = "#";
+            break;
+        default:
+            text.textContent = `D${sides}`;
+    }
+    svg.appendChild(text);
+
+    container.appendChild(svg);
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'dice-name';
+    nameSpan.textContent = diceName;
+    container.appendChild(nameSpan);
+
+    return container;
+}
+
+function selectDice(diceName) {
+    selectedDice = diceName;
+    updateSelectedDieIcon();
+    updateSelectedDieText();
+    update3DDiceColor();
+    rollDice();
+    toggleDiceMenu();
+}
+
+function updateSelectedDieIcon() {
+    const selectedDieIcon = document.getElementById('selected-die-icon');
+    selectedDieIcon.innerHTML = '';
+    const diceColor = getDiceColor(selectedDice);
+    const diceIcon = createDiceIcon(selectedDice, diceColor);
+    selectedDieIcon.appendChild(diceIcon);
+
+    const rollButton = document.querySelector('.roll-dice-button');
+    rollButton.style.setProperty('--dice-color', diceColor);
+    
+    // Change button text color to black if White Keys is selected
+    if (selectedDice === "White Keys") {
+        rollButton.style.color = 'black';
+    } else {
+        rollButton.style.color = 'white';
+    }
+
+    const selectedDieElement = document.getElementById('selected-die');
+    selectedDieElement.innerHTML = '';
+    selectedDieElement.appendChild(diceIcon.cloneNode(true));
+}
+
+function updateSelectedDieText() {
+    const selectedDieText = document.getElementById('selected-die-center-screen');
+    selectedDieText.textContent = `Selected: ${selectedDice}`;
+}
+
+function rollDice() {
+    const result = diceResults[selectedDice][Math.floor(Math.random() * diceResults[selectedDice].length)];
+    const resultElement = document.getElementById('result');
+    resultElement.textContent = result;
+    resultElement.classList.remove('subtle-pulse');
+    void resultElement.offsetWidth;
+    resultElement.classList.add('subtle-pulse');
+}
+
+function toggleDiceMenu() {
+    const arrow = document.getElementById('arrow');
+    const container = document.querySelector('.selected-die-container');
+    arrow.classList.toggle('rotated');
+    container.classList.toggle('menu-open');
+    const diceIcons = document.getElementById('dice-icons');
+    diceIcons.classList.toggle('show');
+    animateMenuDiceIcons();
+}
+
+function animateMenuDiceIcons() {
+    const diceContainers = document.querySelectorAll('.dice-icon-container');
+
+    diceContainers.forEach((container, index) => {
+        if (!container.classList.contains('selected-die-container')) {
+            const diceIcon = container.querySelector('.dice-icon');
+
+            setTimeout(() => {
+                diceIcon.style.transition = 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                diceIcon.style.opacity = '1';
+                diceIcon.style.transform = 'translate(0, 0) rotate(360deg)';
+            }, index * 100);
+        }
+    });
+}
+
+function animatetopleftDice() {
+    const topleftDice = document.querySelector('.selected-die-container .dice-icon-container');
+    if (topleftDice) {
+        const topleftIcon = topleftDice.querySelector('.dice-icon');
+
+        topleftIcon.style.transition = 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        topleftIcon.style.opacity = '1';
+        topleftIcon.style.transform = 'translate(0, 0) rotate(360deg)';
+    }
+}
+
+
+
+// Create dice icons
+for (const diceName in diceResults) {
+    const diceIcon = createDiceIcon(diceName, getDiceColor(diceName));
+    document.getElementById('dice-icons').appendChild(diceIcon);
+}
+
+// Set initial selected die and roll
+updateSelectedDieIcon();
+rollDice();
+
+// Add spacebar event listener
+document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space') {
+        event.preventDefault();
+        rollDice();
+    }
+});
+
+// Hamburger menu functionality
+const menuToggle = document.querySelector('.menu-toggle');
+const menuItems = document.querySelector('.menu-items');
+
+menuToggle.addEventListener('click', () => {
+    menuToggle.classList.toggle('open');
+    menuItems.classList.toggle('show');
+});
+
+// Close the menu when clicking outside
+document.addEventListener('click', (event) => {
+    if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+        menuToggle.classList.remove('open');
+        menuItems.classList.remove('show');
+    }
+});
+    
+    </script>
+</body>
+</html>
