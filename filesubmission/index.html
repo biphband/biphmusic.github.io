@@ -117,7 +117,10 @@
         </div>
     </div>
 
+    <button id="resetButton" style="position: fixed; bottom: 20px; left: 20px; padding: 5px 10px; font-size: 14px; opacity: 0.5; transition: opacity 0.3s;">Reset</button>
+
     <audio id="chime" src="audio/chime.mp3"></audio>
+    <audio id="multichime" src="audio/multichime.mp3"></audio>
 
     <script>
         const students = ["Ben", "Howard", "Terry", "Alice", "Vincent", "Tiger", "Chris", "Lucy", "Diego", "Hailey", "Eileen", "Angelina", "Serena", "Catherine", "Andrew", "Jennifer"];
@@ -147,7 +150,7 @@
                 } else {
                     div.classList.add('found');
                     foundFiles.add(name.toLowerCase());
-                    document.getElementById('chime').play();
+                    playChime();
                 }
                 checkAllFilesFound();
             });
@@ -165,12 +168,16 @@
         function checkAllFilesFound() {
             if (foundFiles.size === students.length) {
                 document.getElementById('popup').classList.add('show');
+                playYesSound();
             } else {
                 document.getElementById('popup').classList.remove('show');
             }
         }
 
         function handleFiles(files) {
+            const fileCount = files.length; // Count the number of files
+            let hasMatch = false;
+
             Array.from(files).forEach(file => {
                 const filename = file.name.toLowerCase();
                 students.forEach(student => {
@@ -179,12 +186,18 @@
                         if (!studentElement.classList.contains('found')) {
                             studentElement.classList.add('found');
                             foundFiles.add(student.toLowerCase());
-                            document.getElementById('chime').play();
+                            hasMatch = true;
                         }
                     }
                 });
             });
-            
+
+            if (fileCount > 1) {
+                playMultiChime();
+            } else if (hasMatch) {
+                playChime();
+            }
+
             checkAllFilesFound();
         }
 
@@ -211,7 +224,48 @@
             handleFiles(e.dataTransfer.files);
         });
 
-        document.getElementById('chime').volume = 0.1; // Set volume to 50%
+        function playChime() {
+            const chimeAudio = new Audio('audio/chime.mp3');
+            chimeAudio.volume = 0.1;
+            chimeAudio.play();
+        }
+
+        function playMultiChime() {
+            const multiChimeAudio = new Audio('audio/multichime.mp3');
+            multiChimeAudio.volume = 0.1;
+            multiChimeAudio.play();
+        }
+
+        function resetChecklist() {
+            foundFiles.clear();
+            document.querySelectorAll('.student').forEach(student => {
+                student.classList.remove('found');
+            });
+            checkAllFilesFound();
+            playResetSound();
+        }
+
+        function playResetSound() {
+            const resetAudio = new Audio('audio/reset.mp3');
+            resetAudio.volume = 0.1;
+            resetAudio.play();
+        }
+
+        function playYesSound() {
+            const yesAudio = new Audio('audio/yes.mp3');
+            yesAudio.volume = 0.1;
+            yesAudio.play();
+        }
+
+        document.getElementById('resetButton').addEventListener('click', resetChecklist);
+
+        document.getElementById('resetButton').addEventListener('mouseover', () => {
+            document.getElementById('resetButton').style.opacity = 1;
+        });
+
+        document.getElementById('resetButton').addEventListener('mouseout', () => {
+            document.getElementById('resetButton').style.opacity = 0.5;
+        });
 
         initializeChecklist();
     </script>
