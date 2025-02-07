@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Units</title>
+    <link rel="icon" href="/icons/BGicon.png">
+    <style>
+        @font-face {
+            font-family: 'Zapfino';
+            src: url('fonts/Zapfino.ttf') format('truetype');
+        }
+        
+        body {
+            background-color: rgb(45, 70, 119);
+            font-family: 'Andika', sans-serif;
+            /* font-family: 'Helvetica Neue', Arial, sans-serif; */
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1); 
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        .logocontainer {
+    position: relative;
+    min-height: 10vh; /* Ensures the container covers the viewport height */
+    padding-bottom: 50px; /* Space for the logo */
+}
+
+.logo {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 25vh;
+    height: auto;
+    z-index: 10; 
+}
+
+.Subtitle {
+            font-family: 'Zapfino', sans-serif;
+            color: white;
+            margin-top: -0.7em;
+            font-size: 40px;
+        }
+
+.hamburger-menu {
+            position: absolute;
+            margin-left: 7px;
+            top: 20px;
+            left: 13px;
+            z-index: 1000;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 20;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s linear;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-items {
+            position: absolute;
+            top: 25px;
+            left: -250px;
+            background: linear-gradient(135deg, rgba(48, 67, 104, 0.8), rgba(20, 31, 53, 0.8));
+            /* background: rgba(35, 47, 70, 0.951); */
+            width: 250px;
+            height: 90vh;
+            padding-top: 20px;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-items.show {
+            left: 0;
+            opacity: 1;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .menu-items.show a {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-items a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-items a:nth-child(1) { transition-delay: 0.1s; }
+.menu-items a:nth-child(2) { transition-delay: 0.2s; }
+.menu-items a:nth-child(3) { transition-delay: 0.3s; }
+.menu-items a:nth-child(4) { transition-delay: 0.4s; }
+.menu-items a:nth-child(5) { transition-delay: 0.5s; }
+.menu-items a:nth-child(6) { transition-delay: 0.6s; }
+.menu-items a:nth-child(7) { transition-delay: 0.7s; }
+.menu-items a:nth-child(8) { transition-delay: 0.8s; }
+.menu-items a:nth-child(9) { transition-delay: 0.9s; }
+.menu-items a:nth-child(10) { transition-delay: 1.0s; }
+
+        .menu-title {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+h1 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    text-align: center;
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+}
+.unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #1e1e1e4a;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+.unit:hover {
+    box-shadow: 0 5px 80px rgba(255, 255, 255, 0.1);
+}
+.unit-info {
+    flex-grow: 1;
+    width: 100%;
+}
+.unit-info h2 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin: 0 0 10px 0;
+}
+.unit-info p {
+    font-size: 1rem;
+    margin: 0;
+    opacity: 0.7;
+}
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    width: 100%;
+    max-width: 250px;
+    flex-direction: column;
+}
+.btn0, .btn, .btn2 {
+    background-color: #b4b4b4;
+    color: #121212;
+    border: none;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+}
+.btn {
+    background-color: #ffffff;
+}
+.btn2 {
+    background-color: #8aa5d7;
+    width: 100%;
+}
+.btn0:hover, .btn:hover, .btn2:hover {
+    background-color: #f8f9d0;
+    transform: scale(1.05);
+}
+.btn0:active, .btn:active, .btn2:active {
+    background-color: #f8f9d0;
+    transform: scale(0.95);
+}
+.vocab, .topics {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out, opacity 0.5s ease-out, transform 0.5s ease-out;
+    opacity: 0;
+    transform: translateY(-20px);
+    background-color: #f9f9f900;
+    width: 100%;
+}
+.vocab.show, .topics.show {
+    max-height: 2000px;
+    opacity: 1;
+    transform: translateY(0);
+    padding: 10px 0;
+}
+.topics ul {
+    margin: 0;
+    padding-left: 20px;
+}
+.vocab-list ul {
+    column-width: 150px;
+    column-gap: 20px;
+    list-style-position: inside;
+    padding-left: 0;
+}
+.vocab-list li {
+    break-inside: avoid;
+    margin-bottom: 5px;
+}
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
+    <div class="hamburger-menu">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="menu-items" id="menu-items">
+            <div class="menu-title">BIPH Music</div>
+            <a href="https://biphmusic.github.io/">Home</a>
+            <a href="https://biphmusic.github.io/units/">AP Units</a>
+            <a href="https://biphmusic.github.io/flashcards/">Flash Cards</a>
+            <a href="https://biphmusic.github.io/dice/">Dice Simulator</a>
+            <a href="https://biphmusic.github.io/piano/">Web Piano</a>
+            <a href="https://biphmusic.github.io/wordwall/">Word Wall</a>
+            <a href="mailto:garrison.tubbs-biph@basischina.com">Contact</a>
+            
+            <div class="menu-footer">© Garrison Tubbs 2024</div>
+        </div>
+    </div>
+
+    <h1 class="Title">BIPH Music</h1>
+    <h1 class="Subtitle">AP Units</h1>
+
+    <div class="container">
+
+        <div class="unit">
+            <div class="unit-info">
+                <h2>Unit 1: Music Fundamentals I</h2>
+                <p>Pitch, Major Scales and Key Signatures, Rhythm, Meter, and Expressive Elements.</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn0">Topics Covered</button>
+                <button class="btn">Vocabulary List</button>
+                <a href="https://biphmusic.github.io/flashcards/" target="_blank">
+                    <button class="btn2">Vocabulary Flashcards</button>
+                </a>
+            </div>
+            <div class="topics">
+                <ul>
+                    <li>1.1 - Pitch and Pitch Notation</li>
+                    <li>1.2 - Rhythmic Values</li>
+                    <li>1.3 - Half Steps and Whole Steps</li>
+                    <li>1.4 - Major Scales and Scale Degrees</li>
+                    <li>1.5 - Major Keys and Key Signatures</li>
+                    <li>1.6 - Simple and Compound Beat Division</li>
+                    <li>1.7 - Meter and Time Signature</li>
+                    <li>1.8 - Rhythmic Patterns</li>
+                    <li>1.9 - Tempo</li>
+                    <li>1.10 - Dynamics and Articulation</li>
+                </ul>
+            </div>
+            <div class="vocab vocab-list">
+                <ul>
+                    <li>Accidental</li>
+                    <li>Sharp</li>
+                    <li>Flat</li>
+                    <li>Double Sharp</li>
+                    <li>Double Flat</li>
+                    <li>Natural</li>
+                    <li>Enharmonic</li>
+                    <li>Key</li>
+                    <li>Key Signature</li>
+                    <li>Solfege</li>
+                    <li>Scale</li>
+                    <li>Major Scale</li>
+                    <li>Natural Minor Scale</li>
+                    <li>Harmonic Minor Scale</li>
+                    <li>Melodic Minor Scale</li>
+                    <li>Relative Minor</li>
+                    <li>Parallel Minor</li>
+                    <li>Slur</li>
+                    <li>Tie</li>
+                    <li>Rhythm</li>
+                    <li>Measure</li>
+                    <li>Time Signature</li>
+                    <li>Meter</li>
+                    <li>Simple Meter</li>
+                    <li>Compound Meter</li>
+                    <li>Complex Meter</li>
+                    <li>Duple Pulse</li>
+                    <li>Triple Pulse</li>
+                    <li>Quadruple Pulse</li>
+                    <li>Downbeat</li>
+                    <li>Upbeat</li>
+                    <li>Syncopation</li>
+                    <li>Tempo</li>
+                    <li>BPM</li>
+                    <li>Ritardano</li>
+                    <li>Accelerando</li>
+                    <li>A Tempo</li>
+                    <li>Rubato</li>
+                    <li>Largo/Lento</li>
+                    <li>Adagio</li>
+                    <li>Andante</li>
+                    <li>Moderato</li>
+                    <li>Allegro</li>
+                    <li>Vivace</li>
+                    <li>Presto</li>
+                    <li>Dynamics</li>
+                    <li>Piano</li>
+                    <li>Forte</li>
+                    <li>Mezzo Piano</li>
+                    <li>Mezzo Forte</li>
+                    <li>Pianissimo</li>
+                    <li>Fortissimo</li>
+                    <li>Crescendo</li>
+                    <li>Decrescendo</li>
+                    <li>Diminuendo</li>
+                    <li>Forte Piano</li>
+                    <li>Articulation</li>
+                    <li>Staccato</li>
+                    <li>Legato</li>
+                    <li>Accent / Bell Tone</li>
+                    <li>Marcato </li>
+                    <li>Tenuto</li>
+                    <li>Sforzando</li>
+                    <li>Maestoso</li>
+                    <li>Glissando</li>
+                </ul>
+            </div>
+        </div>
+        <div class="unit">
+            <div class="unit-info">
+                <h2>Unit 2: Music Fundamentals II</h2>
+                <p>Minor Scales and Key Signatures, Melody, Timbre, and Texture.</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn0">Topics Covered</button>
+                <button class="btn">Vocabulary List</button>
+                <a href="https://biphmusic.github.io/flashcards/" target="_blank">
+                    <button class="btn2">Vocabulary Flashcards</button>
+                </a>
+            </div>
+            <div class="topics">
+                <ul>
+                    <li>2.1 - Minor Scales</li>
+                    <li>2.2 - Relative Keys</li>
+                    <li>2.3 - Key Relationships</li>
+                    <li>2.4 - Other Scales</li>
+                    <li>2.5 - Interval Size and Quality</li>
+                    <li>2.6 - Interval Inversion and Compound Intervals</li>
+                    <li>2.7 - Transposing Instruments</li>
+                    <li>2.8 - Timbre</li>
+                    <li>2.9 - Melodic Features</li>
+                    <li>2.10 - Melodic Transposition</li>
+                    <li>2.11 - Texture and Texture Types</li>
+                    <li>2.12 - Texture Devices</li>
+                    <li>2.13 - Rhythmic Devices</li>
+                </ul>
+            </div>
+            <div class="vocab vocab-list">
+                <ul>
+                    <li>Conjunct Motion</li>
+                    <li>Disjunct Motion</li>
+                    <li>Pentatonic Scale</li>
+                    <li>Chromatic Scale</li>
+                    <li>Whole Tone Scale</li>
+                    <li>Octatonic Scale</li>
+                    <li>Improvisation</li>
+                    <li>Dissonance</li>
+                    <li>Consonance</li>
+                    <li>Texture</li>
+                    <li>Alberti Bass</li>
+                    <li>Monophonic</li>
+                    <li>Homophonic</li>
+                    <li>Polyphonic</li>
+                    <li>Heterophonic</li>
+                    <li>Solo</li>
+                    <li>Duet</li>
+                    <li>Trio</li>
+                    <li>Quartet</li>
+                    <li>Arpeggio</li>
+                    <li>Interval</li>
+                    <li>Perfect Unison</li>
+                    <li>Minor 2</li>
+                    <li>Major 2</li>
+                    <li>Minor 3</li>
+                    <li>Major 3</li>
+                    <li>Perfect 4</li>
+                    <li>Tritone</li>
+                    <li>Perfect 5</li>
+                    <li>Minor 6</li>
+                    <li>Major 6</li>
+                    <li>Minor 7</li>
+                    <li>Major 7</li>
+                    <li>Perfect Octave</li>
+                    <li>Soprano</li>
+                    <li>Alto</li>
+                    <li>Tenor</li>
+                    <li>Bass</li>
+                    <li>Diatonic</li>
+                    <li>Transpose</li>
+                    <li>Ascend</li>
+                    <li>Descend</li>
+                    <li>Canon</li>
+                    <li>Ostinato</li>
+                    <li>Countermelody</li>
+                    <li>Sequence</li>
+                    <li>Real Sequence</li>
+                    <li>Tonal Sequence</li>
+                    <li>Anacrusis</li>
+                    <li>Walking Bass</li>
+                    <li>Dictation</li>
+                    <li>Diatonic</li>
+                    <li>Compound Interval</li>
+                    <li>Melismatic</li>
+                    <li>Syllabic</li>
+                    <li>Motive</li>
+                    <li>Hemiola</li>
+                    <li>Cross Rhythm</li>
+                    <li>Rhythmic Diminution</li>
+                    <li>Rhythmic Augmentation</li>
+                    <li>Motive/Motif</li>
+                    <li>Leitmotif</li>
+                    <li>Melodic Inversion</li>
+                    <li>Melodic Retrograde</li>
+                    <li>Fragmentation</li>
+                    <li>Imitation</li>
+                </ul>
+            </div>
+        </div>
+        <div class="unit">
+            <div class="unit-info">
+                <h2>Unit 3: Music Fundamentals III</h2>
+                <p>Triads and Seventh Chords.</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn0">Topics Covered</button>
+                <button class="btn">Vocabulary List</button>
+                <a href="https://biphmusic.github.io/flashcards/" target="_blank">
+                    <button class="btn2">Vocabulary Flashcards</button>
+                </a>
+            </div>
+            <div class="topics">
+                <ul>
+                    <li>3.1 - Triad and Chord Qualities</li>
+                    <li>3.2 - Diatonic Chords and Roman Numerals</li>
+                    <li>3.3 - Chord Inversions and Figures</li>
+                    <li>3.4 - Seventh Chords</li>
+                    <li>3.5 - Seventh Chord Inversions and Figures</li>
+                </ul>
+            </div>
+        </div>
+        <div class="unit">
+            <div class="unit-info">
+                <h2>Unit 4: Harmony and Voice Leading I</h2>
+                <p>Chord Function, Cadence, and Phrase.</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn0">Topics Covered</button>
+                <button class="btn">Vocabulary List</button>
+                <a href="https://biphmusic.github.io/flashcards/" target="_blank">
+                    <button class="btn2">Vocabulary Flashcards</button>
+                </a>
+            </div>
+            <div class="topics">
+                <ul>
+                    <li>4.1 - Soprano-Bass Counterpoint</li>
+            <li>4.2 - SATB Voice Leading</li>
+            <li>4.3 - Harmonic Progression, Functional Harmony, and Cadences</li>
+            <li>4.4 - Voice Leading with Seventh Chords</li>
+            <li>4.5 - Voice Leading with Seventh Chords in Inversions</li>
+                </ul>
+            </div>
+        </div>
+        <div class="unit">
+            <div class="unit-info">
+                <h2>Unit 5: Harmony and Voice Leading II</h2>
+                <p>Chord Progressions and Predominant Function.</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn0">Topics Covered</button>
+                <button class="btn">Vocabulary List</button>
+                <a href="https://biphmusic.github.io/flashcards/" target="_blank">
+                    <button class="btn2">Vocabulary Flashcards</button>
+                </a>
+            </div>
+            <div class="topics">
+                <ul>
+                    <li>5.1 - Adding Predominant Function to a Melodic Phrase</li>
+            <li>5.2 - The vi (VI) Chord</li>
+            <li>5.3 - Predominant Seventh Chords</li>
+            <li>5.4 - The iii (III) Chord</li>
+            <li>5.5 - Cadences and Predominant Function</li>
+            <li>5.6 - Cadential Six-Four Chords</li>
+            <li>5.7 - Additional Six-Four Chords</li>
+                </ul>
+            </div>
+        </div>
+        <div class="unit">
+            <div class="unit-info">
+                <h2>Unit 6: Harmony and Voice Leading III</h2>
+                <p>Embellishments, Motives, and Melodic Devices.</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn0">Topics Covered</button>
+                <button class="btn">Vocabulary List</button>
+                <a href="https://biphmusic.github.io/flashcards/" target="_blank">
+                    <button class="btn2">Vocabulary Flashcards</button>
+                </a>
+            </div>
+            <div class="topics">
+                <ul>
+                    <li>6.1 - Identifying Passing Tones and Neighbor Tones</li>
+            <li>6.2 - Writing Passing Tones and Neighbor Tones</li>
+            <li>6.3 - Identifying Anticipations, Escape Tones, Appoggiaturas, and Pedal Points</li>
+            <li>6.4 - Identifying and Writing Suspensions; Identifying Retardations</li>
+            <li>6.5 - Motive and Motivic Transformation</li>
+            <li>6.6 - Melodic Sequence</li>
+            <li>6.7 - Harmonic Sequence</li>
+                </ul>
+            </div>
+        </div>
+        <div class="unit">
+            <div class="unit-info">
+                <h2>Unit 7: Harmony and Voice Leading IV</h2>
+                <p>Secondary Function.</p>
+            </div>
+            <div class="btn-group">
+                <button class="btn0">Topics Covered</button>
+                <button class="btn">Vocabulary List</button>
+                <a href="https://biphmusic.github.io/flashcards/" target="_blank">
+                    <button class="btn2">Vocabulary Flashcards</button>
+                </a>
+            </div>
+            <div class="topics">
+                <ul>
+                    <li>7.1 - Tonicization through Secondary Dominant Chords</li>
+            <li>7.2 - Part Writing of Secondary Dominant Chords</li>
+            <li>7.3 - Tonicization Through Secondary Leading Tone Chords</li>
+            <li>7.4 - Part Writing of Secondary Leading Tone Chords</li>
+                </ul>
+            </div>
+        </div>
+        <div class="unit">
+            <div class="unit-info">
+                <h2>Unit 8: Modes and Form</h2>
+            </div>
+            <div class="btn-group">
+                <button class="btn0">Topics Covered</button>
+                <button class="btn">Vocabulary List</button>
+                <a href="https://biphmusic.github.io/flashcards/" target="_blank">
+                    <button class="btn2">Vocabulary Flashcards</button>
+                </a>
+            </div>
+            <div class="topics">
+                <ul>
+                    <li>8.1 - Modes</li>
+                    <li>8.2 - Phrase Relationships</li>
+                    <li>8.3 - Common Formal Sections</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="logocontainer">        
+        <img src="BASIS logo/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
+    </div>
+    
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    function toggleSection(section, button) {
+        if (section.classList.contains('show')) {
+            section.classList.remove('show');
+            button.style.backgroundColor = '';
+        } else {
+            section.classList.add('show');
+            button.style.backgroundColor = '#f8f9d0';
+        }
+    }
+
+    document.querySelectorAll('.btn0').forEach(button => {
+        button.addEventListener('click', function() {
+            const topics = this.parentElement.nextElementSibling;
+            const vocab = this.parentElement.parentElement.querySelector('.vocab');
+            const vocabBtn = this.parentElement.querySelector('.btn');
+
+            toggleSection(topics, this);
+            if (vocab.classList.contains('show')) {
+                vocab.classList.remove('show');
+                vocabBtn.style.backgroundColor = '';
+            }
+        });
+    });
+
+    document.querySelectorAll('.btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const vocab = this.parentElement.parentElement.querySelector('.vocab');
+            const topics = this.parentElement.nextElementSibling;
+            const topicsBtn = this.parentElement.querySelector('.btn0');
+
+            toggleSection(vocab, this);
+            if (topics.classList.contains('show')) {
+                topics.classList.remove('show');
+                topicsBtn.style.backgroundColor = '';
+            }
+        });
+    });
+
+    // Remove button highlight on touchend for mobile devices
+    document.querySelectorAll('.btn0, .btn').forEach(btn => {
+        btn.addEventListener('touchend', function() {
+            setTimeout(() => {
+                this.style.backgroundColor = '';
+            }, 300);
+        });
+    });
+});
+
+
+     // Hamburger menu functionality
+     const menuToggle = document.querySelector('.menu-toggle');
+    const menuItems = document.querySelector('.menu-items');
+    
+    menuToggle.addEventListener('click', () => {
+        menuToggle.classList.toggle('open');
+        menuItems.classList.toggle('show');
+    });
+    
+    // Close the menu when clicking outside
+    document.addEventListener('click', (event) => {
+        // Check if the click was outside the menu and the toggle button
+        if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+            menuToggle.classList.remove('open');
+            menuItems.classList.remove('show');
+        }
+    });
+</script>
+
+</body>
+</html>
