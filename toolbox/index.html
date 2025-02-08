@@ -118,16 +118,20 @@
             width: 100%;
             padding: 15px;
             font-size: 16px;
-            border: 2px solid #ddd;
+            border: 2px dotted rgba(104, 169, 255, 0.543);
             border-radius: 8px;
             outline: none;
             transition: border-color 0.3s;
-            background-color: rgba(255, 255, 255, 0.8);
-            color: #333;
+            background-color: rgba(255, 255, 255, 0.079);
+            color: #fbfbfbde;
         }
 
         #searchInput:focus {
-            border-color: #007bff;
+            border-color: #ffffff;
+        }
+
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.637);
         }
 
         #toolList {
@@ -239,11 +243,6 @@
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
         }
 
-        .menu-items.show a {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
         .menu-items a:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
@@ -310,7 +309,7 @@
 
     <div class="container">
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Narrow your search...">
+            <input type="text" id="searchInput" placeholder="Search">
             <span id="clearSearch" class="clear-button">&times;</span>
         </div>
         <ul id="toolList"></ul>
@@ -322,20 +321,23 @@
 
     <script>
         const tools = [
-            { name: "Word Wall", url: "https://biphmusic.github.io/wordwall/", keywords: "words, wall, vocabulary, vocab", description: "A tool for learning music terms." },
-            { name: "Flashcards", url: "https://biphmusic.github.io/flashcards/", keywords: "flashcards, study, quiz, vocabulary, vocab", description: "Interactive flashcards for music theory." },
-            { name: "Piano", url: "https://biphmusic.github.io/piano/", keywords: "piano, keyboard, play", description: "Virtual piano to practice melodies." },
-            { name: "Building Chords", url: "https://biphmusic.github.io/chords/", keywords: "chords, harmony, progressions", description: "Explore and learn chord structures." },
-            { name: "Modes", url: "https://biphmusic.github.io/modes/", keywords: "modes, scales, tonality", description: "Understand different musical modes." },
-            { name: "Roman Numerals", url: "https://biphmusic.github.io/romannumerals/", keywords: "roman numerals, chords, analysis", description: "Analyze chords with Roman numerals." },
-            { name: "Harmonic Progressions", url: "https://biphmusic.github.io/progressions/", keywords: "progressions, harmony, sequences", description: "Study common chord progressions." },
+            { name: "Word Wall", url: "https://biphmusic.github.io/wordwall/", keywords: "words, wall, vocabulary, vocab", description: "Learn and review music terms." },
+            { name: "Flashcards", url: "https://biphmusic.github.io/flashcards/", keywords: "flashcards, study, quiz, vocabulary, vocab", description: "Quiz yourself." },
+            { name: "Vocab Review", url: "https://biphmusic.github.io/vocabreview/", keywords: "randomized, study, quiz, vocabulary, vocab", description: "10 randomized questions, cumulative." },
+            { name: "Vocab Quiz", url: "https://biphmusic.github.io/vocabquiz/", keywords: "randomized, study, quiz, vocabulary, vocab", description: "26 randomized questions, cumulative." },
+            { name: "Piano", url: "https://biphmusic.github.io/piano/", keywords: "piano, keyboard, play", description: "Get that starting pitch, practice chords and scales." },
+            { name: "Building Chords", url: "https://biphmusic.github.io/chords/", keywords: "chords, harmony, progressions", description: "Understanding the building blocks of harmony." },
+            { name: "Modes", url: "https://biphmusic.github.io/modes/", keywords: "modes, scales, tonality", description: "Ionian, Dorian, Phrygian, what's that all about?" },
+            { name: "Roman Numerals", url: "https://biphmusic.github.io/romannumerals/", keywords: "roman numerals, chords, analysis", description: "Understanding harmony via Roman numerals." },
+            { name: "Harmonic Progressions", url: "https://biphmusic.github.io/progressions/", keywords: "progressions, harmony, sequences", description: "Generate randomized chord progressions." },
             { name: "Dice", url: "https://biphmusic.github.io/dice/", keywords: "dice, random, generator", description: "Randomize various musical elements." },
             { name: "Ear Training", url: "https://biphmusic.github.io/eartraining/", keywords: "ear training, listening, intervals", description: "Intervals, triads, seventh chords, and modes." },
+            { name: "Notation", url: "https://biphmusic.github.io/notation/", keywords: "notation, writing, music, dictation", description: "Write music for dictation assignments." },
             { name: "Daily Sight Singing", url: "https://biphmusic.github.io/dailysightsinging/", keywords: "sight singing, practice, daily", description: "Daily exercises for sight singing." },
-            { name: "Recorder", url: "https://biphmusic.github.io/recorder/", keywords: "recorder, playback, audio", description: "Record and playback audio clips." },
-            { name: "Modes Quiz", url: "https://biphmusic.github.io/modesquiz/", keywords: "quiz, modes, test", description: "Test your knowledge of musical modes." },
-            { name: "Quadrants", url: "https://biphmusic.github.io/quadrants/", keywords: "quadrants, graph, visualization", description: "Visualize music concepts in quadrants." },
-            { name: "AP Units", url: "https://biphmusic.github.io/units/", keywords: "ap units, curriculum, lessons", description: "Resources for AP Music Theory units." }
+            { name: "Recorder", url: "https://biphmusic.github.io/recorder/", keywords: "recorder, playback, audio", description: "Record and play back audio submissions." },
+            { name: "Modes Quiz", url: "https://biphmusic.github.io/modesquiz/", keywords: "quiz, modes, test", description: "Test your ear on modes." },
+            { name: "Quadrants", url: "https://biphmusic.github.io/quadrants/", keywords: "quadrants, graph, visualization", description: "Divide into random groups." },
+            { name: "AP Units", url: "https://biphmusic.github.io/units/", keywords: "ap units, curriculum, lessons", description: "Overview of all AP Music Theory units." }
         ];
 
         const searchInput = document.getElementById('searchInput');
