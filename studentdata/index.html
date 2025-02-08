@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Data</title>
+    <link rel="icon" href="/icons/BGicon.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Zapfino';
+            src: url('fonts/Zapfino.ttf') format('truetype');
+        }
+        
+        body {
+            background-color: rgb(45, 70, 119);
+            font-family: 'Andika', sans-serif;
+            /* font-family: 'Helvetica Neue', Arial, sans-serif; */
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1); 
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        .logocontainer {
+    position: relative;
+    min-height: 10vh;
+    padding-bottom: 50px;
+}
+
+.logo {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 25vh;
+    height: auto;
+    z-index: 10; 
+}
+
+.Subtitle {
+            font-family: 'Zapfino', sans-serif;
+            color: white;
+            margin-top: -0.7em;
+            font-size: 40px;
+        }
+
+.hamburger-menu {
+            position: absolute;
+            margin-left: 7px;
+            top: 20px;
+            left: 13px;
+            z-index: 1000;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 20;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.1s ease-in-out;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-items {
+            position: absolute;
+            top: 25px;
+            left: -250px;
+            background: linear-gradient(135deg, rgba(48, 67, 104, 0.8), rgba(20, 31, 53, 0.8));
+            width: 250px;
+            height: 90vh;
+            padding-top: 20px;
+            transition: all 0.1s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-items.show {
+            left: 0;
+            opacity: 1;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.1s;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+        }
+
+        .menu-items.show a {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-items a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-items a:nth-child(1) { transition-delay: 0.1s; }
+.menu-items a:nth-child(2) { transition-delay: 0.2s; }
+.menu-items a:nth-child(3) { transition-delay: 0.3s; }
+.menu-items a:nth-child(4) { transition-delay: 0.4s; }
+.menu-items a:nth-child(5) { transition-delay: 0.5s; }
+.menu-items a:nth-child(6) { transition-delay: 0.6s; }
+.menu-items a:nth-child(7) { transition-delay: 0.7s; }
+.menu-items a:nth-child(8) { transition-delay: 0.8s; }
+.menu-items a:nth-child(9) { transition-delay: 0.9s; }
+.menu-items a:nth-child(10) { transition-delay: 1.0s; }
+
+        .menu-title {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+       
+/* Add CSS here */
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #ddd;
+            border: solid;
+            border-width: 1px;
+            border-color: #757575;
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+        .tab:first-child {
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+        }
+        .tab:last-child {
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #chart-container {
+            position: relative;
+            height: 430px; /* Increased height to accommodate title */
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        #chart-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        #chart-wrapper {
+            position: relative;
+            height: calc(100% - 30px); /* Subtract title height */
+        }
+
+        .default-tooltip, .lock-tooltip {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid #4CAF50;
+            color: #333;
+            padding: 3px;
+            border-radius: 5px;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            opacity: 0;
+            transform: translateY(10px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .lock-tooltip {
+            background-color: rgba(255, 255, 255, 0.95);
+            border: 2px solid #4CAF50;
+        }
+
+
+
+
+
+
+        
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
+    <div class="hamburger-menu">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="menu-items" id="menu-items">
+            <div class="menu-title">BIPH Music</div>
+            <a href="https://biphmusic.github.io/">Home</a>
+            <a href="https://biphmusic.github.io/APUnits/">AP Units</a>
+            <a href="https://biphmusic.github.io/FlashCards/">Flash Cards</a>
+            <a href="https://biphmusic.github.io/MusicTheoryDice/">Dice Simulator</a>
+            <a href="https://biphmusic.github.io/WebPiano/">Web Piano</a>
+            <a href="https://biphmusic.github.io/WordWall/">Word Wall</a>
+            <a href="mailto:garrison.tubbs-biph@basischina.com">Contact</a>
+            
+            <div class="menu-footer">© Garrison Tubbs 2024</div>
+        </div>
+    </div>
+
+    <h1 class="Title">BIPH Music</h1>
+    <h1 class="Subtitle">Student Progress</h1>
+
+    <div class="container">
+
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('vocabulary')">Vocabulary Tests</button>
+            <button class="tab" onclick="switchTab('theorySkills')">Theory Skills</button>
+            <button class="tab" onclick="switchTab('sightReading')">Sight Reading Exercises</button>
+        </div>
+        <div id="chart-container">
+            <div id="chart-title">Class Average</div>
+            <div id="chart-wrapper">
+                <canvas id="progressChart"></canvas>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+       
+    </div>
+
+    <div class="logocontainer">        
+        <img src="BASIS logo/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
+    </div>
+    
+    <script>
+        
+    // Add Javascript here
+
+// Add these variables at the top of your script
+let lastTooltipX = 0;
+let lastTooltipY = 0;
+let animationFrameId = null;
+
+
+// Hamburger menu functionality
+const menuToggle = document.querySelector('.menu-toggle');
+const menuItems = document.querySelector('.menu-items');
+
+menuToggle.addEventListener('click', () => {
+    menuToggle.classList.toggle('open');
+    menuItems.classList.toggle('show');
+});
+
+// Close the menu when clicking outside
+document.addEventListener('click', (event) => {
+    // Check if the click was outside the menu and the toggle button
+    if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+        menuToggle.classList.remove('open');
+        menuItems.classList.remove('show');
+    }
+});
+
+// Add this new JavaScript for the chart functionality
+const numStudents = 18;
+const numWeeks = 5;
+const studentNames = ['Ben', 'Howard', 'Terry', 'Alice', 'Vincent', 'Tiger', 'Chris', 'Lucy', 'Diego', 'Hailey', 'Eileen', 'Angelina', 'Serena', 'Catherine', 'Andrew', 'Jennifer'];
+const colors = [
+    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+];
+
+function generateData() {
+    return Array.from({length: numWeeks}, () => (Math.floor(Math.random() * 41) + 60) * 0.01);
+}
+
+const vocabularyData = [
+    { name: 'Ben Chen', data: [0.923, 1.000] },
+    { name: 'Howard Ding', data: [1.000, 1.000] },
+    { name: 'Terry He', data: [1.000, 1.000] },
+    { name: 'Alice Li', data: [1.000, 1.000] },
+    { name: 'Vincent Mu', data: [1.000, 1.000] },
+    { name: 'Tiger Pan', data: [1.000, 1.000] },
+    { name: 'Chris Peng', data: [0.846, 1.000] },
+    { name: 'Lucy Sheng', data: [0.923, 1.000] },
+    { name: 'Diego Su', data: [1.000, 0.885] },
+    { name: 'Hailey Wang', data: [1.000, 1.000] },
+    { name: 'Eileen Xu', data: [0.923, 1.000] },
+    { name: 'Angelina Yan', data: [0.846, 1.000] },
+    { name: 'Serena Zeng', data: [1.000, 0.923] },
+    { name: 'Catherine Zhang', data: [1.000, 1.000] },
+    { name: 'Andrew Zhao', data: [1.000, 0.962] },
+    { name: 'Jennifer Zhou', data: [0.923, 1.000] }
+];
+
+const sightReadingData = [
+    { name: 'Ben Chen', data: [0.625, 0.875, 0.188, 0.500, 0.688] },
+    { name: 'Howard Ding', data: [0.750, 0.813, 1.000, 0.750, 0.938] },
+    { name: 'Terry He', data: [1.000, 1.000, 0.919, 1.000, 1.000] },
+    { name: 'Alice Li', data: [0.250, 0.984, 0.000, 0.500, 1.000] },
+    { name: 'Vincent Mu', data: [0.787, 0.938, 0.625, 1.000, 1.000] },
+    { name: 'Tiger Pan', data: [0.938, 1.000, 1.000, 1.000, 1.000] },
+    { name: 'Chris Peng', data: [0.625, 1.000, 0.813, 1.000, 0.813] },
+    { name: 'Lucy Sheng', data: [0.688, 1.000, 1.000, 1.000, 1.000] },
+    { name: 'Diego Su', data: [0.563, 0.919, 0.563, 0.919, 0.919] },
+    { name: 'Hailey Wang', data: [0.625, 0.938, 0.438, 1.000, 0.750] },
+    { name: 'Eileen Xu', data: [0.313, 0.125, 0.000, 0.000, 0.000] },
+    { name: 'Angelina Yan', data: [1.000, 1.000, 0.875, 1.000, 1.000] },
+    { name: 'Serena Zeng', data: [0.688, 0.500, 0.625, 0.000, 0.500] },
+    { name: 'Catherine Zhang', data: [0.750, 1.000, 0.875, 1.000, 1.000] },
+    { name: 'Andrew Zhao', data: [0.938, 1.000, 1.000, 1.000, 0.000] },
+    { name: 'Jennifer Zhou', data: [1.000, 0.984, 0.000, 0.000, 0.000] }
+];
+
+const theorySkillsData = [
+    { name: 'Ben Chen', data: [0.952, 0.887, 0.685] },
+    { name: 'Howard Ding', data: [1.0, 0.96, 0.96] },
+    { name: 'Terry He', data: [1.0, 0.973, 0.93] },
+    { name: 'Alice Li', data: [0.924, 0.963, 0.835] },
+    { name: 'Vincent Mu', data: [1.0, 1.0, 0.98] },
+    { name: 'Tiger Pan', data: [0.972, 0.973, 0.0] },
+    { name: 'Chris Peng', data: [0.986, 0.987, 0.76] },
+    { name: 'Lucy Sheng', data: [1.0, 0.987, 0.85] },
+    { name: 'Diego Su', data: [0.938, 0.9, 0.635] },
+    { name: 'Hailey Wang', data: [0.952, 0.722, 0.72] },
+    { name: 'Eileen Xu', data: [0.781, 0.67, 0.62] },
+    { name: 'Angelina Yan', data: [1.0, 0.967, 0.8] },
+    { name: 'Serena Zeng', data: [0.958, 0.67, 0.175] },
+    { name: 'Catherine Zhang', data: [1.0, 0.987, 0.85] },
+    { name: 'Andrew Zhao', data: [0.972, 0.973, 0.0] },
+    { name: 'Jennifer Zhou', data: [1.0, 0.987, 0.98] }
+];
+
+let chart;
+let activeDataset = vocabularyData;
+
+function calculateClassAverage(data) {
+    const averages = [];
+    for (let i = 0; i < numWeeks; i++) {
+        const sum = data.reduce((acc, student) => acc + student.data[i], 0);
+        averages.push((sum / numStudents) * 100); // Convert back to percentage
+    }
+    return averages;
+}
+
+function createChart() {
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    const classAverage = calculateClassAverage(activeDataset);
+
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: numWeeks}, (_, i) => `Week ${i + 1}`),
+            datasets: [
+                {
+                    label: 'Class Avg.',
+                    data: classAverage,
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: 'blue', // Make points solid
+                    fill: false,
+                    tension: 0.1
+                },
+                ...activeDataset.map((student, index) => ({
+                    label: student.name,
+                    data: student.data.map(value => value * 100),
+                    borderColor: 'rgba(200, 200, 200, 0.5)',
+                    backgroundColor: colors[index],
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    pointHoverRadius: 8,
+                    tension: 0.1,
+                    hidden: false
+                }))
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    position: 'right',
+                    align: 'start', // Align legend to the top
+                    onHover: (event, legendItem, legend) => {
+                        const index = legendItem.datasetIndex;
+                        if (index > 0 && lockedDatasetIndex === null) {
+                            highlightDataset(index);
+                        }
+                        // Hide tooltip when hovering over legend
+                        hideTooltip();
+                    },
+                    onLeave: (event, legendItem, legend) => {
+                        if (lockedDatasetIndex === null) {
+                            resetHighlight();
+                        }
+                    },
+                    onClick: (e, legendItem, legend) => {
+                        const index = legendItem.datasetIndex;
+                        if (index === 0) return; // Don't toggle class average
+                        toggleLockMode(index);
+                        chart.update();
+                    },
+                    labels: {
+                        generateLabels: function(chart) {
+                            const datasets = chart.data.datasets;
+                            return datasets.map((dataset, i) => ({
+                                text: dataset.label === '' ? 'Class Avg.' : dataset.label,
+                                fillStyle: dataset.borderColor,
+                                hidden: !chart.isDatasetVisible(i),
+                                lineCap: dataset.borderCapStyle,
+                                lineDash: dataset.borderDash,
+                                lineDashOffset: dataset.borderDashOffset,
+                                lineJoin: dataset.borderJoinStyle,
+                                lineWidth: dataset.borderWidth,
+                                strokeStyle: dataset.borderColor,
+                                pointStyle: dataset.pointStyle,
+                                rotation: dataset.rotation,
+                                datasetIndex: i
+                            }));
+                        }
+                    }
+                },
+                tooltip: {
+                    enabled: false,
+                    external: customTooltip
+                }
+            },
+            onClick: (event, elements) => {
+                if (lockedDatasetIndex !== null) {
+                    // If in lock mode, clicking anywhere should revert to default mode
+                    disableLockMode();
+                } else if (elements.length > 0) {
+                    const { datasetIndex } = elements[0];
+                    toggleLockMode(datasetIndex);
+                }
+                chart.update();
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: true
+            },
+            onHover: null
+        }
+    });
+
+    setDefaultState(); // Set the default state when the chart is created
+}
+
+    let lockedDatasetIndex = null;
+
+    function toggleLockMode(index) {
+        if (lockedDatasetIndex === index) {
+            disableLockMode();
+        } else {
+            enableLockMode(index);
+        }
+    }
+
+    const fullNames = [
+        'Ben Chen', 'Howard Ding', 'Terry He', 'Alice Li', 'Vincent Mu', 'Tiger Pan', 
+        'Chris Peng', 'Lucy Sheng', 'Diego Su', 'Hailey Wang', 'Eileen Xu', 'Angelina Yan', 
+        'Serena Zeng', 'Catherine Zhang', 'Andrew Zhao', 'Jennifer Zhou'
+    ];
+
+    function enableLockMode(index) {
+        lockedDatasetIndex = index;
+        document.getElementById('chart-title').textContent = fullNames[index - 1];
+        chart.data.datasets.forEach((dataset, i) => {
+            if (i === 0) {
+                dataset.borderWidth = 1;
+                dataset.borderDash = [5, 5];
+                dataset.pointRadius = 0;
+                dataset.pointHoverRadius = 0;
+                dataset.backgroundColor = 'transparent'; // Remove fill for class average
+            } else if (i === index) {
+                // Selected student
+                dataset.borderColor = colors[i - 1];
+                dataset.borderWidth = 3;
+                dataset.pointRadius = 5;
+                dataset.pointHoverRadius = 8;
+                chart.getDatasetMeta(i).hidden = false;
+            } else {
+                // Other students
+                dataset.borderColor = 'rgba(200, 200, 200, 0.3)';
+                dataset.borderWidth = 1;
+                dataset.pointRadius = 0;
+                dataset.pointHoverRadius = 0;
+                chart.getDatasetMeta(i).hidden = true;
+            }
+        });
+
+        // Update legend generation
+        chart.options.plugins.legend.labels.generateLabels = function(chart) {
+            const datasets = chart.data.datasets;
+            return datasets.map((dataset, i) => ({
+                text: dataset.label === '' ? 'Class Avg.' : dataset.label,
+                fillStyle: i === 0 && lockedDatasetIndex !== null ? 'transparent' : dataset.borderColor,
+                strokeStyle: dataset.borderColor,
+                lineWidth: dataset.borderWidth,
+                hidden: !chart.isDatasetVisible(i),
+                lineCap: dataset.borderCapStyle,
+                lineDash: dataset.borderDash,
+                lineDashOffset: dataset.borderDashOffset,
+                lineJoin: dataset.borderJoinStyle,
+                pointStyle: dataset.pointStyle,
+                rotation: dataset.rotation,
+                datasetIndex: i
+            }));
+        };
+
+        // Ensure custom tooltip settings are maintained
+        chart.options.plugins.tooltip = {
+            enabled: false,
+            external: customTooltip
+        };
+
+        chart.options.onHover = null; // Disable default hover behavior
+        chart.update();
+    }
+
+    function disableLockMode() {
+        lockedDatasetIndex = null;
+        document.getElementById('chart-title').textContent = 'Class Average';
+        chart.data.datasets.forEach((dataset, index) => {
+            if (index === 0) {
+                // Reset class average line
+                dataset.borderWidth = 3;
+                dataset.borderDash = [];
+                dataset.pointRadius = 5;
+                dataset.pointHoverRadius = 8;
+                dataset.backgroundColor = 'rgba(0, 0, 255, 0.1)'; // Restore fill for class average
+            } else {
+                // Reset all student lines
+                dataset.borderColor = 'rgba(200, 200, 200, 0.5)';
+                dataset.borderWidth = 1;
+                dataset.pointRadius = 0;
+                chart.getDatasetMeta(index).hidden = false;
+            }
+        });
+
+        // Reset legend generation
+        chart.options.plugins.legend.labels.generateLabels = function(chart) {
+            const datasets = chart.data.datasets;
+            return datasets.map((dataset, i) => ({
+                text: dataset.label === '' ? 'Class Avg.' : dataset.label,
+                fillStyle: dataset.borderColor,
+                strokeStyle: dataset.borderColor,
+                lineWidth: dataset.borderWidth,
+                hidden: !chart.isDatasetVisible(i),
+                lineCap: dataset.borderCapStyle,
+                lineDash: dataset.borderDash,
+                lineDashOffset: dataset.borderDashOffset,
+                lineJoin: dataset.borderJoinStyle,
+                pointStyle: dataset.pointStyle,
+                rotation: dataset.rotation,
+                datasetIndex: i
+            }));
+        };
+
+        chart.update();
+    }
+
+    function highlightDataset(index) {
+        if (lockedDatasetIndex !== null) return; // Don't highlight if in lock mode
+        chart.data.datasets.forEach((dataset, i) => {
+            if (i === 0) {
+                // Modify class average line
+                dataset.borderWidth = 1;
+                dataset.borderDash = [5, 5];
+                dataset.pointRadius = 0;
+            } else if (i === index) {
+                dataset.borderColor = colors[i - 1];
+                dataset.borderWidth = 3;
+                chart.getDatasetMeta(i).hidden = false;
+            } else {
+                dataset.borderColor = 'rgba(200, 200, 200, 0.3)';
+                dataset.borderWidth = 1;
+            }
+        });
+        chart.update();
+    }
+
+    function resetHighlight() {
+        if (lockedDatasetIndex !== null) return; // Don't reset highlight if in lock mode
+        chart.data.datasets.forEach((dataset, index) => {
+            if (index === 0) {
+                // Reset class average line
+                dataset.borderWidth = 3;
+                dataset.borderDash = [];
+                dataset.pointRadius = 4;
+            } else {
+                dataset.borderColor = 'rgba(200, 200, 200, 0.5)';
+                dataset.borderWidth = 1;
+            }
+        });
+        chart.update();
+    }
+
+    function switchTab(tab) {
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+
+    // Update activeDataset based on the selected tab
+    if (tab === 'vocabulary') {
+        activeDataset = vocabularyData;
+    } else if (tab === 'theorySkills') {
+        activeDataset = theorySkillsData;
+    } else if (tab === 'sightReading') {
+        activeDataset = sightReadingData;
+    }
+    
+    updateChart();
+}
+
+    function updateChart() {
+        const classAverage = calculateClassAverage(activeDataset);
+        chart.data.datasets[0].data = classAverage;
+
+        for (let i = 1; i < chart.data.datasets.length; i++) {
+            chart.data.datasets[i].data = activeDataset[i - 1].data.map(value => value * 100); // Multiply by 100 here
+        }
+
+        // Ensure custom tooltip settings are maintained
+        chart.options.plugins.tooltip = {
+            enabled: false,
+            external: customTooltip
+        };
+
+        chart.options.onHover = null; // Disable default hover behavior
+        chart.update();
+    }
+
+    // Update the customTooltip function
+    function customTooltip(context) {
+        const defaultTooltip = document.getElementById('default-tooltip');
+        const lockTooltip = document.getElementById('lock-tooltip');
+        const {chart, tooltip: tooltipModel} = context;
+
+        if (tooltipModel.opacity === 0) {
+            hideTooltip();
+            return;
+        }
+
+        const chartRect = chart.canvas.getBoundingClientRect();
+        const activeTooltip = lockedDatasetIndex === null ? defaultTooltip : lockTooltip;
+        const inactiveTooltip = lockedDatasetIndex === null ? lockTooltip : defaultTooltip;
+
+        // Update tooltip content
+        if (lockedDatasetIndex === null) {
+            const classAvgValue = chart.data.datasets[0].data[tooltipModel.dataPoints[0].dataIndex].toFixed(1);
+            defaultTooltip.innerHTML = `${classAvgValue}%`;
+        } else {
+            const value = chart.data.datasets[lockedDatasetIndex].data[tooltipModel.dataPoints[0].dataIndex].toFixed(1);
+            lockTooltip.innerHTML = `${value}%`;
+        }
+
+        // Calculate tooltip position based on screen size
+        const screenWidth = window.innerWidth;
+        const xOffset = screenWidth > 1200 ? '37%' : '200px';
+        const yOffset = screenWidth > 1200 ? '-46%' : '-200px';
+
+        // Smooth tooltip movement
+        const targetX = tooltipModel.caretX + chartRect.left;
+        const targetY = tooltipModel.caretY + chartRect.top;
+
+        function animateTooltip() {
+            lastTooltipX += (targetX - lastTooltipX) * 0.3;
+            lastTooltipY += (targetY - lastTooltipY) * 0.3;
+
+            activeTooltip.style.left = `calc(${lastTooltipX}px + ${xOffset})`;
+            activeTooltip.style.top = `calc(${lastTooltipY}px + ${yOffset})`;
+
+            if (Math.abs(targetX - lastTooltipX) > 0.1 || Math.abs(targetY - lastTooltipY) > 0.1) {
+                animationFrameId = requestAnimationFrame(animateTooltip);
+            }
+        }
+
+        if (!animationFrameId) {
+            animationFrameId = requestAnimationFrame(animateTooltip);
+        }
+
+        // Show active tooltip and hide inactive one
+        activeTooltip.style.opacity = '1';
+        inactiveTooltip.style.opacity = '0';
+    }
+
+    // Update the mousemove event listener
+    document.getElementById('progressChart').addEventListener('mousemove', (event) => {
+        const activeTooltip = lockedDatasetIndex === null ? document.getElementById('default-tooltip') : document.getElementById('lock-tooltip');
+        activeTooltip.style.left = `${event.clientX}px`;
+        activeTooltip.style.top = `calc(${event.clientY}px + 1vh)`;
+    });
+
+   // Call createChart after the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', createChart);
+
+
+    // Add this new function to hide the tooltip
+    function hideTooltip() {
+        const defaultTooltip = document.getElementById('default-tooltip');
+        const lockTooltip = document.getElementById('lock-tooltip');
+        defaultTooltip.style.opacity = '0';
+        lockTooltip.style.opacity = '0';
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+    }
+</script>
+
+<div id="default-tooltip" class="default-tooltip"></div>
+<div id="lock-tooltip" class="lock-tooltip"></div>
+
+</body>
+</html>
