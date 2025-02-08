@@ -504,78 +504,126 @@ window.addEventListener('resize', () => {
             });
         }
 
-        // Musical symbols definitions
         function createNote(type) {
-            const noteHead = createNoteHead();
+    if (type === 'whole' || type === 'half') {
+        // Load the SVG for the whole note or half note
+        fabric.loadSVGFromString(`
+            <svg height="800px" width="800px">
+                <path class="s0" d="m257.8 227.6c-78.2 19.6-115.1 77.2-82.9 126.5 31 47.3 114.2 68.5 186.2 49.2 71.2-19 108.8-71.6 83.7-119.3-26-49.6-109.8-75.8-187-56.4zm93.6 159.3c-36.2 9.6-84.3-12.6-107.9-50.6-24.4-39.4-13.3-80.2 25.3-89.9 38.4-9.7 87.7 15.4 109.6 54.9 21.3 38.2 9 76-27 85.6z"/>
+            </svg>
+        `, function(objects, options) {
+            const svgGroup = fabric.util.groupSVGElements(objects, options);
+            svgGroup.set({
+                left: 100,
+                top: 100,
+                scaleX: noteScaleFactor * 0.063, // Slightly increased scale for whole and half notes
+                scaleY: noteScaleFactor * 0.058, // Slightly increased scale for whole and half notes
+                originX: 'center',
+                originY: 'center',
+                angle: -0 // Rotate 5 degrees to the left
+            });
 
-            if (type === 'whole') {
-                return noteHead;
-            } else if (type === 'half') {
-                const halfNoteHead = new fabric.Ellipse({
-                    rx: 12 * noteScaleFactor,
-                    ry: 8 * noteScaleFactor,
-                    fill: 'black',
-                    angle: -5,
-                    left: 100 * noteScaleFactor,
-                    top: 90 * noteScaleFactor
-                });
-
-                const innerHalfNoteHead = new fabric.Ellipse({
-                    rx: 8 * noteScaleFactor,
-                    ry: 5.5 * noteScaleFactor,
-                    angle: -25,
-                    fill: 'white',
-                    left: 103.2 * noteScaleFactor,
-                    top: 95.5 * noteScaleFactor
-                });
-
+            if (type === 'half') {
+                // Add a vertical stem for the half note
                 const stem = new fabric.Rect({
-                    left: 122.5 * noteScaleFactor,
-                    top: 37 * noteScaleFactor,
+                    left: 100.7 * noteScaleFactor, // Adjust position relative to the note head
+                    top: 54 * noteScaleFactor,  // Adjust position relative to the note head
                     width: 2 * noteScaleFactor,
-                    height: 60 * noteScaleFactor,
+                    height: 40 * noteScaleFactor,
                     fill: 'black'
                 });
 
-                return new fabric.Group([halfNoteHead, innerHalfNoteHead, stem], {
-                    left: 100,
-                    top: 100,
-                    originX: 'center',
-                    originY: 'center',
-                    scaleX: noteScaleFactor,
-                    scaleY: noteScaleFactor
+                // Load the new SVG for the half note head
+                fabric.loadSVGFromString(`
+                    <svg height="800px" width="800px">
+                        <path id="Layer copy" class="s0" d="m347.5 222.4c79.9 10.4 123.3 63.3 97 115.9-25.2 50.6-105.4 81.3-179.2 70.6-72.9-10.6-116.3-58.5-97-108.7 20.1-52.3 100.2-88.1 179.2-77.8zm-74.5 169c37.1 5.4 82.3-22.2 101.3-62.8 19.7-41.9 3.9-81.1-35.6-86.3-39.3-5.2-85.3 25.5-102.5 67.3-16.6 40.4 0 76.5 36.8 81.8z"/>
+                        <path id="Layer copy 2" class="s0" d="m384.2 244.7c46.5 33.4 46.3 93.5 0.7 132.4-43.8 37.3-112.7 40.4-155.1 8.6-41.8-31.5-44.3-87.1-4.6-126 41.4-40.4 113-47.9 159-15zm-139.9 127.8c21.3 15.9 65.7 5 100-25.2 35.5-31.3 46.4-71 23.4-87.5-22.8-16.5-69.4-3.1-103.2 28.8-32.7 30.9-41.4 68-20.2 83.9z"/>
+                    </svg>
+                `, function(halfNoteObjects, halfNoteOptions) {
+                    const halfNoteSVGGroup = fabric.util.groupSVGElements(halfNoteObjects, halfNoteOptions);
+                    halfNoteSVGGroup.set({
+                        left: 100,
+                        top: 100,
+                        scaleX: noteScaleFactor * 0.063, // Slightly increased scale for whole and half notes
+                        scaleY: noteScaleFactor * 0.058, // Slightly increased scale for whole and half notes
+                        originX: 'center',
+                        originY: 'center',
+                        angle: -0
+                    });
+
+                    // Combine the SVG note head and the stem into a group
+                    const halfNoteGroup = new fabric.Group([halfNoteSVGGroup, stem], {
+                        left: 100,
+                        top: 100,
+                        originX: 'center',
+                        originY: 'center',
+                        scaleX: noteScaleFactor,
+                        scaleY: noteScaleFactor
+                    });
+
+                    canvas.add(halfNoteGroup);
+                    canvas.setActiveObject(halfNoteGroup);
+                    saveState();
+                    canvas.renderAll();
                 });
-            } else if (type === 'quarter') {
-                const quarterNoteHead = new fabric.Ellipse({
-                    angle: -20,
-                    rx: 12 * noteScaleFactor,
-                    ry: 8 * noteScaleFactor,
-                    fill: 'black',
-                    left: 100 * noteScaleFactor,
-                    top: 90 * noteScaleFactor
-                });
-                const stem = new fabric.Rect({
-                    left: 123.7 * noteScaleFactor,
-                    top: 32 * noteScaleFactor,
-                    width: 2 * noteScaleFactor,
-                    height: 60 * noteScaleFactor,
-                    fill: 'black'
-                });
-                return new fabric.Group([quarterNoteHead, stem], {
-                    left: 100,
-                    top: 45,
-                    scaleX: noteScaleFactor,
-                    scaleY: noteScaleFactor
-                });
+            } else {
+                // For whole notes, just add the SVG note head
+                canvas.add(svgGroup);
+                canvas.setActiveObject(svgGroup);
+                saveState();
+                canvas.renderAll();
             }
-            return noteHead;
+        });
+        return; // Exit early since the SVG is handled asynchronously
+    } else if (type === 'quarter') {
+        const quarterNoteHead = new fabric.Ellipse({
+            angle: -20,
+            rx: 12 * noteScaleFactor,
+            ry: 8 * noteScaleFactor,
+            fill: 'black',
+            left: 100 * noteScaleFactor,
+            top: 90 * noteScaleFactor
+        });
+        const stem = new fabric.Rect({
+            left: 123.7 * noteScaleFactor,
+            top: 32 * noteScaleFactor,
+            width: 2 * noteScaleFactor,
+            height: 60 * noteScaleFactor,
+            fill: 'black'
+        });
+        return new fabric.Group([quarterNoteHead, stem], {
+            left: 100,
+            top: 45,
+            scaleX: 0.6 * noteScaleFactor,
+            scaleY: 0.6 * noteScaleFactor
+        });
+    }
+}
+
+ // Note size adjustment
+ const noteSizeDisplay = document.getElementById('noteSize');
+
+function adjustNoteSize(delta) {
+    noteScaleFactor += delta;
+    noteScaleFactor = Math.max(0.5, Math.min(2, noteScaleFactor)); // Clamp between 0.5x and 2x
+    noteSizeDisplay.textContent = `${noteScaleFactor.toFixed(1)}x`;
+
+    // Update existing notes
+    canvas.forEachObject(obj => {
+        if (obj.type === 'group') { // Assuming notes are grouped objects
+            obj.scaleX = noteScaleFactor;
+            obj.scaleY = noteScaleFactor;
         }
+    });
+
+    canvas.renderAll();
+}
 
         function addNote(type) {
             const note = createNote(type);
             note.set({
                 cornerSize: 8,
-                transparentCorners: false,
+                transparentCorners: true,
                 cornerColor: 'rgba(102,153,255,0.8)',
                 borderColor: 'rgba(102,153,255,0.8)',
                 cornerStyle: 'circle'
@@ -721,24 +769,6 @@ window.addEventListener('resize', () => {
             originalAddText();
         };
 
-        // Note size adjustment
-        const noteSizeDisplay = document.getElementById('noteSize');
-
-        function adjustNoteSize(delta) {
-            noteScaleFactor += delta;
-            noteScaleFactor = Math.max(0.5, Math.min(2, noteScaleFactor)); // Clamp between 0.5x and 2x
-            noteSizeDisplay.textContent = `${noteScaleFactor.toFixed(1)}x`;
-
-            // Update existing notes
-            canvas.forEachObject(obj => {
-                if (obj.type === 'group') { // Assuming notes are grouped objects
-                    obj.scaleX = noteScaleFactor;
-                    obj.scaleY = noteScaleFactor;
-                }
-            });
-
-            canvas.renderAll();
-        }
 
         // Pan functionality
         let isDragging = false;
