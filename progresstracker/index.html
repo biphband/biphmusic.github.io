@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Tracker</title>
+    <link rel="icon" href="/icons/BGicon.png">
+    <style>
+        body {
+            background-color: rgb(45, 70, 119);
+            color:white;
+            font-family: 'Andika', sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            align-items: center; 
+            text-align: center; 
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1); 
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        .logocontainer {
+    min-height: 10vh;
+    padding-bottom: 50px;
+}
+
+.logo {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 25vh;
+    height: auto;
+    z-index: 10; 
+}
+
+h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+.Subtitle {
+            font-family: 'Zapfino', sans-serif;
+            color: white;
+            margin-top: -0.7em;
+            font-size: 40px;
+            transform: translateX(-1.8%);
+        }
+
+        .dropzone {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 150, 136, 0.2);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #009688;
+            z-index: 1000;
+        }
+
+        .dropzone.active {
+            display: flex;
+        }
+
+        .checklist {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px 10px;
+            padding: 20px;
+        }
+
+        .student {
+            display: flex;
+            align-items: center;
+            border: 2px solid rgba(255, 255, 255, 0);
+            padding: 15px;
+            padding-block: 20px;
+            opacity: 1;
+            transition: opacity 0.3s;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .student.found {
+            opacity: 1;
+            background: white;
+            color: #154565;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .check-circle {
+            width: 30px;
+            height: 30px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .found .check-circle {
+            transform: scale(1);
+        }
+
+        .check-mark {
+            color: white;
+            font-size: 18px;
+        }
+
+        .popup {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background: #009688;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1001;
+        }
+
+        .popup.show {
+            transform: translateX(-50%) scale(1);
+        }
+
+        .popup .check-circle {
+            background: white;
+            margin-left: 15px;
+            transform: scale(1);
+        }
+
+        .popup .check-mark {
+            color: #009688;
+            color: black;
+        }
+
+        .search-container {
+    position: relative;
+    margin-bottom: 20px;
+    width: 50%;
+    margin: auto;
+    transform: translateX(-10%);
+}
+
+#search-bar {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    border: 2px dotted rgba(104, 169, 255, 0.543);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+    background-color: rgba(255, 255, 255, 0.079);
+    color: #fbfbfbde;
+}
+
+#search-bar:focus {
+    border-color: #ffffff;
+}
+
+#search-bar::placeholder {
+    color: rgba(255, 255, 255, 0.637);
+}
+
+.clear-button {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.637);
+    font-size: 18px;
+    background: none;
+    border: none;
+}
+
+.dialog {
+    position: fixed;
+    width: 250px;
+    top: 50%;
+    left: 50%;
+    text-align: left;
+    padding-top: 0px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    transform: translate(-50%, -50%);
+    color: #154565;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.dialog.hidden {
+    display: none;
+}
+
+ul {
+    list-style-type: none;
+    padding-top: 0px;
+    padding-left: 70px;
+}
+
+li {
+    padding-top: 0px;
+    margin-bottom: 5px;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
+    <h1 class="Title">BIPH Music</h1>
+    <h1 class="Subtitle">Progress Tracker</h1>
+
+    <div class="search-container">
+    <input type="text" id="search-bar" placeholder="Search...">
+    <button class="clear-button">x</button>
+    </div>
+
+    <div class="dropzone" id="dropzone">
+        Drop files here
+    </div>
+    <div class="checklist" id="checklist"></div>
+    <div class="popup" id="popup">
+        All files are in!
+        <div class="check-circle">
+            <div class="check-mark">✓</div>
+        </div>
+    </div>
+
+    <button id="resetButton" style="position: fixed; bottom: 20px; left: 20px; padding: 5px 10px; font-size: 14px; opacity: 0.3; transition: opacity 0.3s;">Reset</button>
+    <button id="editListButton" style="position: fixed; bottom: 20px; left: 90px; padding: 5px 10px; font-size: 14px; opacity: 0.3; transition: opacity 0.3s;">Edit List</button>
+
+    <div id="editListDialog" class="dialog hidden">
+        <h3>Edit Student List</h3>
+        <ul id="studentListForEditing"></ul>
+        <button id="saveEditButton">Save</button>
+    </div>
+    
+
+    <div class="logocontainer">        
+        <img src="BASIS logo/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
+    </div>
+    
+
+    <audio id="chime" src="audio/chime.mp3"></audio>
+    <audio id="multichime" src="audio/multichime.mp3"></audio>
+
+    <script>
+        const students = ["Ben", "Howard", "Terry", "Alice", "Vincent", "Tiger", "Chris", "Lucy", "Diego", "Hailey", "Eileen", "Angelina", "Serena", "Catherine", "Andrew", "Jennifer"];
+        const foundFiles = new Set();
+
+        function createStudentElement(name) {
+            const div = document.createElement('div');
+            div.className = 'student';
+            div.id = `student-${name.toLowerCase()}`;
+            
+            const checkCircle = document.createElement('div');
+            checkCircle.className = 'check-circle';
+            
+            const checkMark = document.createElement('div');
+            checkMark.className = 'check-mark';
+            checkMark.textContent = '✓';
+            
+            checkCircle.appendChild(checkMark);
+            div.appendChild(checkCircle);
+            div.appendChild(document.createTextNode(name));
+            
+            // 'Toggle' checkmarks using 'found' attribute
+            div.addEventListener('click', () => {
+                if (div.classList.contains('found')) {
+                    div.classList.remove('found');
+                    foundFiles.delete(name.toLowerCase());
+                } else {
+                    div.classList.add('found');
+                    foundFiles.add(name.toLowerCase());
+                    playChime();
+                }
+                checkAllFilesFound();
+            });
+            
+            return div;
+        }
+
+        function initializeChecklist() {
+    const checklist = document.getElementById('checklist');
+    students.forEach(student => {
+        const existingElement = document.getElementById(`student-${student.toLowerCase()}`);
+        if (!existingElement) {
+            checklist.appendChild(createStudentElement(student));
+        }
+    });
+}
+
+function filterStudents(query) {
+    const checklist = document.getElementById('checklist');
+    const studentElements = checklist.getElementsByClassName('student');
+
+    for (let i = 0; i < studentElements.length; i++) {
+        const studentName = studentElements[i].textContent.toLowerCase();
+        if (studentName.includes(query.toLowerCase())) {
+            studentElements[i].style.opacity = '1'; // Fully visible
+        } else {
+            studentElements[i].style.opacity = '0.2'; // Semi-transparent
+        }
+    }
+
+
+     // If there is exactly one match, highlight it
+     const matches = Array.from(studentElements).filter(el => el.style.opacity === '1');
+    if (matches.length === 1) {
+        matches[0].classList.add('highlight');
+    } else {
+        for (let i = 0; i < studentElements.length; i++) {
+            studentElements[i].classList.remove('highlight');
+        }
+    }
+}
+
+function handleSearchInput(event) {
+    const query = event.target.value;
+    filterStudents(query);
+
+    // If the query is empty, reset all students' opacity
+    if (query === '') {
+        resetStudentOpacity();
+    }
+}
+
+// Helper function to reset student opacity
+function resetStudentOpacity() {
+    const checklist = document.getElementById('checklist');
+    const studentElements = checklist.getElementsByClassName('student');
+
+    for (let i = 0; i < studentElements.length; i++) {
+        studentElements[i].style.opacity = '1'; // Reset to default opacity
+    }
+}
+
+
+
+function handleKeyPress(event) {
+    const searchBar = document.getElementById('search-bar');
+    
+    if (event.key === 'Enter') {
+        const checklist = document.getElementById('checklist');
+        const highlightedStudent = checklist.querySelector('.student.highlight');
+        
+        if (highlightedStudent) {
+            // Remove the .highlight class
+            highlightedStudent.classList.remove('highlight');
+
+            // Add the .found class to the selected student
+            highlightedStudent.classList.add('found');
+            
+            // Add the selected student to foundFiles
+            const studentName = highlightedStudent.textContent.trim().toLowerCase();
+                foundFiles.add(studentName);
+                checkAllFilesFound();
+            playChime();
+
+            // Reset all students' opacity and classes after selecting a student
+            resetStudentOpacity();
+            removeHighlightAndResetOpacity();
+
+            event.target.value = '';
+            searchBar.blur();
+        }
+    } else if (event.key === 'Escape' && searchBar.value !== '') {
+        event.preventDefault();
+        searchBar.value = ''; 
+        filterStudents(''); 
+
+        // Reset all students' opacity and classes after clearing the search
+        resetStudentOpacity();
+        removeHighlightAndResetOpacity();
+    } else if (event.key === 'Escape') {
+        searchBar.blur(); // Deselect the search bar
+    }
+}
+
+// Helper function to remove highlight and reset opacity for non-found students
+function removeHighlightAndResetOpacity() {
+    const checklist = document.getElementById('checklist');
+    const studentElements = checklist.getElementsByClassName('student');
+
+    for (let i = 0; i < studentElements.length; i++) {
+        const studentElement = studentElements[i];
+        
+        if (!studentElement.classList.contains('found')) {
+            studentElement.classList.remove('highlight'); // Remove any highlight classes
+        }
+    }
+}
+
+
+
+
+// Initialize the checklist
+initializeChecklist();
+
+// Add event listeners for the search bar
+const searchBar = document.getElementById('search-bar');
+searchBar.addEventListener('input', handleSearchInput);
+searchBar.addEventListener('keydown', handleKeyPress);
+
+// Optional: Add a style for highlighting matched students
+document.head.insertAdjacentHTML('beforeend', `
+    <style>
+        .student.highlight {
+            color: #154565;
+            background-color: #f0f8ff56;
+            border: 2px solid white;
+        }
+    </style>
+`);
+
+
+
+
+
+
+
+function checkAllFilesFound() {
+    if (foundFiles.size === students.length) {
+        document.getElementById('popup').classList.add('show');
+        playYesSound();
+
+        // Set a timeout to reset the checklist after 5 seconds
+        setTimeout(() => {
+            resetChecklist();
+        }, 2000);
+    } else {
+        document.getElementById('popup').classList.remove('show');
+    }
+}
+
+
+        function handleFiles(files) {
+            const fileCount = files.length; // Count the number of files
+            let hasMatch = false;
+
+            Array.from(files).forEach(file => {
+                const filename = file.name.toLowerCase();
+                students.forEach(student => {
+                    if (filename.includes(student.toLowerCase())) {
+                        const studentElement = document.getElementById(`student-${student.toLowerCase()}`);
+                        if (!studentElement.classList.contains('found')) {
+                            studentElement.classList.add('found');
+                            foundFiles.add(student.toLowerCase());
+                            hasMatch = true;
+                        }
+                    }
+                });
+            });
+
+            if (fileCount > 1) {
+                playMultiChime();
+            } else if (hasMatch) {
+                playChime();
+            }
+
+            checkAllFilesFound();
+        }
+
+        // Drag and drop handlers
+        document.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            document.getElementById('dropzone').classList.add('active');
+        });
+
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        document.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            if (e.relatedTarget === null) {
+                document.getElementById('dropzone').classList.remove('active');
+            }
+        });
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            document.getElementById('dropzone').classList.remove('active');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        function playChime() {
+            const chimeAudio = new Audio('audio/chime.mp3');
+            chimeAudio.volume = 0.1;
+            chimeAudio.play();
+        }
+
+        function playMultiChime() {
+            const multiChimeAudio = new Audio('audio/multichime.mp3');
+            multiChimeAudio.volume = 0.1;
+            multiChimeAudio.play();
+        }
+
+        function resetChecklist() {
+            foundFiles.clear();
+            document.querySelectorAll('.student').forEach(student => {
+                student.classList.remove('found');
+            });
+            checkAllFilesFound();
+            playResetSound();
+        }
+
+        function playResetSound() {
+            const resetAudio = new Audio('audio/reset.mp3');
+            resetAudio.volume = 0.2;
+            resetAudio.play();
+        }
+
+        function playYesSound() {
+            const yesAudio = new Audio('audio/yes.mp3');
+            yesAudio.volume = 0.5;
+            yesAudio.play();
+        }
+
+       // Add event listener for the "Edit List" button
+document.getElementById('editListButton').addEventListener('click', () => {
+    const studentListForEditing = document.getElementById('studentListForEditing');
+    studentListForEditing.innerHTML = ''; // Clear existing items
+
+    students.forEach(student => {
+        const li = document.createElement('li');
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'x';
+        deleteButton.style.color = 'red';
+        deleteButton.style.marginRight = '10px';
+        deleteButton.style.marginLeft = '-40px';
+        deleteButton.addEventListener('click', () => {
+            students = students.filter(s => s !== student);
+            updateStudentList();
+            li.remove(); // Remove the item from the dialog
+        });
+        li.appendChild(deleteButton);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = student;
+        li.appendChild(nameSpan);
+
+        studentListForEditing.appendChild(li);
+    });
+
+    document.getElementById('editListDialog').classList.remove('hidden');
+});
+
+// Add event listener for the "Save" button in the dialog
+document.getElementById('saveEditButton').addEventListener('click', () => {
+    document.getElementById('editListDialog').classList.add('hidden');
+});
+
+// Function to update the student list on the page after editing
+function updateStudentList() {
+    // Reinitialize the checklist with updated students
+    initializeChecklist();
+}
+
+
+        document.getElementById('resetButton').addEventListener('click', resetChecklist);
+
+        document.getElementById('resetButton').addEventListener('mouseover', () => {
+            document.getElementById('resetButton').style.opacity = 0.8;
+        });
+
+        document.getElementById('resetButton').addEventListener('mouseout', () => {
+            document.getElementById('resetButton').style.opacity = 0.3;
+        });
+
+        document.getElementById('editListButton').addEventListener('mouseover', () => {
+            document.getElementById('editListButton').style.opacity = 0.8;
+        });
+
+        document.getElementById('editListButton').addEventListener('mouseout', () => {
+            document.getElementById('editListButton').style.opacity = 0.3;
+        });
+
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === '/') {
+            event.preventDefault(); 
+            searchBar.focus();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+    const searchBar = document.getElementById('search-bar');
+    
+    // Check if the search bar is not active and the correct combination of keys is pressed
+    if (!searchBar.isEqualNode(document.activeElement)) {
+        if ((event.key === 'r' || event.key === 'R') && 
+            (event.metaKey || event.ctrlKey)) { // MetaKey for Mac, CtrlKey for Windows
+                event.preventDefault();
+                playResetSound()
+            resetChecklist();
+        }
+    }
+});
+
+        initializeChecklist();
+    </script>
+</body>
+</html>

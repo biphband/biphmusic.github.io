@@ -11,13 +11,61 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #1c2439;
+            background-color: rgb(45, 70, 119);
             color: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
             user-select: none;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1); 
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
         }
 
         .container {
@@ -150,6 +198,25 @@
             align-items: center;
         }
 
+        #submitPassword {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+        }
+
+        #submitPassword:hover {
+            background-color: #45a049;
+        }
+
+        #submitPassword:active {
+            background-color: #3d8b40;
+        }
+
         .modal-content {
             background-color: white;
             padding: 20px;
@@ -160,6 +227,10 @@
     </style>
 </head>
 <body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
     <div class="container">
         <h1>Daily Sight Singing Practice</h1>
         <h2 id="dateSubtitle"></h2>
@@ -223,13 +294,10 @@
             const differenceInTime = today.getTime() - startDate.getTime();
             let differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
             
-            // Calculate number of complete weeks
             const completeWeeks = Math.floor(differenceInDays / 7);
-            // Subtract 2 days for each complete week (to account for weekends)
             differenceInDays -= (completeWeeks * 2);
             
-            // Check if current day is weekend
-            const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
+            const currentDay = today.getDay();
             if (currentDay === 0) differenceInDays -= 2;
             if (currentDay === 6) differenceInDays -= 1;
             
@@ -241,20 +309,46 @@
             const dateSubtitle = document.getElementById('dateSubtitle');
             const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
             const todayFormatted = today.toLocaleDateString('en-US', options);
-            dateSubtitle.textContent = todayFormatted;  // Removed exercise number
-            // Add periodic check for time and name
+            dateSubtitle.textContent = todayFormatted;
+
             setInterval(checkNameAndTime, 1000);
+
+    // Update the escape key handler to also clear the name input
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            const modal = document.getElementById('passwordModal');
+            modal.style.display = 'none';
+            document.getElementById('passwordInput').value = ''; // Clear password field
+            document.getElementById('nameInput').value = ''; // Clear name field
+        }
+    });
+
+    // Update the window click handler to also clear the name input
+    window.onclick = (event) => {
+        if (event.target === document.getElementById('passwordModal')) {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('passwordInput').value = ''; // Clear password field
+            document.getElementById('nameInput').value = ''; // Clear name field
+        }
+    };
         });
 
         function checkNameAndTime() {
-            const name = nameInput.value.trim();
-            if (name === "Mr. Tubbs") {
-                document.getElementById('passwordModal').style.display = 'flex';
-            } else if (allowedNames.includes(name) && checkTime()) {
-                document.getElementById('exerciseImage').classList.add('revealed');
-                document.getElementById('recordButton').disabled = false;
-            }
+        const name = nameInput.value.trim();
+        const nameLower = name.toLowerCase();
+        
+        // Check if the entered name matches any allowed name (case-insensitive)
+        const isAllowed = allowedNames.some(allowedName => 
+            allowedName.toLowerCase() === nameLower
+        );
+
+        if (nameLower === "mr. tubbs" || nameLower === "mr tubbs") {
+            showPasswordModal();
+        } else if (isAllowed && checkTime()) {
+            document.getElementById('exerciseImage').classList.add('revealed');
+            document.getElementById('recordButton').disabled = false;
         }
+    }
 
         function checkTime() {
             const now = new Date();
@@ -263,17 +357,11 @@
             return (hour === 10 && minutes >= 45 && minutes < 48);
         }
 
-        const nameInput = document.getElementById('nameInput');
-        nameInput.addEventListener('input', () => {
-            const name = nameInput.value.trim();
-            if (name === "Mr. Tubbs") {
-                document.getElementById('passwordModal').style.display = 'flex';
-            } else if (allowedNames.includes(name) && checkTime()) {
-                document.getElementById('exerciseImage').classList.add('revealed');
-                document.getElementById('recordButton').disabled = false;
-                document.getElementById('recordingNotice').style.display = 'block';
-            }
-        });
+        function showPasswordModal() {
+        document.getElementById('passwordModal').style.display = 'flex';
+        document.getElementById('passwordInput').focus();
+        }
+
 
         document.getElementById('submitPassword').onclick = () => {
             const password = document.getElementById('passwordInput').value;
@@ -282,6 +370,7 @@
                 window.open(exerciseImageSrc, '_blank');
                 document.getElementById('recordButton').disabled = false;
                 document.getElementById('passwordModal').style.display = 'none';
+                document.getElementById('passwordInput').value = ''; // Clear password field
             } else {
                 alert("Incorrect password.");
             }

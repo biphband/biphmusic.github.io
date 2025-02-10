@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Sight Singing Practice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1c2439;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        .container {
+            margin-top: 150px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .reminders {
+            width: 300px;
+            border-radius: 10px;
+            border: solid #6ec5d9a5;
+            background-color: rgba(49, 129, 125, 0.543);
+            padding: 0 5% 10px;
+            margin-left: -10px;
+            text-align: center;
+        }
+
+        h1 { margin: -70px 0 20px; }
+        h2 { font-size: large; margin-bottom: 20px; }
+        h3 {
+            font-size: medium;
+            margin-bottom: 20px;
+            font-weight: 100;
+            text-align: center;
+        }
+
+        .time-restriction {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        .browser-link {
+            color: #80bbde;
+            text-decoration: none;
+            font-size: 18px;
+            margin-top: 30px;
+            margin-bottom: 50px;
+            padding: 10px;
+            border: 1.5px solid #65a6cb;
+            border-radius: 5px;
+            background-color: #2c3b4300;
+            display: inline-block;
+        }
+
+        .browser-link:hover {
+            background-color: #4c8baf;
+            color: white;
+        }
+
+        #qrCode {
+            width: 200px;
+            height: 200px;
+            margin-top: 10px;
+            margin-bottom: 25px;
+            background-color: white;
+        }
+
+        canvas {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Sight Singing Practice</h1>
+        <h2 id="dateSubtitle"></h2>
+        <div id="timeRestriction" class="time-restriction"></div>
+        <button onclick="openInNewTab()" class="browser-link">Open in browser to view</button>
+    </div>
+
+    <div class="reminders">
+        <h2><br>Or scan here to open on mobile</h2>
+        <img id="qrCode" src="qrcode.png" alt="QR Code" style="width: 200px; height: 200px;">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateSubtitle = document.getElementById('dateSubtitle');
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            const today = new Date();
+            const todayFormatted = today.toLocaleDateString('en-US', options);
+            dateSubtitle.textContent = todayFormatted;
+
+            // Generate QR Code
+            const canvas = document.getElementById('qrCode');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 200;
+            canvas.height = 200;
+            
+            // This is a placeholder for actual QR code generation
+            // You would need to add a QR code library to generate a real QR code
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, 200, 200);
+            ctx.fillStyle = 'black';
+            ctx.fillText('QR Code Placeholder', 50, 100);
+        });
+
+        function openInNewTab() {
+            window.open('https://biphmusic.github.io/dailysightsinging/', '_blank');
+        }
+
+        function updateCountdown() {
+            const now = new Date();
+            const targetTime = new Date(now);
+            targetTime.setHours(10, 45, 0);
+            
+            const endTime = new Date(now);
+            endTime.setHours(10, 48, 0);
+            
+            const peerReviewEnd = new Date(now);
+            peerReviewEnd.setHours(10, 50, 0);
+
+            const nextDay = new Date(now);
+            nextDay.setDate(nextDay.getDate() + 1);
+            nextDay.setHours(10, 45, 0);
+
+            const timeRestriction = document.getElementById('timeRestriction');
+            
+            if (now >= targetTime && now < endTime) {
+                const timeLeft = endTime - now;
+                const minutes = Math.floor(timeLeft / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                timeRestriction.textContent = `${minutes}:${seconds.toString().padStart(2, '0')} remaining`;
+            } else if (now < targetTime) {
+                const timeLeft = targetTime - now;
+                const hours = Math.floor(timeLeft / 3600000);
+                const minutes = Math.floor((timeLeft % 3600000) / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                timeRestriction.textContent = `Today's sight singing example will go live in ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else if (now < peerReviewEnd) {
+                timeRestriction.textContent = "Bring your recording in for peer review!";
+            } else {
+                const timeLeft = nextDay - now;
+                const hours = Math.floor(timeLeft / 3600000);
+                const minutes = Math.floor((timeLeft % 3600000) / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                timeRestriction.textContent = `Tomorrow's sight singing example will go live in ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    </script>
+</body>
+</html>
