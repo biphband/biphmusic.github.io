@@ -274,22 +274,28 @@
             opacity: 0.4;
         }
 
-        .submit-button {
-            align-self: center;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            color: white;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-top: 10px; /* Added margin to create space above the button */
-        }
+        .quiz-actions {
+    display: flex;
+    gap: 15px; /* Add spacing between buttons */
+    margin-top: 20px; /* Add space above the buttons */
+}
 
-        .submit-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
+.action-button {
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-transform: uppercase; /* Optional: Make text uppercase for better visibility */
+    font-weight: bold; /* Optional: Add bold font for emphasis */
+}
+
+.action-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
 
         .hidden {
             display: none;
@@ -364,7 +370,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Duplicate Highlighting */
         .word-bank button.duplicate {
             background: rgba(255, 255, 0, 0.236);
             border: 2px dotted rgb(237, 255, 77);
@@ -414,6 +419,7 @@
     height: auto;
     z-index: 10; 
 }
+
     </style>
 </head>
 <body>
@@ -736,7 +742,7 @@
                     files: [new File([blob], fileName, { type: 'application/json' })],
                 }).catch((error) => {
                     console.error('Sharing failed:', error);
-                    alert('Download your results instead?');
+                    alert('Sharing is not supported on this device. Downloading instead.');
                     triggerDownload(url, fileName);
                 });
             } else {
@@ -745,11 +751,14 @@
             }
             break;
         case 'email':
-            const mailtoLink = `mailto:?subject=${encodeURIComponent(fileName)}&body=${encodeURIComponent(`Here are the quiz results:\n\n${jsonString}`)}`;
+            const mailtoLink = `mailto:garrison.tubbs-biph@basischina.com?subject=${encodeURIComponent(fileName)}&body=${encodeURIComponent(`Here are the quiz results:\n\nEncrypted Data:\n${encodedData}`)}`;
             window.location.href = mailtoLink;
             break;
         case 'open':
-            window.open(url, '_blank');
+            const decodedDataForPreview = atob(encodedData); // Decode Base64 for preview
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(`<pre>${JSON.stringify(JSON.parse(decodedDataForPreview), null, 2)}</pre>`);
+            previewWindow.document.close();
             break;
     }
 
