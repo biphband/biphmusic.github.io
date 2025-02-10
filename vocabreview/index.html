@@ -694,55 +694,56 @@
         }
 
         function finishQuiz() {
-        const resultData = {
-            student: capitalizeFirstLetter(currentStudent),
-            date: new Date().toISOString().split('T')[0],
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
-            exercise: "Vocab Review",
-            answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
-            questionSet: questionBank[currentStudent],
-            termsToReview: []
-        };
+    const resultData = {
+        student: capitalizeFirstLetter(currentStudent),
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+        exercise: "Vocab Review",
+        answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
+        questionSet: questionBank[currentStudent],
+        termsToReview: []
+    };
 
-        const correctAnswers = questionBank[currentStudent].answers;
+    const correctAnswers = questionBank[currentStudent].answers;
 
-        const allTerms = [...correctAnswers];
-        const correctTerms = answers
-            .map((answer, index) => answer.toLowerCase() === correctAnswers[index].toLowerCase() ? correctAnswers[index] : null)
-            .filter(term => term);
-        const termsToReview = allTerms.filter(term => !correctTerms.includes(term));
+    const allTerms = [...correctAnswers];
+    const correctTerms = answers
+        .map((answer, index) => answer.toLowerCase() === correctAnswers[index].toLowerCase() ? correctAnswers[index] : null)
+        .filter(term => term);
+    const termsToReview = allTerms.filter(term => !correctTerms.includes(term));
 
-        resultData.termsToReview = termsToReview.map(term => ({
-            term,
-            definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
-        })).sort((a, b) => a.term.localeCompare(b.term));
+    resultData.termsToReview = termsToReview.map(term => ({
+        term,
+        definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
+    })).sort((a, b) => a.term.localeCompare(b.term));
 
-        const jsonString = JSON.stringify(resultData, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+    const jsonString = JSON.stringify(resultData, null, 2);
+    const encodedData = btoa(jsonString); // Encrypt the JSON data using Base64 encoding
+    const blob = new Blob([encodedData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
 
-        const today = new Date();
-        const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
 
-        // Prompt user to download or share the file
-        if (navigator.share) {
-            navigator.share({
-                title: fileName,
-                files: [new File([blob], fileName, { type: 'application/json' })],
-            }).catch((error) => {
-                console.error('Sharing failed:', error);
-                alert('Download your results?');
-                triggerDownload(url, fileName);
-            });
-        } else {
+    // Prompt user to download or share the file
+    if (navigator.share) {
+        navigator.share({
+            title: fileName,
+            files: [new File([blob], fileName, { type: 'application/json' })],
+        }).catch((error) => {
+            console.error('Sharing failed:', error);
+            alert('Download your results?');
             triggerDownload(url, fileName);
-        }
-
-        document.getElementById('quiz-section').classList.add('hidden');
-        document.getElementById('login-section').classList.remove('hidden');
-        document.getElementById('name-input').value = '';
+        });
+    } else {
+        triggerDownload(url, fileName);
     }
+
+    document.getElementById('quiz-section').classList.add('hidden');
+    document.getElementById('login-section').classList.remove('hidden');
+    document.getElementById('name-input').value = '';
+}
 
     function triggerDownload(url, fileName) {
         const a = document.createElement('a');
