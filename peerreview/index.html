@@ -228,14 +228,15 @@
         }
 
         .container {
-            display: flex;
-            flex-direction: column;
+            align-items: center;
             }
 
 table {
+    align-items: center;
     border-collapse: collapse;
     width: 80%;
     margin-bottom: 20px;
+    margin: 20px auto;
 }
 
 th, td {
@@ -348,18 +349,19 @@ th {
             </tbody>
         </table>
         <div class="total-points">
-            <p>0 total points awarded</p>
-            <p>0%</p>
+            <p id="total-points-display">0 total points awarded</p>
+            <p id="percentage-display">0%</p>
             <button id="export-button">Export Data</button>
         </div>
+</div>
     </div>
     <div class="logocontainer">        
         <img src="BASIS logo/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
     </div>
     <script>
 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-const totalPointsDisplay = document.querySelector('.total-points p:first-child');
-const percentageDisplay = document.querySelector('.total-points p:last-child');
+const totalPointsDisplay = document.getElementById('total-points-display');
+const percentageDisplay = document.getElementById('percentage-display');
 const approvedNames = [
             "ben", "howard", "terry", "alice",
             "vincent", "tiger", "chris", "lucy", "diego", "hailey", "eileen",
@@ -418,7 +420,7 @@ const approvedNames = [
             }
         }
 
-checkboxes.forEach(checkbox => {
+        checkboxes.forEach(checkbox => {
     checkbox.addEventListener('change', () => {
         if (checkbox.checked) {
             totalPoints++;
