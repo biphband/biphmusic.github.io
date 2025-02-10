@@ -694,54 +694,65 @@
         }
 
         function finishQuiz() {
-            const resultData = {
-                student: capitalizeFirstLetter(currentStudent),
-                date: new Date().toISOString().split('T')[0],
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
-                exercise: "Vocab Review",
-                answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
-                questionSet: questionBank[currentStudent],
-                termsToReview: []
-            };
+        const resultData = {
+            student: capitalizeFirstLetter(currentStudent),
+            date: new Date().toISOString().split('T')[0],
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+            exercise: "Vocab Review",
+            answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
+            questionSet: questionBank[currentStudent],
+            termsToReview: []
+        };
 
-            const correctAnswers = questionBank[currentStudent].answers;
+        const correctAnswers = questionBank[currentStudent].answers;
 
-            // Step 1: Collect all terms from the quiz
-            const allTerms = [...correctAnswers];
+        const allTerms = [...correctAnswers];
+        const correctTerms = answers
+            .map((answer, index) => answer.toLowerCase() === correctAnswers[index].toLowerCase() ? correctAnswers[index] : null)
+            .filter(term => term);
+        const termsToReview = allTerms.filter(term => !correctTerms.includes(term));
 
-            // Step 2: Identify terms the student answered correctly
-            const correctTerms = answers
-                .map((answer, index) => answer.toLowerCase() === correctAnswers[index].toLowerCase() ? correctAnswers[index] : null)
-                .filter(term => term); // Filter out null values
+        resultData.termsToReview = termsToReview.map(term => ({
+            term,
+            definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
+        })).sort((a, b) => a.term.localeCompare(b.term));
 
-            // Step 3: Subtract correctly answered terms from all terms
-            const termsToReview = allTerms.filter(term => !correctTerms.includes(term));
+        const jsonString = JSON.stringify(resultData, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
 
-            // Step 4: Map terms to their definitions and sort alphabetically
-            resultData.termsToReview = termsToReview.map(term => ({
-                term,
-                definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
-            })).sort((a, b) => a.term.localeCompare(b.term));
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
 
-            const jsonString = JSON.stringify(resultData, null, 2);
-            const encodedData = btoa(jsonString);
-
-            const blob = new Blob([encodedData], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const today = new Date();
-            const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            a.download = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            document.getElementById('quiz-section').classList.add('hidden');
-            document.getElementById('login-section').classList.remove('hidden');
-            document.getElementById('name-input').value = '';
+        // Prompt user to download or share the file
+        if (navigator.share) {
+            navigator.share({
+                title: fileName,
+                files: [new File([blob], fileName, { type: 'application/json' })],
+            }).catch((error) => {
+                console.error('Sharing failed:', error);
+                alert('Download your results?');
+                triggerDownload(url, fileName);
+            });
+        } else {
+            triggerDownload(url, fileName);
         }
+
+        document.getElementById('quiz-section').classList.add('hidden');
+        document.getElementById('login-section').classList.remove('hidden');
+        document.getElementById('name-input').value = '';
+    }
+
+    function triggerDownload(url, fileName) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 
         function checkAnswers() {
             const fileInput = document.getElementById('json-input');
