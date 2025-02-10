@@ -467,7 +467,12 @@
                     <div class="word-bank" id="word-bank"></div>
                 </div>
             </div>
-            <button class="submit-button" onclick="submitQuiz()">Submit Quiz</button>
+            <div class="quiz-actions">
+                <button class="action-button" onclick="handleQuizAction('download')">Download</button>
+                <button class="action-button" onclick="handleQuizAction('share')">Share</button>
+                <button class="action-button" onclick="handleQuizAction('email')">Email</button>
+                <button class="action-button" onclick="handleQuizAction('open')">Open in New Tab</button>
+            </div>
         </div>
 
         <div id="teacher-section" class="teacher-section hidden">
@@ -476,6 +481,8 @@
             <div id="results-container"></div>
         </div>
     </div>
+
+    
 
     <div class="logocontainer">        
         <img src="../icons/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
@@ -690,38 +697,68 @@
             });
         }
 
-        function submitQuiz() {
-            const hasBlankAnswers = [...document.querySelectorAll('.answer-input')].some(input => input.value.trim() === '');
-            const duplicateAnswers = Object.keys(usedTerms).filter(term => usedTerms[term].length > 1);
+        function handleQuizAction(action) {
+    const hasBlankAnswers = [...document.querySelectorAll('.answer-input')].some(input => input.value.trim() === '');
+    const duplicateAnswers = Object.keys(usedTerms).filter(term => usedTerms[term].length > 1);
 
-            if (hasBlankAnswers && duplicateAnswers.length > 0) {
-                if (!confirm('There are blank answers and duplicate responses.\nWould you still like to submit?')) {
-                    return; // User chose not to submit, exit the function
-                }
-            } else if (hasBlankAnswers) {
-                if (!confirm('There are some questions left blank.\nWould you still like to submit?')) {
-                    return; // User chose not to submit, exit the function
-                }
-            } else if (duplicateAnswers.length > 0) {
-                if (!confirm('There are duplicate responses \n(each word should only be used once).\n\nWould you still like to submit?')) {
-                    return; // User chose not to submit, exit the function
-                }
-            }
-
-            finishQuiz();
+    if (hasBlankAnswers && duplicateAnswers.length > 0) {
+        if (!confirm('There are blank answers and duplicate responses.\nWould you still like to proceed?')) {
+            return;
         }
+    } else if (hasBlankAnswers) {
+        if (!confirm('There are some questions left blank.\nWould you still like to proceed?')) {
+            return;
+        }
+    } else if (duplicateAnswers.length > 0) {
+        if (!confirm('There are duplicate responses \n(each word should only be used once).\n\nWould you still like to proceed?')) {
+            return;
+        }
+    }
 
-        function finishQuiz() {
-    const resultData = {
-        student: capitalizeFirstLetter(currentStudent),
-        date: new Date().toISOString().split('T')[0],
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
-        exercise: "Vocab Review",
-        answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
-        questionSet: questionBank[currentStudent],
-        termsToReview: []
-    };
+    const resultData = prepareResultData();
+    const jsonString = JSON.stringify(resultData, null, 2);
+    const encodedData = btoa(jsonString); // Base64 encode the JSON data
+    const blob = new Blob([encodedData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
 
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
+
+    switch (action) {
+        case 'download':
+            triggerDownload(url, fileName);
+            break;
+        case 'share':
+            if (navigator.share) {
+                navigator.share({
+                    title: fileName,
+                    files: [new File([blob], fileName, { type: 'application/json' })],
+                }).catch((error) => {
+                    console.error('Sharing failed:', error);
+                    alert('Download your results instead?');
+                    triggerDownload(url, fileName);
+                });
+            } else {
+                alert('Sharing is not supported on this device. Downloading instead.');
+                triggerDownload(url, fileName);
+            }
+            break;
+        case 'email':
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(fileName)}&body=${encodeURIComponent(`Here are the quiz results:\n\n${jsonString}`)}`;
+            window.location.href = mailtoLink;
+            break;
+        case 'open':
+            window.open(url, '_blank');
+            break;
+    }
+
+    document.getElementById('quiz-section').classList.add('hidden');
+    document.getElementById('login-section').classList.remove('hidden');
+    document.getElementById('name-input').value = '';
+}
+
+function prepareResultData() {
     const correctAnswers = questionBank[currentStudent].answers;
 
     const allTerms = [...correctAnswers];
@@ -730,48 +767,29 @@
         .filter(term => term);
     const termsToReview = allTerms.filter(term => !correctTerms.includes(term));
 
-    resultData.termsToReview = termsToReview.map(term => ({
-        term,
-        definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
-    })).sort((a, b) => a.term.localeCompare(b.term));
-
-    const jsonString = JSON.stringify(resultData, null, 2);
-    const encodedData = btoa(jsonString); // Encrypt the JSON data using Base64 encoding
-    const blob = new Blob([encodedData], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
-
-    // Prompt user to download or share the file
-    if (navigator.share) {
-        navigator.share({
-            title: fileName,
-            files: [new File([blob], fileName, { type: 'application/json' })],
-        }).catch((error) => {
-            console.error('Sharing failed:', error);
-            alert('Download your results?');
-            triggerDownload(url, fileName);
-        });
-    } else {
-        triggerDownload(url, fileName);
-    }
-
-    document.getElementById('quiz-section').classList.add('hidden');
-    document.getElementById('login-section').classList.remove('hidden');
-    document.getElementById('name-input').value = '';
+    return {
+        student: capitalizeFirstLetter(currentStudent),
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+        exercise: "Vocab Review",
+        answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
+        questionSet: questionBank[currentStudent],
+        termsToReview: termsToReview.map(term => ({
+            term,
+            definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
+        })).sort((a, b) => a.term.localeCompare(b.term))
+    };
 }
 
-    function triggerDownload(url, fileName) {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
+function triggerDownload(url, fileName) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
 
         function checkAnswers() {
             const fileInput = document.getElementById('json-input');
