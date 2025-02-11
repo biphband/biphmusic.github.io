@@ -503,13 +503,21 @@
                     <button class="action-button export" id="export-button" onclick="handleExport()">Export</button>
                 </div>
             </div>
+            <div class="quiz-actions">
                 <div class="button-row">
-                    <button class="action-button quick-action" onclick="handleQuickAction('download')">Quick Download</button>
-                    <button class="action-button quick-action" onclick="handleQuickAction('share')">Quick Share</button>
-                    <button class="action-button quick-action" onclick="handleQuickAction('email')">Quick Email</button>
-                    <button class="action-button quick-action" onclick="handleQuickAction('open')">Quick Open</button>
-                    <button class="action-button quick-action" id="quick-export-button" onclick="handleQuickExport()">Quick Export</button>
+                    <button class="action-button" onclick="legacyBlobExport()">Blob Export</button>
+                    <button class="action-button" onclick="msSaveBlobExport()">Edge Export</button>
+                    <button class="action-button" onclick="dataURLExport()">Data URL Export</button>
+                    <button class="action-button" onclick="textWindowExport()">Text Window Export</button>
+                    <button class="action-button" onclick="base64HashExport()">URL Hash Export</button>
                 </div>
+            </div>
+            <div class="button-row">
+                <button class="action-button quick-action" onclick="handleQuickAction('download')">Quick Download</button>
+                <button class="action-button quick-action" onclick="handleQuickAction('share')">Quick Share</button>
+                <button class="action-button quick-action" onclick="handleQuickAction('email')">Quick Email</button>
+                <button class="action-button quick-action" onclick="handleQuickAction('open')">Quick Open</button>
+                <button class="action-button quick-action" id="quick-export-button" onclick="handleQuickExport()">Quick Export</button>
             </div>
         </div>
 
@@ -908,7 +916,80 @@
 
 
 
+        function legacyBlobExport() {
+    const resultData = prepareResultData();
+    const jsonString = JSON.stringify(resultData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = generateFileName();
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 100);
+}
 
+function msSaveBlobExport() {
+    if (window.navigator.msSaveBlob) { // For IE/Edge
+        const blob = new Blob([JSON.stringify(prepareResultData())], { type: 'application/json' });
+        window.navigator.msSaveBlob(blob, generateFileName());
+    } else {
+        alert('This method only works in Microsoft Edge');
+    }
+}
+
+function dataURLExport() {
+    const resultData = prepareResultData();
+    const jsonString = JSON.stringify(resultData, null, 2);
+    const reader = new FileReader();
+    const blob = new Blob([jsonString], {type: 'application/json'});
+    
+    reader.onload = function() {
+        const dataURL = reader.result;
+        window.open(dataURL, '_blank');
+    };
+    reader.readAsDataURL(blob);
+}
+
+function textWindowExport() {
+    const resultData = prepareResultData();
+    const jsonString = JSON.stringify(resultData, null, 2);
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(`<pre>${jsonString}</pre>`);
+    newWindow.document.close();
+}
+
+function base64HashExport() {
+    const resultData = prepareResultData();
+    const jsonString = JSON.stringify(resultData);
+    const base64 = btoa(unescape(encodeURIComponent(jsonString)));
+    
+    const tempWindow = window.open('', '_blank');
+    tempWindow.location.hash = base64;
+    tempWindow.document.write(`
+        <script>
+            const data = decodeURIComponent(escape(atob(window.location.hash.slice(1))));
+            const blob = new Blob([data], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '${generateFileName()}';
+            a.click();
+            setTimeout(() => window.close(), 1000);
+        <\/script>
+    `);
+}
+
+function generateFileName() {
+    const resultData = prepareResultData();
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
+}
 
 
 
