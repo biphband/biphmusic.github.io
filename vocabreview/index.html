@@ -419,7 +419,28 @@
     height: auto;
     z-index: 10; 
 }
+.action-button.export {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
+        .button-row {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .quick-action {
+            margin-top: 10px;
+            background-color: #fff87b61;
+            border: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
@@ -474,10 +495,21 @@
                 </div>
             </div>
             <div class="quiz-actions">
-                <button class="action-button" onclick="handleQuizAction('download')">Download</button>
-                <button class="action-button" onclick="handleQuizAction('share')">Share</button>
-                <button class="action-button" onclick="handleQuizAction('email')">Email</button>
-                <button class="action-button" onclick="handleQuizAction('open')">Open in New Tab</button>
+                <div class="button-row">
+                    <button class="action-button" onclick="handleQuizAction('download')">Download</button>
+                    <button class="action-button" onclick="handleQuizAction('share')">Share</button>
+                    <button class="action-button" onclick="handleQuizAction('email')">Email</button>
+                    <button class="action-button" onclick="handleQuizAction('open')">Open in New Tab</button>
+                    <button class="action-button export" id="export-button" onclick="handleExport()">Export</button>
+                </div>
+            </div>
+                <div class="button-row">
+                    <button class="action-button quick-action" onclick="handleQuickAction('download')">Quick Download</button>
+                    <button class="action-button quick-action" onclick="handleQuickAction('share')">Quick Share</button>
+                    <button class="action-button quick-action" onclick="handleQuickAction('email')">Quick Email</button>
+                    <button class="action-button quick-action" onclick="handleQuickAction('open')">Quick Open</button>
+                    <button class="action-button quick-action" id="quick-export-button" onclick="handleQuickExport()">Quick Export</button>
+                </div>
             </div>
         </div>
 
@@ -703,102 +735,285 @@
             });
         }
 
-        function handleQuizAction(action) {
-    const hasBlankAnswers = [...document.querySelectorAll('.answer-input')].some(input => input.value.trim() === '');
-    const duplicateAnswers = Object.keys(usedTerms).filter(term => usedTerms[term].length > 1);
+        async function handleExport() {
+            const hasBlankAnswers = [...document.querySelectorAll('.answer-input')].some(input => input.value.trim() === '');
+            const duplicateAnswers = Object.keys(usedTerms).filter(term => usedTerms[term].length > 1);
 
-    if (hasBlankAnswers && duplicateAnswers.length > 0) {
-        if (!confirm('There are blank answers and duplicate responses.\nWould you still like to proceed?')) {
-            return;
-        }
-    } else if (hasBlankAnswers) {
-        if (!confirm('There are some questions left blank.\nWould you still like to proceed?')) {
-            return;
-        }
-    } else if (duplicateAnswers.length > 0) {
-        if (!confirm('There are duplicate responses \n(each word should only be used once).\n\nWould you still like to proceed?')) {
-            return;
-        }
-    }
-
-    const resultData = prepareResultData();
-    const jsonString = JSON.stringify(resultData, null, 2);
-    const encodedData = btoa(jsonString); // Base64 encode the JSON data
-    const blob = new Blob([encodedData], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
-
-    switch (action) {
-        case 'download':
-            triggerDownload(url, fileName);
-            break;
-        case 'share':
-            if (navigator.share) {
-                navigator.share({
-                    title: fileName,
-                    files: [new File([blob], fileName, { type: 'application/json' })],
-                }).catch((error) => {
-                    console.error('Sharing failed:', error);
-                    alert('Sharing is not supported on this device. Downloading instead.');
-                    triggerDownload(url, fileName);
-                });
-            } else {
-                alert('Sharing is not supported on this device. Downloading instead.');
-                triggerDownload(url, fileName);
+            if (hasBlankAnswers && duplicateAnswers.length > 0) {
+                if (!confirm('There are blank answers and duplicate responses.\nWould you still like to proceed?')) {
+                    return;
+                }
+            } else if (hasBlankAnswers) {
+                if (!confirm('There are some questions left blank.\nWould you still like to proceed?')) {
+                    return;
+                }
+            } else if (duplicateAnswers.length > 0) {
+                if (!confirm('There are duplicate responses \n(each word should only be used once).\n\nWould you still like to proceed?')) {
+                    return;
+                }
             }
-            break;
-        case 'email':
-            const mailtoLink = `mailto:garrison.tubbs-biph@basischina.com?subject=${encodeURIComponent(fileName)}&body=${encodeURIComponent(`Here are the quiz results:\n\nEncrypted Data:\n${encodedData}`)}`;
-            window.location.href = mailtoLink;
-            break;
-        case 'open':
-            const decodedDataForPreview = atob(encodedData); // Decode Base64 for preview
-            const previewWindow = window.open('', '_blank');
-            previewWindow.document.write(`<pre>${JSON.stringify(JSON.parse(decodedDataForPreview), null, 2)}</pre>`);
-            previewWindow.document.close();
-            break;
-    }
 
-    document.getElementById('quiz-section').classList.add('hidden');
-    document.getElementById('login-section').classList.remove('hidden');
-    document.getElementById('name-input').value = '';
-}
+            const exportButton = document.getElementById('export-button');
+            exportButton.disabled = true;
+            
+            try {
+                const resultData = prepareResultData();
+                const jsonString = JSON.stringify(resultData, null, 2);
+                const encodedData = btoa(jsonString);
+                const blob = new Blob([encodedData], { type: 'application/json' });
 
-function prepareResultData() {
-    const correctAnswers = questionBank[currentStudent].answers;
+                const today = new Date();
+                const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
 
-    const allTerms = [...correctAnswers];
-    const correctTerms = answers
-        .map((answer, index) => answer.toLowerCase() === correctAnswers[index].toLowerCase() ? correctAnswers[index] : null)
-        .filter(term => term);
-    const termsToReview = allTerms.filter(term => !correctTerms.includes(term));
+                // Try using the File System Access API first
+                if ('showSaveFilePicker' in window) {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: fileName,
+                            types: [{
+                                description: 'JSON File',
+                                accept: { 'application/json': ['.json'] },
+                            }],
+                        });
+                        
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                        return;
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            console.error('File System API failed, falling back to default download');
+                        }
+                    }
+                }
 
-    return {
-        student: capitalizeFirstLetter(currentStudent),
-        date: new Date().toISOString().split('T')[0],
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
-        exercise: "Vocab Review",
-        answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
-        questionSet: questionBank[currentStudent],
-        termsToReview: termsToReview.map(term => ({
-            term,
-            definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
-        })).sort((a, b) => a.term.localeCompare(b.term))
-    };
-}
+                // Fallback for browsers without File System Access API
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
 
-function triggerDownload(url, fileName) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export data. Please try again.');
+            } finally {
+                exportButton.disabled = false;
+            }
+        }
+
+
+
+        function handleQuizAction(action) {
+            const hasBlankAnswers = [...document.querySelectorAll('.answer-input')].some(input => input.value.trim() === '');
+            const duplicateAnswers = Object.keys(usedTerms).filter(term => usedTerms[term].length > 1);
+
+            if (hasBlankAnswers && duplicateAnswers.length > 0) {
+                if (!confirm('There are blank answers and duplicate responses.\nWould you still like to proceed?')) {
+                    return;
+                }
+            } else if (hasBlankAnswers) {
+                if (!confirm('There are some questions left blank.\nWould you still like to proceed?')) {
+                    return;
+                }
+            } else if (duplicateAnswers.length > 0) {
+                if (!confirm('There are duplicate responses \n(each word should only be used once).\n\nWould you still like to proceed?')) {
+                    return;
+                }
+            }
+
+            const resultData = prepareResultData();
+            const jsonString = JSON.stringify(resultData, null, 2);
+            const encodedData = btoa(jsonString);
+            const blob = new Blob([encodedData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
+
+            switch (action) {
+                case 'download':
+                    triggerDownload(url, fileName);
+                    break;
+                case 'share':
+                    if (navigator.share) {
+                        navigator.share({
+                            title: fileName,
+                            files: [new File([blob], fileName, { type: 'application/json' })],
+                        }).catch((error) => {
+                            console.error('Sharing failed:', error);
+                            alert('Sharing is not supported on this device. Downloading instead.');
+                            triggerDownload(url, fileName);
+                        });
+                    } else {
+                        alert('Sharing is not supported on this device. Downloading instead.');
+                        triggerDownload(url, fileName);
+                    }
+                    break;
+                case 'email':
+                    const mailtoLink = `mailto:garrison.tubbs-biph@basischina.com?subject=${encodeURIComponent(fileName)}&body=${encodeURIComponent(`Here are the quiz results:\n\n${encodedData}`)}`;
+                    window.location.href = mailtoLink;
+                    break;
+                case 'open':
+                    const decodedDataForPreview = atob(encodedData);
+                    const previewWindow = window.open('', '_blank');
+                    previewWindow.document.write(`<pre>${JSON.stringify(JSON.parse(decodedDataForPreview), null, 2)}</pre>`);
+                    previewWindow.document.close();
+                    break;
+            }
+
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('name-input').value = '';
+        }
+
+        function prepareResultData() {
+            const correctAnswers = questionBank[currentStudent].answers;
+
+            const allTerms = [...correctAnswers];
+            const correctTerms = answers
+                .map((answer, index) => answer.toLowerCase() === correctAnswers[index].toLowerCase() ? correctAnswers[index] : null)
+                .filter(term => term);
+            const termsToReview = allTerms.filter(term => !correctTerms.includes(term));
+
+            return {
+                student: capitalizeFirstLetter(currentStudent),
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+                exercise: "Vocab Review",
+                answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
+                questionSet: questionBank[currentStudent],
+                termsToReview: termsToReview.map(term => ({
+                    term,
+                    definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
+                })).sort((a, b) => a.term.localeCompare(b.term))
+            };
+        }
+
+        function triggerDownload(url, fileName) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+
+
+
+
+
+
+
+
+        function handleQuickAction(action) {
+            const resultData = prepareResultData();
+            const jsonString = JSON.stringify(resultData, null, 2);
+            const encodedData = btoa(jsonString);
+            const blob = new Blob([encodedData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
+
+            switch (action) {
+                case 'download':
+                    triggerDownload(url, fileName);
+                    break;
+                case 'share':
+                    if (navigator.share) {
+                        navigator.share({
+                            title: fileName,
+                            files: [new File([blob], fileName, { type: 'application/json' })],
+                        }).catch(() => {
+                            triggerDownload(url, fileName);
+                        });
+                    } else {
+                        triggerDownload(url, fileName);
+                    }
+                    break;
+                case 'email':
+                    const mailtoLink = `mailto:garrison.tubbs-biph@basischina.com?subject=${encodeURIComponent(fileName)}&body=${encodeURIComponent(`Here are the quiz results:\n\nEncrypted Data:\n${encodedData}`)}`;
+                    window.location.href = mailtoLink;
+                    break;
+                case 'open':
+                    const decodedDataForPreview = atob(encodedData);
+                    const previewWindow = window.open('', '_blank');
+                    previewWindow.document.write(`<pre>${JSON.stringify(JSON.parse(decodedDataForPreview), null, 2)}</pre>`);
+                    previewWindow.document.close();
+                    break;
+            }
+
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('name-input').value = '';
+        }
+
+        // Add this new function for quick export
+        async function handleQuickExport() {
+            const exportButton = document.getElementById('quick-export-button');
+            exportButton.disabled = true;
+            
+            try {
+                const resultData = prepareResultData();
+                const jsonString = JSON.stringify(resultData, null, 2);
+                const encodedData = btoa(jsonString);
+                const blob = new Blob([encodedData], { type: 'application/json' });
+
+                const today = new Date();
+                const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
+
+                if ('showSaveFilePicker' in window) {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: fileName,
+                            types: [{
+                                description: 'JSON File',
+                                accept: { 'application/json': ['.json'] },
+                            }],
+                        });
+                        
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                        return;
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            const url = URL.createObjectURL(blob);
+                            triggerDownload(url, fileName);
+                        }
+                    }
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    triggerDownload(url, fileName);
+                }
+
+            } catch (error) {
+                console.error('Export failed:', error);
+            } finally {
+                exportButton.disabled = false;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
 
         function checkAnswers() {
             const fileInput = document.getElementById('json-input');
@@ -1055,45 +1270,46 @@ function triggerDownload(url, fileName) {
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
-        document.addEventListener('keydown', (event) => {
-            const activeElement = document.activeElement;
-            if (activeElement.classList.contains('answer-input')) {
-                const currentIndex = parseInt(activeElement.id.split('-')[1]);
-                if (event.key === 'Tab') {
-                    event.preventDefault(); // Prevent default tab behavior
-                    if (event.shiftKey) {
-                        // Shift + Tab functionality
-                        const previousInput = document.getElementById(`answer-${currentIndex - 1}`);
-                        if (previousInput) {
-                            previousInput.focus(); // Move focus to the previous input
-                        }
-                    } else {
-                        // Regular Tab functionality
-                        const nextInput = document.getElementById(`answer-${currentIndex + 1}`);
-                        if (nextInput) {
-                            nextInput.focus(); // Move focus to the next input
-                        }
-                    }
-                }
-            }
-        });
+        // Function to handle navigation between inputs
+function handleInputNavigation(event) {
+    const inputs = Array.from(document.querySelectorAll('.answer-input'));
+    const currentIndex = inputs.indexOf(document.activeElement);
 
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Tab' && document.activeElement.tagName !== 'INPUT') {
-                event.preventDefault();
-                document.getElementById('name-input').focus();
-            }
-        });
+    if (event.key === 'Tab' && !event.shiftKey || event.key === 'ArrowDown') {
+        // Move to next input
+        if (currentIndex < inputs.length - 1) {
+            event.preventDefault();
+            inputs[currentIndex + 1].focus();
+        }
+    } else if ((event.key === 'Tab' && event.shiftKey) || event.key === 'ArrowUp') {
+        // Move to previous input
+        if (currentIndex > 0) {
+            event.preventDefault();
+            inputs[currentIndex - 1].focus();
+        }
+    }
+}
 
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Tab') {
-                const firstBlankInput = document.querySelector('.answer-input:not([value])');
-                if (!document.activeElement.classList.contains('answer-input') && firstBlankInput) {
-                    event.preventDefault();
-                    firstBlankInput.focus();
-                }
-            }
-        });
+// Function to check name input
+function handleNameInput(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        checkName();
+    }
+}
+
+// Function to check password input
+function handlePasswordInput(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        checkPassword();
+    }
+}
+
+// Event listeners
+document.addEventListener('keydown', handleInputNavigation);
+document.getElementById('name-input').addEventListener('keydown', handleNameInput);
+document.getElementById('password-input').addEventListener('keydown', handlePasswordInput);
 
         document.getElementById('name-input').addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
