@@ -188,7 +188,7 @@ const vocabularyTerms = [
         {"Term": "Retardation", "Definition": "An NCT that holds over from a previous harmony and then resolves up"},
         {"Term": "Pedal Point or Tone", "Definition": "An NCT that holds underneath or above several different harmonies"},
         {"Term": "Syncope", "Definition": "A systematic rhythmic anticipation of the following harmony"},
-        {"Term": "Changing Tones", "Definition": "Also called “neighbor group” or “cambiata” two notes on either side of the following CT"},
+        {"Term": "Changing Tones", "Definition": "Also called 'neighbor group' or 'cambiata' two notes on either side of the following CT"},
         {"Term": "Accented (NCT)", "Definition": "A non chord tone that falls on the strong beat of a measure"},
         {"Term": "Authentic Cadence", "Definition": "A cadence from the dominant (V) to tonic (I or i)"},
         {"Term": "Perfect Authentic Cadence", "Definition": "An authentic cadence with both chords in root position, soprano ends on tonic"},
