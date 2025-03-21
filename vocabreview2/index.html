@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Review</title>
+    <link rel="icon" href="../icons/BGicon.png">
+    <style>
+        @font-face {
+            font-family: 'Zapfino';
+            src: url('../fonts/Zapfino.ttf') format('truetype');
+        }
+
+        body {
+            background-color: rgb(45, 70, 119);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+
+        .hamburger-menu {
+            position: absolute;
+            margin-left: 7px;
+            top: 20px;
+            left: 13px;
+            z-index: 1000;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s linear;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-items {
+            position: absolute;
+            top: 25px;
+            left: -250px;
+            background: linear-gradient(135deg, rgba(48, 67, 104, 0.8), rgba(20, 31, 53, 0.8));
+            width: 250px;
+            height: 90vh;
+            padding-top: 20px;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-items.show {
+            left: 0;
+            opacity: 1;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .menu-items.show a {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-items a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-title {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        h1.Title {
+            font-family: 'Arial', sans-serif;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h1.Subtitle {
+            font-family: 'Zapfino', sans-serif;
+            font-size: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            text-align: left;
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .login-section, .quiz-section {
+            width: 100%;
+        }
+
+        .login-section {
+    text-align: center;
+    margin-bottom: 20px; 
+}
+
+        .quiz-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .questions-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .question-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-box p {
+            margin: 0;
+            font-size: 1rem;
+            flex-grow: 1;
+        }
+
+        .question-box input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 5px;
+            color: white;
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .word-bank-container {
+            flex: 0.65;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 20px;
+            align-self: flex-start;
+            overflow: hidden;
+        }
+
+        .word-bank {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .word-bank button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: default;
+            transition: background-color 0.3s, color 0.3s, opacity 0.3s;
+            font-size: 0.9rem;
+            color: white;
+            text-align: left;
+            pointer-events: none;
+        }
+
+        .word-bank button.used {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+            opacity: 0.4;
+        }
+
+        .quiz-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .action-button {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .action-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .results-section {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        .results-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .results-table th,
+        .results-table td {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px;
+            text-align: left;
+        }
+
+        .results-table th {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .incorrect {
+            color: #dc2626;
+        }
+
+        .correct-mark {
+            color: #16a34a;
+            margin-left: 4px;
+        }
+
+        .terms-to-review {
+            margin-top: 20px;
+        }
+
+        .terms-to-review ul {
+            padding-left: 20px;
+        }
+
+        .copy-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .copy-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .word-bank button.duplicate {
+            background: rgba(255, 255, 0, 0.236);
+            border: 2px dotted rgb(237, 255, 77);
+            color: black;
+            position: relative;
+        }
+
+        .word-bank button.duplicate::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-size: 0.8rem;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .word-bank button.duplicate:hover::after {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .duplicate-input {
+            background-color: rgba(255, 255, 0, 0.2) !important;
+        }
+
+        .invalid-input {
+            outline: 2px solid rgba(255, 0, 0, 0.589);
+        }
+
+        .logocontainer {
+    min-height: 10vh;
+    padding-bottom: 50px;
+}
+
+.logo {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 25vh;
+    height: auto;
+    z-index: 10; 
+}
+
+        .action-button.export {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .quick-action {
+            margin-top: 10px;
+            background-color: #fff87b61;
+            border: 1px solid #ddd;
+        }
+
+        .hidden {
+    display: none;
+}
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
+    <div class="hamburger-menu">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="menu-items" id="menu-items">
+            <div class="menu-title">BIPH Music</div>
+            <a href="https://biphmusic.github.io/">Home</a>
+            <a href="https://biphmusic.github.io/dailysightsinging/">Daily Sight Singing</a>
+            <a href="https://biphmusic.github.io/wordwall/">Word Wall</a>
+            <a href="https://biphmusic.github.io/flashcards/">Flash Cards</a>
+            <a href="https://biphmusic.github.io/dice/">Dice Simulator</a>
+            <a href="https://biphmusic.github.io/chords/">Chord Quality</a>
+            <a href="https://biphmusic.github.io/progressions/">Chord Progressions</a>
+            <a href="https://biphmusic.github.io/piano/">Web Piano</a>
+            <a href="https://biphmusic.github.io/units/">AP Units</a>
+            <a href="mailto:garrison.tubbs-biph@basischina.com">Contact</a>
+            <div class="menu-footer">© Garrison Tubbs 2024</div>
+        </div>
+    </div>
+
+    <h1 class="Title">BIPH Music</h1>
+    <h1 class="Subtitle">Vocabulary Review</h1>
+
+    <div class="logincontainer">
+        <div id="login-section" class="login-section">
+            <h2>Enter your name to begin</h2>
+            <input type="text" id="name-input" placeholder="Your name" autofocus>
+            <button onclick="checkName()">Begin</button>
+            <div id="error-message" class="error"></div>
+        </div>
+
+        <div id="quiz-section" class="quiz-section hidden">
+            <div class="quiz-container">
+                <div class="questions-container" id="quiz-questions"></div>
+                <div class="word-bank-container">
+                    <div class="word-bank" id="word-bank"></div>
+                </div>
+            </div>
+            <div class="quiz-actions hidden">
+                <button class="action-button" onclick="submitQuiz()" tabindex="0">Submit</button>
+            </div>
+            <div id="results-section" class="results-section hidden"></div>
+        </div>
+    </div>
+    
+
+    <div class="logocontainer">        
+        <img src="../icons/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
+    </div>
+
+    <script src="vocab.js"></script>
+    <script>
+
+
+        const approvedNames = [
+            "ben chen", "howard ding", "terry he", "alice li", "vincent mu",
+            "tiger pan", "chris peng", "lucy sheng", "diego su", "hailey wang",
+            "eileen xu", "angelina yan", "serena zeng", "catherine zhang",
+            "andrew zhao", "jennifer zhou", "ben", "howard", "terry", "alice",
+            "vincent", "tiger", "chris", "lucy", "diego", "hailey", "eileen",
+            "angelina", "serena", "catherine", "andrew", "jennifer", "mr. tubbs"
+        ];
+
+        function unscrambleTerms(scrambledArray) {
+            function unshiftString(str, shift) {
+                return str.split('').map(char => {
+                    if (char.match(/[a-zA-Z]/)) {
+                        const code = char.charCodeAt(0);
+                        const base = char >= 'a' ? 97 : 65;
+                        return String.fromCharCode((code - base - shift + 26) % 26 + base);
+                    }
+                    return char;
+                }).join('');
+            }
+            return scrambledArray.map(item => {
+                const decodedTerm = atob(item.Term);
+                const decodedDef = atob(item.Definition);
+                return {
+                    Term: unshiftString(decodedTerm, 3),
+                    Definition: unshiftString(decodedDef, 3)
+                };
+            });
+        }
+        const vocabularyTerms = unscrambleTerms(scrambledVocabularyTerms);
+
+        let currentStudent = '';
+        let questionBank = {};
+        let answers = [];
+        let usedTerms = {};
+
+        function checkName() {
+    const nameInput = document.getElementById('name-input').value.toLowerCase();
+    const errorElement = document.getElementById('error-message');
+
+    if (approvedNames.includes(nameInput)) {
+        currentStudent = nameInput;
+        questionBank[currentStudent] = generateQuestionSet(nameInput);
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('quiz-section').classList.remove('hidden');
+        document.querySelector('.quiz-actions').classList.remove('hidden'); // Show Submit button
+        initializeQuiz();
+        document.getElementById('answer-0').focus();
+    } else {
+        errorElement.textContent = 'Name not found in approved list';
+    }
+}
+
+        function generateQuestionSet(student) {
+            const shuffledQuestions = [...vocabularyTerms].sort(() => Math.random() - 0.5).slice(0, 15);
+            const sortedTerms = [...shuffledQuestions.map(q => q.Term)].sort((a, b) => a.localeCompare(b));
+            return {
+                questions: shuffledQuestions,
+                terms: sortedTerms,
+                answers: shuffledQuestions.map(q => q.Term)
+            };
+        }
+
+        function initializeQuiz() {
+            const quizQuestionsDiv = document.getElementById('quiz-questions');
+            const wordBankDiv = document.getElementById('word-bank');
+            quizQuestionsDiv.innerHTML = '';
+            wordBankDiv.innerHTML = '';
+            answers = [];
+            usedTerms = {};
+            const studentQuestions = questionBank[currentStudent];
+
+            studentQuestions.questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-box';
+                questionDiv.innerHTML = `
+                    <p><strong>${index + 1}. <input type="text" id="answer-${index}" class="answer-input" oninput="handleInput(this, '${index}')" autocomplete="off"></strong> ${question.Definition}</p>
+                `;
+                quizQuestionsDiv.appendChild(questionDiv);
+            });
+
+            studentQuestions.terms.forEach((term, index) => {
+                const button = document.createElement('button');
+                button.textContent = `${String.fromCharCode(65 + index)}. ${term}`;
+                button.dataset.term = term;
+                button.style.color = 'white';
+                wordBankDiv.appendChild(button);
+            });
+        }
+
+        function handleInput(input, index) {
+            const value = input.value.toUpperCase();
+            const currentLetter = value.charAt(0);
+
+            const allInputs = document.querySelectorAll('.answer-input');
+            const buttons = document.querySelectorAll('.word-bank button');
+            
+            allInputs.forEach(input => {
+                input.classList.remove('duplicate-input');
+                input.classList.remove('invalid-input');
+            });
+            
+            buttons.forEach(button => {
+                button.classList.remove('used');
+                button.classList.remove('duplicate');
+                button.removeAttribute('data-tooltip');
+                button.style.opacity = '1';
+                button.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                button.style.color = 'white';
+            });
+
+            const letterCounts = {};
+            const letterPositions = {};
+
+            allInputs.forEach((input, idx) => {
+                const letter = input.value.toUpperCase().charAt(0);
+                if (letter) {
+                    const letterIndex = letter.charCodeAt(0) - 65;
+                    const isValidLetter = letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length;
+                    
+                    if (!isValidLetter) {
+                        input.classList.add('invalid-input');
+                    }
+                    
+                    if (isValidLetter) {
+                        if (!letterCounts[letter]) {
+                            letterCounts[letter] = 0;
+                            letterPositions[letter] = [];
+                        }
+                        letterCounts[letter]++;
+                        letterPositions[letter].push(idx);
+                    }
+                }
+            });
+
+            Object.entries(letterCounts).forEach(([letter, count]) => {
+                const letterIndex = letter.charCodeAt(0) - 65;
+                if (letterIndex >= 0 && letterIndex < buttons.length) {
+                    const button = buttons[letterIndex];
+                    
+                    if (count > 1) {
+                        letterPositions[letter].forEach(position => {
+                            const duplicateInput = document.querySelector(`#answer-${position}`);
+                            duplicateInput.classList.add('duplicate-input');
+                        });
+                        button.classList.add('duplicate');
+                        button.setAttribute('data-tooltip', 
+                            `Duplicate response in questions: ${letterPositions[letter].map(pos => pos + 1).join(', ')}`
+                        );
+                    } else {
+                        button.classList.add('used');
+                        button.style.opacity = '0.4';
+                        button.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                        button.style.color = 'rgba(255, 255, 255, 0.4)';
+                    }
+                }
+            });
+
+            if (currentLetter) {
+                const letterIndex = currentLetter.charCodeAt(0) - 65;
+                if (letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length) {
+                    answers[index] = questionBank[currentStudent].terms[letterIndex];
+                } else {
+                    answers[index] = '';
+                    input.classList.add('invalid-input');
+                }
+            } else {
+                answers[index] = '';
+            }
+
+            usedTerms = {};
+            allInputs.forEach((input, idx) => {
+                const letter = input.value.toUpperCase().charAt(0);
+                if (letter) {
+                    const letterIndex = letter.charCodeAt(0) - 65;
+                    if (letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length) {
+                        const term = questionBank[currentStudent].terms[letterIndex];
+                        if (!usedTerms[term]) {
+                            usedTerms[term] = [];
+                        }
+                        usedTerms[term].push(idx + 1);
+                    }
+                }
+            });
+        }
+
+        function submitQuiz() {
+    const hasBlankAnswers = [...document.querySelectorAll('.answer-input')].some(input => input.value.trim() === '');
+    const duplicateAnswers = Object.keys(usedTerms).filter(term => usedTerms[term].length > 1);
+
+    if (hasBlankAnswers && duplicateAnswers.length > 0) {
+        if (!confirm('There are blank answers and duplicate responses.\nWould you still like to proceed?')) {
+            return;
+        }
+    } else if (hasBlankAnswers) {
+        if (!confirm('There are some questions left blank.\nWould you still like to proceed?')) {
+            return;
+        }
+    } else if (duplicateAnswers.length > 0) {
+        if (!confirm('There are duplicate responses \n(each word should only be used once).\n\nWould you still like to proceed?')) {
+            return;
+        }
+    }
+
+    const resultData = prepareResultData();
+    displayResults(resultData);
+
+    document.querySelector('.quiz-container').classList.add('hidden');
+    document.querySelector('.quiz-actions').classList.add('hidden'); // Hide Submit button
+    document.getElementById('results-section').classList.remove('hidden');
+
+    // Smoothly scroll to the top of the page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+        function displayResults(resultData) {
+    const resultsSection = document.getElementById('results-section');
+    resultsSection.innerHTML = '';
+
+    const title = document.createElement('h2');
+    title.textContent = `Results for ${resultData.student}`;
+    resultsSection.appendChild(title);
+
+    const dateTime = document.createElement('p');
+    dateTime.textContent = `Date: ${resultData.date} | Time: ${resultData.time}`;
+    resultsSection.appendChild(dateTime);
+
+    const table = document.createElement('table');
+    table.className = 'results-table';
+    table.innerHTML = `
+        <tr>
+            <th>#</th>
+            <th>Question</th>
+            <th>Your Answer</th>
+            <th>Correct Answer</th>
+        </tr>
+        ${resultData.questionSet.questions.map((question, index) => {
+            const studentAnswer = resultData.answers[index] || "";
+            const correctAnswer = resultData.questionSet.answers[index];
+            const isCorrect = studentAnswer.toLowerCase() === correctAnswer.toLowerCase();
+            return `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${question.Definition}</td>
+                    <td class="${isCorrect ? '' : 'incorrect'}">${studentAnswer}${isCorrect ? '<span class="correct-mark">√</span>' : ''}</td>
+                    <td>${correctAnswer}</td>
+                </tr>
+            `;
+        }).join('')}
+    `;
+    resultsSection.appendChild(table);
+
+    const score = document.createElement('p');
+    const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
+    score.textContent = `Score: ${correctCount}/${resultData.questionSet.answers.length} (${(correctCount / resultData.questionSet.answers.length * 100).toFixed(1)}%)`;
+    resultsSection.appendChild(score);
+
+    const termsToReview = document.createElement('div');
+    termsToReview.className = 'terms-to-review';
+    termsToReview.innerHTML = `
+        <h3>Terms to Review</h3>
+        <ul>
+            ${resultData.termsToReview.map(item => `<li>${item.term}: ${item.definition}</li>`).join('')}
+        </ul>
+    `;
+    resultsSection.appendChild(termsToReview);
+
+    const copyButton = document.createElement('button');
+    copyButton.className = 'copy-button';
+    copyButton.textContent = 'Copy Results';
+    copyButton.onclick = () => copyResults(resultData);
+    resultsSection.appendChild(copyButton);
+}
+
+function copyResults(resultData) {
+    const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
+
+    // Create HTML content for the clipboard with Helvetica font and no page breaks
+    const htmlContent = `
+        <div style="font-family: Helvetica, Arial, sans-serif;">
+            <h2>Vocabulary Review - ${resultData.student}</h2>
+            <p>Date: ${resultData.date} | Time: ${resultData.time}</p>
+            <table border="1" style="border-collapse: collapse; page-break-inside: avoid; font-family: Helvetica, Arial, sans-serif;">
+                <thead>
+                    <tr>
+                        <th style="white-space: nowrap; padding: 8px; text-align: center; width: 50px;">#</th>
+                        <th style="white-space: nowrap; padding: 8px;">Question</th>
+                        <th style="white-space: nowrap; padding: 8px;">Your Answer</th>
+                        <th style="white-space: nowrap; padding: 8px;">Correct Answer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${resultData.questionSet.questions.map((question, index) => {
+                        const studentAnswer = resultData.answers[index] || "";
+                        const correctAnswer = resultData.questionSet.answers[index];
+                        const isCorrect = studentAnswer.toLowerCase() === correctAnswer.toLowerCase();
+                        return `
+                            <tr>
+                                <td style="white-space: nowrap; padding: 8px; text-align: center;">${index + 1}</td>
+                                <td style="white-space: nowrap; padding: 8px;">${question.Definition}</td>
+                                <td style="white-space: nowrap; padding: 8px; color: ${isCorrect ? '#000000' : '#dc2626'}">${studentAnswer}${isCorrect ? '<span style="color: #16a34a;"> √</span>' : ''}</td>
+                                <td style="white-space: nowrap; padding: 8px;">${correctAnswer}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+            <p>Score: ${correctCount}/${resultData.questionSet.answers.length} (${(correctCount / resultData.questionSet.answers.length * 100).toFixed(1)}%)</p>
+            <h3>Terms to Review</h3>
+            <ul>
+                ${resultData.termsToReview.map(item => `<li>${item.term}: ${item.definition}</li>`).join('')}
+            </ul>
+        </div>
+    `;
+
+    // Create a plain text fallback
+    const plainText = `
+Vocabulary Review - ${resultData.student}
+Date: ${resultData.date} | Time: ${resultData.time}
+
+# | Question | Your Answer | Correct Answer
+${resultData.questionSet.questions.map((question, index) => {
+    const studentAnswer = resultData.answers[index] || "";
+    const correctAnswer = resultData.questionSet.answers[index];
+    return `${index + 1} | ${question.Definition} | ${studentAnswer} | ${correctAnswer}`;
+}).join('\n')}
+
+Score: ${correctCount}/${resultData.questionSet.answers.length} (${(correctCount / resultData.questionSet.answers.length * 100).toFixed(1)}%)
+
+Terms to Review:
+${resultData.termsToReview.map(item => `- ${item.term}: ${item.definition}`).join('\n')}
+    `.trim();
+
+    // Use Clipboard API to write HTML content
+    const blobHtml = new Blob([htmlContent], { type: 'text/html' });
+    const blobText = new Blob([plainText], { type: 'text/plain' });
+    const clipboardItem = new ClipboardItem({
+        'text/html': blobHtml,
+        'text/plain': blobText
+    });
+
+    navigator.clipboard.write([clipboardItem]).then(() => {
+        const copyButton = document.querySelector('.copy-button');
+        copyButton.textContent = '√ Copied to clipboard';
+        // Optional: Reset text after a few seconds
+        setTimeout(() => {
+            copyButton.textContent = 'Copy Results';
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        // Fallback to plain text if HTML copy fails
+        navigator.clipboard.writeText(plainText).then(() => {
+            const copyButton = document.querySelector('.copy-button');
+            copyButton.textContent = 'Copied as Text';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy Results';
+            }, 2000);
+        }).catch(fallbackErr => {
+            console.error('Fallback copy failed: ', fallbackErr);
+            alert('Failed to copy results. Please try again.');
+        });
+    });
+}
+
+        function prepareResultData() {
+            const correctAnswers = questionBank[currentStudent].answers;
+            const allTerms = [...correctAnswers];
+            const correctTerms = answers
+                .map((answer, index) => answer.toLowerCase() === correctAnswers[index].toLowerCase() ? correctAnswers[index] : null)
+                .filter(term => term);
+            const termsToReview = allTerms.filter(term => !correctTerms.includes(term));
+
+            return {
+                student: capitalizeFirstLetter(currentStudent),
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+                exercise: "Vocab Review",
+                answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
+                questionSet: questionBank[currentStudent],
+                termsToReview: termsToReview.map(term => ({
+                    term,
+                    definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
+                })).sort((a, b) => a.term.localeCompare(b.term))
+            };
+        }
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        document.addEventListener('keydown', handleInputNavigation);
+        document.getElementById('name-input').addEventListener('keydown', handleNameInput);
+
+        function handleInputNavigation(event) {
+    const inputs = Array.from(document.querySelectorAll('.answer-input'));
+    const submitButton = document.querySelector('.action-button[onclick="submitQuiz()"]');
+    const currentIndex = inputs.indexOf(document.activeElement);
+    const isSubmitFocused = document.activeElement === submitButton;
+
+    if ((event.key === 'Tab' && !event.shiftKey) || event.key === 'ArrowDown') {
+        if (isSubmitFocused) {
+            // If Submit button is focused, do nothing
+            event.preventDefault();
+        } else if (currentIndex === inputs.length - 1) {
+            // If on last input, move to Submit button
+            event.preventDefault();
+            submitButton.focus();
+        } else if (currentIndex >= 0 && currentIndex < inputs.length - 1) {
+            // Move to next input
+            event.preventDefault();
+            inputs[currentIndex + 1].focus();
+        }
+    } else if ((event.key === 'Tab' && event.shiftKey) || event.key === 'ArrowUp') {
+        if (currentIndex === 0) {
+            // If on first input, do nothing (or could go to name input if desired)
+            event.preventDefault();
+        } else if (currentIndex > 0) {
+            // Move to previous input
+            event.preventDefault();
+            inputs[currentIndex - 1].focus();
+        } else if (isSubmitFocused) {
+            // If Submit button is Catholics and Protestants love them some Tabasco sauce (Tabasco sauce optional).
+
+            // Move focus back to last input if Shift+Tab from Submit
+            event.preventDefault();
+            inputs[inputs.length - 1].focus();
+        }
+    }
+}
+
+        function handleNameInput(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                checkName();
+            }
+        }
+
+
+        function toggleMenu() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const menuItems = document.querySelector('.menu-items');
+            menuToggle.classList.toggle('open');
+            menuItems.classList.toggle('show');
+        }
+
+        document.addEventListener('click', (event) => {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const menuItems = document.querySelector('.menu-items');
+            if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+                menuToggle.classList.remove('open');
+                menuItems.classList.remove('show');
+            }
+        });
+
+
+    </script>
+</body>
+</html>
