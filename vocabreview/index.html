@@ -275,27 +275,27 @@
         }
 
         .quiz-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
+    display: flex;
+    gap: 15px; /* Add spacing between buttons */
+    margin-top: 20px; /* Add space above the buttons */
+}
 
-        .action-button {
-            padding: 10px 15px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            color: white;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
+.action-button {
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-transform: uppercase; /* Optional: Make text uppercase for better visibility */
+    font-weight: bold; /* Optional: Add bold font for emphasis */
+}
 
-        .action-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
+.action-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
 
         .hidden {
             display: none;
@@ -306,6 +306,7 @@
             text-align: center;
         }
 
+        /* Teacher Mode */
         .teacher-section {
             display: flex;
             flex-direction: column;
@@ -352,17 +353,17 @@
             color: white;
             font-size: 0.9rem;
             cursor: pointer;
-            width: 60px;
-            text-align: center;
-            opacity: 1;
+            width: 60px; /* Set a fixed width to prevent size change */
+            text-align: center; /* Center the text */
+            opacity: 1; /* Ensure the button is fully visible */
         }
 
         .copy-text {
-            transition: opacity 1.0s;
+            transition: opacity 1.0s; /* Fade transition for text */
         }
 
         .copy-text.fade {
-            opacity: 0;
+            opacity: 0; /* Start fading out */
         }
 
         .copy-button:hover {
@@ -405,22 +406,20 @@
         .invalid-input {
             outline: 2px solid rgba(255, 0, 0, 0.589);
         }
-
         .logocontainer {
-            min-height: 10vh;
-            padding-bottom: 50px;
-        }
+    min-height: 10vh;
+    padding-bottom: 50px;
+}
 
-        .logo {
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            width: 25vh;
-            height: auto;
-            z-index: 10; 
-        }
-
-        .action-button.export {
+.logo {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 25vh;
+    height: auto;
+    z-index: 10; 
+}
+.action-button.export {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -497,9 +496,11 @@
             </div>
             <div class="quiz-actions">
                 <div class="button-row">
-                    <button class="action-button" onclick="legacyBlobExport()">Export</button>
+                    <button class="action-button" onclick="legacyBlobExport()">Export*</button>
+
                 </div>
             </div>
+
         </div>
 
         <div id="teacher-section" class="teacher-section hidden">
@@ -508,6 +509,8 @@
             <div id="results-container"></div>
         </div>
     </div>
+
+    
 
     <div class="logocontainer">        
         <img src="../icons/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
@@ -722,7 +725,80 @@
             });
         }
 
-        async function legacyBlobExport() {
+        async function handleExport() {
+            const hasBlankAnswers = [...document.querySelectorAll('.answer-input')].some(input => input.value.trim() === '');
+            const duplicateAnswers = Object.keys(usedTerms).filter(term => usedTerms[term].length > 1);
+
+            if (hasBlankAnswers && duplicateAnswers.length > 0) {
+                if (!confirm('There are blank answers and duplicate responses.\nWould you still like to proceed?')) {
+                    return;
+                }
+            } else if (hasBlankAnswers) {
+                if (!confirm('There are some questions left blank.\nWould you still like to proceed?')) {
+                    return;
+                }
+            } else if (duplicateAnswers.length > 0) {
+                if (!confirm('There are duplicate responses \n(each word should only be used once).\n\nWould you still like to proceed?')) {
+                    return;
+                }
+            }
+
+            const exportButton = document.getElementById('export-button');
+            exportButton.disabled = true;
+            
+            try {
+                const resultData = prepareResultData();
+                const jsonString = JSON.stringify(resultData, null, 2);
+                const encodedData = btoa(jsonString);
+                const blob = new Blob([encodedData], { type: 'application/json' });
+
+                const today = new Date();
+                const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
+
+                // Try using the File System Access API first
+                if ('showSaveFilePicker' in window) {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: fileName,
+                            types: [{
+                                description: 'JSON File',
+                                accept: { 'application/json': ['.json'] },
+                            }],
+                        });
+                        
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                        return;
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            console.error('File System API failed, falling back to default download');
+                        }
+                    }
+                }
+
+                // Fallback for browsers without File System Access API
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export data. Please try again.');
+            } finally {
+                exportButton.disabled = false;
+            }
+        }
+
+
+
+        function handleQuizAction(action) {
             const hasBlankAnswers = [...document.querySelectorAll('.answer-input')].some(input => input.value.trim() === '');
             const duplicateAnswers = Object.keys(usedTerms).filter(term => usedTerms[term].length > 1);
 
@@ -742,23 +818,48 @@
 
             const resultData = prepareResultData();
             const jsonString = JSON.stringify(resultData, null, 2);
-            const encodedData = btoa(jsonString); // Encrypt the data using base64
+            const encodedData = btoa(jsonString);
             const blob = new Blob([encodedData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            
+
             const today = new Date();
             const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 100);
+
+            switch (action) {
+                case 'download':
+                    triggerDownload(url, fileName);
+                    break;
+                case 'share':
+                    if (navigator.share) {
+                        navigator.share({
+                            title: fileName,
+                            files: [new File([blob], fileName, { type: 'application/json' })],
+                        }).catch((error) => {
+                            console.error('Sharing failed:', error);
+                            alert('Sharing is not supported on this device. Downloading instead.');
+                            triggerDownload(url, fileName);
+                        });
+                    } else {
+                        alert('Sharing is not supported on this device. Downloading instead.');
+                        triggerDownload(url, fileName);
+                    }
+                    break;
+                case 'email':
+                    const mailtoLink = `mailto:garrison.tubbs-biph@basischina.com?subject=${encodeURIComponent(fileName)}&body=${encodeURIComponent(`Here are the quiz results:\n\n${encodedData}`)}`;
+                    window.location.href = mailtoLink;
+                    break;
+                case 'open':
+                    const decodedDataForPreview = atob(encodedData);
+                    const previewWindow = window.open('', '_blank');
+                    previewWindow.document.write(`<pre>${JSON.stringify(JSON.parse(decodedDataForPreview), null, 2)}</pre>`);
+                    previewWindow.document.close();
+                    break;
+            }
+
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('name-input').value = '';
         }
 
         function prepareResultData() {
@@ -783,6 +884,199 @@
                 })).sort((a, b) => a.term.localeCompare(b.term))
             };
         }
+
+        function triggerDownload(url, fileName) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+
+
+
+        function legacyBlobExport() {
+    const resultData = prepareResultData();
+    const jsonString = JSON.stringify(resultData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = generateFileName();
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 100);
+}
+
+function msSaveBlobExport() {
+    if (window.navigator.msSaveBlob) { // For IE/Edge
+        const blob = new Blob([JSON.stringify(prepareResultData())], { type: 'application/json' });
+        window.navigator.msSaveBlob(blob, generateFileName());
+    } else {
+        alert('This method only works in Microsoft Edge');
+    }
+}
+
+function dataURLExport() {
+    const resultData = prepareResultData();
+    const jsonString = JSON.stringify(resultData, null, 2);
+    const reader = new FileReader();
+    const blob = new Blob([jsonString], {type: 'application/json'});
+    
+    reader.onload = function() {
+        const dataURL = reader.result;
+        window.open(dataURL, '_blank');
+    };
+    reader.readAsDataURL(blob);
+}
+
+function textWindowExport() {
+    const resultData = prepareResultData();
+    const jsonString = JSON.stringify(resultData, null, 2);
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(`<pre>${jsonString}</pre>`);
+    newWindow.document.close();
+}
+
+function base64HashExport() {
+    const resultData = prepareResultData();
+    const jsonString = JSON.stringify(resultData);
+    const base64 = btoa(unescape(encodeURIComponent(jsonString)));
+    
+    const tempWindow = window.open('', '_blank');
+    tempWindow.location.hash = base64;
+    tempWindow.document.write(`
+        <script>
+            const data = decodeURIComponent(escape(atob(window.location.hash.slice(1))));
+            const blob = new Blob([data], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '${generateFileName()}';
+            a.click();
+            setTimeout(() => window.close(), 1000);
+        <\/script>
+    `);
+}
+
+function generateFileName() {
+    const resultData = prepareResultData();
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
+}
+
+
+
+
+        function handleQuickAction(action) {
+            const resultData = prepareResultData();
+            const jsonString = JSON.stringify(resultData, null, 2);
+            const encodedData = btoa(jsonString);
+            const blob = new Blob([encodedData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
+
+            switch (action) {
+                case 'download':
+                    triggerDownload(url, fileName);
+                    break;
+                case 'share':
+                    if (navigator.share) {
+                        navigator.share({
+                            title: fileName,
+                            files: [new File([blob], fileName, { type: 'application/json' })],
+                        }).catch(() => {
+                            triggerDownload(url, fileName);
+                        });
+                    } else {
+                        triggerDownload(url, fileName);
+                    }
+                    break;
+                case 'email':
+                    const mailtoLink = `mailto:garrison.tubbs-biph@basischina.com?subject=${encodeURIComponent(fileName)}&body=${encodeURIComponent(`Here are the quiz results:\n\nEncrypted Data:\n${encodedData}`)}`;
+                    window.location.href = mailtoLink;
+                    break;
+                case 'open':
+                    const decodedDataForPreview = atob(encodedData);
+                    const previewWindow = window.open('', '_blank');
+                    previewWindow.document.write(`<pre>${JSON.stringify(JSON.parse(decodedDataForPreview), null, 2)}</pre>`);
+                    previewWindow.document.close();
+                    break;
+            }
+
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('name-input').value = '';
+        }
+
+        // Add this new function for quick export
+        async function handleQuickExport() {
+            const exportButton = document.getElementById('quick-export-button');
+            exportButton.disabled = true;
+            
+            try {
+                const resultData = prepareResultData();
+                const jsonString = JSON.stringify(resultData, null, 2);
+                const encodedData = btoa(jsonString);
+                const blob = new Blob([encodedData], { type: 'application/json' });
+
+                const today = new Date();
+                const formattedDate = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const fileName = `${capitalizeFirstLetter(currentStudent)} - Vocab Review - ${formattedDate} - ${resultData.time.replace(/:/g, '_')}.json`;
+
+                if ('showSaveFilePicker' in window) {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: fileName,
+                            types: [{
+                                description: 'JSON File',
+                                accept: { 'application/json': ['.json'] },
+                            }],
+                        });
+                        
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                        return;
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            const url = URL.createObjectURL(blob);
+                            triggerDownload(url, fileName);
+                        }
+                    }
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    triggerDownload(url, fileName);
+                }
+
+            } catch (error) {
+                console.error('Export failed:', error);
+            } finally {
+                exportButton.disabled = false;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
 
         function checkAnswers() {
             const fileInput = document.getElementById('json-input');
@@ -1038,6 +1332,47 @@
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
+
+        // Function to handle navigation between inputs
+function handleInputNavigation(event) {
+    const inputs = Array.from(document.querySelectorAll('.answer-input'));
+    const currentIndex = inputs.indexOf(document.activeElement);
+
+    if (event.key === 'Tab' && !event.shiftKey || event.key === 'ArrowDown') {
+        // Move to next input
+        if (currentIndex < inputs.length - 1) {
+            event.preventDefault();
+            inputs[currentIndex + 1].focus();
+        }
+    } else if ((event.key === 'Tab' && event.shiftKey) || event.key === 'ArrowUp') {
+        // Move to previous input
+        if (currentIndex > 0) {
+            event.preventDefault();
+            inputs[currentIndex - 1].focus();
+        }
+    }
+}
+
+// Function to check name input
+function handleNameInput(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        checkName();
+    }
+}
+
+// Function to check password input
+function handlePasswordInput(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        checkPassword();
+    }
+}
+
+// Event listeners
+document.addEventListener('keydown', handleInputNavigation);
+document.getElementById('name-input').addEventListener('keydown', handleNameInput);
+document.getElementById('password-input').addEventListener('keydown', handlePasswordInput);
 
         document.getElementById('name-input').addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
