@@ -199,6 +199,7 @@
 }
 
         .quiz-container {
+            margin-top: 40px;
             display: flex;
             gap: 20px;
         }
@@ -494,7 +495,32 @@
 
     <script src="vocab.js"></script>
     <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const resultsParam = urlParams.get('results');
+    if (resultsParam) {
+        try {
+            const decodedData = atob(decodeURIComponent(resultsParam));
+            const resultData = JSON.parse(decodedData);
+            
+            resultData.questionSet = {
+                questions: resultData.questions.map(q => ({ Definition: q.definition })),
+                answers: resultData.questions.map(q => q.correctAnswer)
+            };
+            resultData.answers = resultData.questions.map(q => q.studentAnswer);
 
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('quiz-section').classList.remove('hidden');
+            document.querySelector('.quiz-actions').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+            displayResults(resultData, true); // Pass true for URL view
+            window.scrollTo({ top: 0});
+        } catch (err) {
+            console.error('Failed to decode results from URL:', err);
+            alert('Invalid results URL');
+        }
+    }
+});
 
         const approvedNames = [
             "ben chen", "howard ding", "terry he", "alice li", "vincent mu",
@@ -701,17 +727,16 @@
     }
 
     const resultData = prepareResultData();
-    displayResults(resultData);
+    displayResults(resultData, false); // Pass false for initial view
 
     document.querySelector('.quiz-container').classList.add('hidden');
-    document.querySelector('.quiz-actions').classList.add('hidden'); // Hide Submit button
+    document.querySelector('.quiz-actions').classList.add('hidden');
     document.getElementById('results-section').classList.remove('hidden');
 
-    // Smoothly scroll to the top of the page
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-        function displayResults(resultData) {
+function displayResults(resultData, isUrlView = false) {
     const resultsSection = document.getElementById('results-section');
     resultsSection.innerHTML = '';
 
@@ -748,115 +773,83 @@
     `;
     resultsSection.appendChild(table);
 
-    const score = document.createElement('p');
     const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
-    score.textContent = `Score: ${correctCount}/${resultData.questionSet.answers.length} (${(correctCount / resultData.questionSet.answers.length * 100).toFixed(1)}%)`;
+    const percentage = Math.round(correctCount / resultData.questionSet.answers.length * 100); // Rounded to no decimals
+    const scoreText = `Score: ${correctCount}/${resultData.questionSet.answers.length} (${percentage}%)`;
+
+    const score = document.createElement('p');
+    score.textContent = scoreText;
     resultsSection.appendChild(score);
 
-    const termsToReview = document.createElement('div');
-    termsToReview.className = 'terms-to-review';
-    termsToReview.innerHTML = `
-        <h3>Terms to Review</h3>
-        <ul>
-            ${resultData.termsToReview.map(item => `<li>${item.term}: ${item.definition}</li>`).join('')}
-        </ul>
-    `;
-    resultsSection.appendChild(termsToReview);
+    if (isUrlView) {
+        // Add Copy button below score for URL view
+        const copyScoreButton = document.createElement('button');
+        copyScoreButton.className = 'copy-button';
+        copyScoreButton.textContent = 'Copy Score';
+        copyScoreButton.onclick = () => {
+            const percentageText = `${percentage}%`; // Only the numerical percentage
+            navigator.clipboard.writeText(percentageText).then(() => {
+                copyScoreButton.textContent = '√ Copied';
+                setTimeout(() => {
+                    copyScoreButton.textContent = 'Copy Score';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy percentage: ', err);
+                alert('Failed to copy percentage');
+            });
+        };
+        resultsSection.appendChild(copyScoreButton);
+    }
 
-    const copyButton = document.createElement('button');
-    copyButton.className = 'copy-button';
-    copyButton.textContent = 'Copy Results';
-    copyButton.onclick = () => copyResults(resultData);
-    resultsSection.appendChild(copyButton);
-}
-
-function copyResults(resultData) {
-    const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
-
-    // Create HTML content for the clipboard with Helvetica font and no page breaks
-    const htmlContent = `
-        <div style="font-family: Helvetica, Arial, sans-serif;">
-            <h2>Vocabulary Review - ${resultData.student}</h2>
-            <p>Date: ${resultData.date} | Time: ${resultData.time}</p>
-            <table border="1" style="border-collapse: collapse; page-break-inside: avoid; font-family: Helvetica, Arial, sans-serif;">
-                <thead>
-                    <tr>
-                        <th style="white-space: nowrap; padding: 8px; text-align: center; width: 50px;">#</th>
-                        <th style="white-space: nowrap; padding: 8px;">Question</th>
-                        <th style="white-space: nowrap; padding: 8px;">Your Answer</th>
-                        <th style="white-space: nowrap; padding: 8px;">Correct Answer</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${resultData.questionSet.questions.map((question, index) => {
-                        const studentAnswer = resultData.answers[index] || "";
-                        const correctAnswer = resultData.questionSet.answers[index];
-                        const isCorrect = studentAnswer.toLowerCase() === correctAnswer.toLowerCase();
-                        return `
-                            <tr>
-                                <td style="white-space: nowrap; padding: 8px; text-align: center;">${index + 1}</td>
-                                <td style="white-space: nowrap; padding: 8px;">${question.Definition}</td>
-                                <td style="white-space: nowrap; padding: 8px; color: ${isCorrect ? '#000000' : '#dc2626'}">${studentAnswer}${isCorrect ? '<span style="color: #16a34a;"> √</span>' : ''}</td>
-                                <td style="white-space: nowrap; padding: 8px;">${correctAnswer}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-            <p>Score: ${correctCount}/${resultData.questionSet.answers.length} (${(correctCount / resultData.questionSet.answers.length * 100).toFixed(1)}%)</p>
+    if (!isUrlView) {
+        // Show Terms to Review only for initial student view
+        const termsToReview = document.createElement('div');
+        termsToReview.className = 'terms-to-review';
+        termsToReview.innerHTML = `
             <h3>Terms to Review</h3>
             <ul>
                 ${resultData.termsToReview.map(item => `<li>${item.term}: ${item.definition}</li>`).join('')}
             </ul>
-        </div>
-    `;
+        `;
+        resultsSection.appendChild(termsToReview);
 
-    // Create a plain text fallback
-    const plainText = `
-Vocabulary Review - ${resultData.student}
-Date: ${resultData.date} | Time: ${resultData.time}
+        // Add Copy Results URL button for initial view
+        const copyButton = document.createElement('button');
+        copyButton.className = 'copy-button';
+        copyButton.textContent = 'Copy Results URL';
+        copyButton.onclick = () => copyResults(resultData);
+        resultsSection.appendChild(copyButton);
+    }
+}
 
-# | Question | Your Answer | Correct Answer
-${resultData.questionSet.questions.map((question, index) => {
-    const studentAnswer = resultData.answers[index] || "";
-    const correctAnswer = resultData.questionSet.answers[index];
-    return `${index + 1} | ${question.Definition} | ${studentAnswer} | ${correctAnswer}`;
-}).join('\n')}
+function copyResults(resultData) {
+    const simplifiedResultData = {
+        student: resultData.student,
+        date: resultData.date,
+        time: resultData.time,
+        questions: resultData.questionSet.questions.map((q, index) => ({
+            definition: q.Definition,
+            studentAnswer: resultData.answers[index] || "",
+            correctAnswer: resultData.questionSet.answers[index]
+        })),
+        score: `${resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length}/${resultData.questionSet.answers.length}`
+        // Note: termsToReview is intentionally omitted here
+    };
 
-Score: ${correctCount}/${resultData.questionSet.answers.length} (${(correctCount / resultData.questionSet.answers.length * 100).toFixed(1)}%)
+    const jsonString = JSON.stringify(simplifiedResultData);
+    const base64Data = btoa(jsonString);
+    const baseUrl = window.location.origin + window.location.pathname;
+    const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
 
-Terms to Review:
-${resultData.termsToReview.map(item => `- ${item.term}: ${item.definition}`).join('\n')}
-    `.trim();
-
-    // Use Clipboard API to write HTML content
-    const blobHtml = new Blob([htmlContent], { type: 'text/html' });
-    const blobText = new Blob([plainText], { type: 'text/plain' });
-    const clipboardItem = new ClipboardItem({
-        'text/html': blobHtml,
-        'text/plain': blobText
-    });
-
-    navigator.clipboard.write([clipboardItem]).then(() => {
+    navigator.clipboard.writeText(resultUrl).then(() => {
         const copyButton = document.querySelector('.copy-button');
-        copyButton.textContent = '√ Copied to clipboard';
-        // Optional: Reset text after a few seconds
+        copyButton.textContent = '√ URL Copied';
         setTimeout(() => {
-            copyButton.textContent = 'Copy Results';
+            copyButton.textContent = 'Copy Results URL';
         }, 2000);
     }).catch(err => {
-        console.error('Failed to copy: ', err);
-        // Fallback to plain text if HTML copy fails
-        navigator.clipboard.writeText(plainText).then(() => {
-            const copyButton = document.querySelector('.copy-button');
-            copyButton.textContent = 'Copied as Text';
-            setTimeout(() => {
-                copyButton.textContent = 'Copy Results';
-            }, 2000);
-        }).catch(fallbackErr => {
-            console.error('Fallback copy failed: ', fallbackErr);
-            alert('Failed to copy results. Please try again.');
-        });
+        console.error('Failed to copy URL: ', err);
+        alert('Failed to copy URL. Please try again.');
     });
 }
 
