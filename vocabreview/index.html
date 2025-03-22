@@ -558,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsParam = urlParams.get('results');
     if (resultsParam) {
         try {
-            const decodedData = atob(decodeURIComponent(resultsParam));
+            const decodedData = base64ToUnicode(decodeURIComponent(resultsParam)); // Changed to base64ToUnicode
             const resultData = JSON.parse(decodedData);
 
             // Handle old format with full questions array
@@ -595,38 +595,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-        // const approvedNames = [
-        //     (contained in names.js)
-        // ];
+// Unicode-safe base64 encoding and decoding functions
+function unicodeToBase64(str) {
+    const utf8Bytes = new TextEncoder().encode(str);
+    const binary = Array.from(utf8Bytes, byte => String.fromCharCode(byte)).join('');
+    return btoa(binary);
+}
 
-        function unscrambleTerms(scrambledArray) {
-            function unshiftString(str, shift) {
-                return str.split('').map(char => {
-                    if (char.match(/[a-zA-Z]/)) {
-                        const code = char.charCodeAt(0);
-                        const base = char >= 'a' ? 97 : 65;
-                        return String.fromCharCode((code - base - shift + 26) % 26 + base);
-                    }
-                    return char;
-                }).join('');
+function base64ToUnicode(base64) {
+    const binary = atob(base64);
+    const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+}
+
+function unscrambleTerms(scrambledArray) {
+    function unshiftString(str, shift) {
+        return str.split('').map(char => {
+            if (char.match(/[a-zA-Z]/)) {
+                const code = char.charCodeAt(0);
+                const base = char >= 'a' ? 97 : 65;
+                return String.fromCharCode((code - base - shift + 26) % 26 + base);
             }
-            return scrambledArray.map(item => {
-                const decodedTerm = atob(item.Term);
-                const decodedDef = atob(item.Definition);
-                return {
-                    Term: unshiftString(decodedTerm, 3),
-                    Definition: unshiftString(decodedDef, 3)
-                };
-            });
-        }
-        const vocabularyTerms = unscrambleTerms(scrambledVocabularyTerms);
+            return char;
+        }).join('');
+    }
+    return scrambledArray.map(item => {
+        const decodedTerm = atob(item.Term);
+        const decodedDef = atob(item.Definition);
+        return {
+            Term: unshiftString(decodedTerm, 3),
+            Definition: unshiftString(decodedDef, 3)
+        };
+    });
+}
+const vocabularyTerms = unscrambleTerms(scrambledVocabularyTerms);
 
-        let currentStudent = '';
-        let questionBank = {};
-        let answers = [];
-        let usedTerms = {};
+let currentStudent = '';
+let questionBank = {};
+let answers = [];
+let usedTerms = {};
 
-        function checkName() {
+function checkName() {
     const nameInput = document.getElementById('name-input').value.toLowerCase();
     const errorElement = document.getElementById('error-message');
 
@@ -643,140 +652,140 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 }
 
-        function generateQuestionSet(student) {
-            const shuffledQuestions = [...vocabularyTerms].sort(() => Math.random() - 0.5).slice(0, 15);
-            const sortedTerms = [...shuffledQuestions.map(q => q.Term)].sort((a, b) => a.localeCompare(b));
-            return {
-                questions: shuffledQuestions,
-                terms: sortedTerms,
-                answers: shuffledQuestions.map(q => q.Term)
-            };
-        }
+function generateQuestionSet(student) {
+    const shuffledQuestions = [...vocabularyTerms].sort(() => Math.random() - 0.5).slice(0, 15);
+    const sortedTerms = [...shuffledQuestions.map(q => q.Term)].sort((a, b) => a.localeCompare(b));
+    return {
+        questions: shuffledQuestions,
+        terms: sortedTerms,
+        answers: shuffledQuestions.map(q => q.Term)
+    };
+}
 
-        function initializeQuiz() {
-            const quizQuestionsDiv = document.getElementById('quiz-questions');
-            const wordBankDiv = document.getElementById('word-bank');
-            quizQuestionsDiv.innerHTML = '';
-            wordBankDiv.innerHTML = '';
-            answers = [];
-            usedTerms = {};
-            const studentQuestions = questionBank[currentStudent];
+function initializeQuiz() {
+    const quizQuestionsDiv = document.getElementById('quiz-questions');
+    const wordBankDiv = document.getElementById('word-bank');
+    quizQuestionsDiv.innerHTML = '';
+    wordBankDiv.innerHTML = '';
+    answers = [];
+    usedTerms = {};
+    const studentQuestions = questionBank[currentStudent];
 
-            studentQuestions.questions.forEach((question, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'question-box';
-                questionDiv.innerHTML = `
-                    <p><strong>${index + 1}. <input type="text" id="answer-${index}" class="answer-input" oninput="handleInput(this, '${index}')" autocomplete="off"></strong> ${question.Definition}</p>
-                `;
-                quizQuestionsDiv.appendChild(questionDiv);
-            });
+    studentQuestions.questions.forEach((question, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-box';
+        questionDiv.innerHTML = `
+            <p><strong>${index + 1}. <input type="text" id="answer-${index}" class="answer-input" oninput="handleInput(this, '${index}')" autocomplete="off"></strong> ${question.Definition}</p>
+        `;
+        quizQuestionsDiv.appendChild(questionDiv);
+    });
 
-            studentQuestions.terms.forEach((term, index) => {
-                const button = document.createElement('button');
-                button.textContent = `${String.fromCharCode(65 + index)}. ${term}`;
-                button.dataset.term = term;
-                button.style.color = 'white';
-                wordBankDiv.appendChild(button);
-            });
-        }
+    studentQuestions.terms.forEach((term, index) => {
+        const button = document.createElement('button');
+        button.textContent = `${String.fromCharCode(65 + index)}. ${term}`;
+        button.dataset.term = term;
+        button.style.color = 'white';
+        wordBankDiv.appendChild(button);
+    });
+}
 
-        function handleInput(input, index) {
-            const value = input.value.toUpperCase();
-            const currentLetter = value.charAt(0);
+function handleInput(input, index) {
+    const value = input.value.toUpperCase();
+    const currentLetter = value.charAt(0);
 
-            const allInputs = document.querySelectorAll('.answer-input');
-            const buttons = document.querySelectorAll('.word-bank button');
+    const allInputs = document.querySelectorAll('.answer-input');
+    const buttons = document.querySelectorAll('.word-bank button');
+    
+    allInputs.forEach(input => {
+        input.classList.remove('duplicate-input');
+        input.classList.remove('invalid-input');
+    });
+    
+    buttons.forEach(button => {
+        button.classList.remove('used');
+        button.classList.remove('duplicate');
+        button.removeAttribute('data-tooltip');
+        button.style.opacity = '1';
+        button.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        button.style.color = 'white';
+    });
+
+    const letterCounts = {};
+    const letterPositions = {};
+
+    allInputs.forEach((input, idx) => {
+        const letter = input.value.toUpperCase().charAt(0);
+        if (letter) {
+            const letterIndex = letter.charCodeAt(0) - 65;
+            const isValidLetter = letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length;
             
-            allInputs.forEach(input => {
-                input.classList.remove('duplicate-input');
-                input.classList.remove('invalid-input');
-            });
-            
-            buttons.forEach(button => {
-                button.classList.remove('used');
-                button.classList.remove('duplicate');
-                button.removeAttribute('data-tooltip');
-                button.style.opacity = '1';
-                button.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                button.style.color = 'white';
-            });
-
-            const letterCounts = {};
-            const letterPositions = {};
-
-            allInputs.forEach((input, idx) => {
-                const letter = input.value.toUpperCase().charAt(0);
-                if (letter) {
-                    const letterIndex = letter.charCodeAt(0) - 65;
-                    const isValidLetter = letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length;
-                    
-                    if (!isValidLetter) {
-                        input.classList.add('invalid-input');
-                    }
-                    
-                    if (isValidLetter) {
-                        if (!letterCounts[letter]) {
-                            letterCounts[letter] = 0;
-                            letterPositions[letter] = [];
-                        }
-                        letterCounts[letter]++;
-                        letterPositions[letter].push(idx);
-                    }
-                }
-            });
-
-            Object.entries(letterCounts).forEach(([letter, count]) => {
-                const letterIndex = letter.charCodeAt(0) - 65;
-                if (letterIndex >= 0 && letterIndex < buttons.length) {
-                    const button = buttons[letterIndex];
-                    
-                    if (count > 1) {
-                        letterPositions[letter].forEach(position => {
-                            const duplicateInput = document.querySelector(`#answer-${position}`);
-                            duplicateInput.classList.add('duplicate-input');
-                        });
-                        button.classList.add('duplicate');
-                        button.setAttribute('data-tooltip', 
-                            `Duplicate response in questions: ${letterPositions[letter].map(pos => pos + 1).join(', ')}`
-                        );
-                    } else {
-                        button.classList.add('used');
-                        button.style.opacity = '0.4';
-                        button.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                        button.style.color = 'rgba(255, 255, 255, 0.4)';
-                    }
-                }
-            });
-
-            if (currentLetter) {
-                const letterIndex = currentLetter.charCodeAt(0) - 65;
-                if (letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length) {
-                    answers[index] = questionBank[currentStudent].terms[letterIndex];
-                } else {
-                    answers[index] = '';
-                    input.classList.add('invalid-input');
-                }
-            } else {
-                answers[index] = '';
+            if (!isValidLetter) {
+                input.classList.add('invalid-input');
             }
-
-            usedTerms = {};
-            allInputs.forEach((input, idx) => {
-                const letter = input.value.toUpperCase().charAt(0);
-                if (letter) {
-                    const letterIndex = letter.charCodeAt(0) - 65;
-                    if (letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length) {
-                        const term = questionBank[currentStudent].terms[letterIndex];
-                        if (!usedTerms[term]) {
-                            usedTerms[term] = [];
-                        }
-                        usedTerms[term].push(idx + 1);
-                    }
+            
+            if (isValidLetter) {
+                if (!letterCounts[letter]) {
+                    letterCounts[letter] = 0;
+                    letterPositions[letter] = [];
                 }
-            });
+                letterCounts[letter]++;
+                letterPositions[letter].push(idx);
+            }
         }
+    });
 
-        function submitQuiz() {
+    Object.entries(letterCounts).forEach(([letter, count]) => {
+        const letterIndex = letter.charCodeAt(0) - 65;
+        if (letterIndex >= 0 && letterIndex < buttons.length) {
+            const button = buttons[letterIndex];
+            
+            if (count > 1) {
+                letterPositions[letter].forEach(position => {
+                    const duplicateInput = document.querySelector(`#answer-${position}`);
+                    duplicateInput.classList.add('duplicate-input');
+                });
+                button.classList.add('duplicate');
+                button.setAttribute('data-tooltip', 
+                    `Duplicate response in questions: ${letterPositions[letter].map(pos => pos + 1).join(', ')}`
+                );
+            } else {
+                button.classList.add('used');
+                button.style.opacity = '0.4';
+                button.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                button.style.color = 'rgba(255, 255, 255, 0.4)';
+            }
+        }
+    });
+
+    if (currentLetter) {
+        const letterIndex = currentLetter.charCodeAt(0) - 65;
+        if (letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length) {
+            answers[index] = questionBank[currentStudent].terms[letterIndex];
+        } else {
+            answers[index] = '';
+            input.classList.add('invalid-input');
+        }
+    } else {
+        answers[index] = '';
+    }
+
+    usedTerms = {};
+    allInputs.forEach((input, idx) => {
+        const letter = input.value.toUpperCase().charAt(0);
+        if (letter) {
+            const letterIndex = letter.charCodeAt(0) - 65;
+            if (letterIndex >= 0 && letterIndex < questionBank[currentStudent].terms.length) {
+                const term = questionBank[currentStudent].terms[letterIndex];
+                if (!usedTerms[term]) {
+                    usedTerms[term] = [];
+                }
+                usedTerms[term].push(idx + 1);
+            }
+        }
+    });
+}
+
+function submitQuiz() {
     const hasBlankAnswers = [...document.querySelectorAll('.answer-input')].some(input => input.value.trim() === '');
     const duplicateAnswers = Object.keys(usedTerms).filter(term => usedTerms[term].length > 1);
 
@@ -1056,42 +1065,41 @@ function displayResults(resultData, isUrlView = false) {
 
         // Add QR code in initial view (under PNG button)
         if (resultData.questionSet && resultData.answers) {
-            // Generate Results URL (unchanged)
-const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
-const percentageForUrl = Math.round(correctCount / resultData.questionSet.answers.length * 100);
-const simplifiedResultData = { s: resultData.student, d: resultData.date, t: resultData.time, p: percentageForUrl };
-const jsonString = JSON.stringify(simplifiedResultData);
-const base64Data = btoa(jsonString);
-const baseUrl = window.location.origin + window.location.pathname;
-const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
+            const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
+            const percentageForUrl = Math.round(correctCount / resultData.questionSet.answers.length * 100);
+            const simplifiedResultData = { s: resultData.student, d: resultData.date, t: resultData.time, p: percentageForUrl };
+            const jsonString = JSON.stringify(simplifiedResultData);
+            const base64Data = unicodeToBase64(jsonString); // Changed to unicodeToBase64
+            const baseUrl = window.location.origin + window.location.pathname;
+            const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
 
-// Create QR code container (unchanged)
-const qrContainer = document.createElement('div');
-qrContainer.id = 'qr-code';
-qrContainer.style.marginTop = '20px';
-qrContainer.style.marginBottom = '-100px';
-qrContainer.style.width = '200px';
-qrContainer.style.height = '200px';
-qrContainer.style.marginLeft = 'auto';
-qrContainer.style.marginRight = 'auto';
-resultsSection.appendChild(qrContainer);
+            // Create QR code container
+            const qrContainer = document.createElement('div');
+            qrContainer.id = 'qr-code';
+            qrContainer.style.marginTop = '20px';
+            qrContainer.style.marginBottom = '-100px';
+            qrContainer.style.width = '200px';
+            qrContainer.style.height = '200px';
+            qrContainer.style.marginLeft = 'auto';
+            qrContainer.style.marginRight = 'auto';
+            resultsSection.appendChild(qrContainer);
 
-// Generate QR code with kjua
-if (typeof kjua !== 'undefined') {
-  const qr = kjua({
-    text: resultUrl,
-    size: 200, // Total canvas size
-    fill: '#303f6c', // Foreground color (dark blue)
-    back: '#FFFFFF', // Background color (white)
-    quiet: 0, // No quiet zone to maximize QR code size
-    ecLevel: 'M', // Medium error correction
-    render: 'canvas' // Use canvas for rendering
-  });
-  qrContainer.appendChild(qr);
-} else {
-  qrContainer.innerHTML = '<p style="color: red;">QR Code unavailable: Library failed to load</p>';
-  console.error('kjua library is not loaded');
-}
+            // Generate QR code with kjua
+            if (typeof kjua !== 'undefined') {
+                const qr = kjua({
+                    text: resultUrl,
+                    size: 200,
+                    fill: '#303f6c',
+                    back: '#FFFFFF',
+                    quiet: 0,
+                    ecLevel: 'M',
+                    render: 'canvas'
+                });
+                qrContainer.appendChild(qr);
+            } else {
+                qrContainer.innerHTML = '<p style="color: red;">QR Code unavailable: Library failed to load</p>';
+                console.error('kjua library is not loaded');
+            }
         }
     }
 }
@@ -1108,7 +1116,7 @@ function copyResults(resultData) {
     };
 
     const jsonString = JSON.stringify(simplifiedResultData);
-    const base64Data = btoa(jsonString);
+    const base64Data = unicodeToBase64(jsonString); // Changed to unicodeToBase64
     const baseUrl = window.location.origin + window.location.pathname;
     const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
 
@@ -1124,36 +1132,36 @@ function copyResults(resultData) {
     });
 }
 
-        function prepareResultData() {
-            const correctAnswers = questionBank[currentStudent].answers;
-            const allTerms = [...correctAnswers];
-            const correctTerms = answers
-                .map((answer, index) => answer.toLowerCase() === correctAnswers[index].toLowerCase() ? correctAnswers[index] : null)
-                .filter(term => term);
-            const termsToReview = allTerms.filter(term => !correctTerms.includes(term));
+function prepareResultData() {
+    const correctAnswers = questionBank[currentStudent].answers;
+    const allTerms = [...correctAnswers];
+    const correctTerms = answers
+        .map((answer, index) => answer.toLowerCase() === correctAnswers[index].toLowerCase() ? correctAnswers[index] : null)
+        .filter(term => term);
+    const termsToReview = allTerms.filter(term => !correctTerms.includes(term));
 
-            return {
-                student: capitalizeFirstLetter(currentStudent),
-                date: new Date().toISOString().split('T')[0],
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
-                exercise: "Vocab Review",
-                answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
-                questionSet: questionBank[currentStudent],
-                termsToReview: termsToReview.map(term => ({
-                    term,
-                    definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
-                })).sort((a, b) => a.term.localeCompare(b.term))
-            };
-        }
+    return {
+        student: capitalizeFirstLetter(currentStudent),
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+        exercise: "Vocab Review",
+        answers: Array.from({ length: 15 }, (_, index) => answers[index] || ""),
+        questionSet: questionBank[currentStudent],
+        termsToReview: termsToReview.map(term => ({
+            term,
+            definition: vocabularyTerms.find(v => v.Term === term)?.Definition || "Definition not found"
+        })).sort((a, b) => a.term.localeCompare(b.term))
+    };
+}
 
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
-        document.addEventListener('keydown', handleInputNavigation);
-        document.getElementById('name-input').addEventListener('keydown', handleNameInput);
+document.addEventListener('keydown', handleInputNavigation);
+document.getElementById('name-input').addEventListener('keydown', handleNameInput);
 
-        function handleInputNavigation(event) {
+function handleInputNavigation(event) {
     const inputs = Array.from(document.querySelectorAll('.answer-input'));
     const submitButton = document.querySelector('.action-button[onclick="submitQuiz()"]');
     const currentIndex = inputs.indexOf(document.activeElement);
@@ -1181,8 +1189,6 @@ function copyResults(resultData) {
             event.preventDefault();
             inputs[currentIndex - 1].focus();
         } else if (isSubmitFocused) {
-            // If Submit button is Catholics and Protestants love them some Tabasco sauce (Tabasco sauce optional).
-
             // Move focus back to last input if Shift+Tab from Submit
             event.preventDefault();
             inputs[inputs.length - 1].focus();
@@ -1190,29 +1196,28 @@ function copyResults(resultData) {
     }
 }
 
-        function handleNameInput(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                checkName();
-            }
-        }
+function handleNameInput(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        checkName();
+    }
+}
 
+function toggleMenu() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const menuItems = document.querySelector('.menu-items');
+    menuToggle.classList.toggle('open');
+    menuItems.classList.toggle('show');
+}
 
-        function toggleMenu() {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const menuItems = document.querySelector('.menu-items');
-            menuToggle.classList.toggle('open');
-            menuItems.classList.toggle('show');
-        }
-
-        document.addEventListener('click', (event) => {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const menuItems = document.querySelector('.menu-items');
-            if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
-                menuToggle.classList.remove('open');
-                menuItems.classList.remove('show');
-            }
-        });
+document.addEventListener('click', (event) => {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const menuItems = document.querySelector('.menu-items');
+    if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+        menuToggle.classList.remove('open');
+        menuItems.classList.remove('show');
+    }
+});
 
 
     </script>
