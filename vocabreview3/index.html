@@ -822,12 +822,15 @@ function displayResults(resultData, isUrlView = false) {
         copyUrlButton.onclick = () => copyResults(resultData);
         resultsSection.appendChild(copyUrlButton);
 
-        // Add Copy Results PNG button for initial view only
-        const copyPngButton = document.createElement('button');
-        copyPngButton.className = 'copy-button';
-        copyPngButton.id = 'copy-png-button';
-        copyPngButton.textContent = 'Copy Results PNG';
-        copyPngButton.onclick = () => {
+        // Detect if the device is mobile or iPad
+        const isMobileOrTablet = /iPad|iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Add Copy/Download Results PNG button for initial view only
+        const pngButton = document.createElement('button');
+        pngButton.className = 'copy-button';
+        pngButton.id = 'copy-png-button';
+        pngButton.textContent = isMobileOrTablet ? 'Download Results PNG' : 'Copy Results PNG';
+        pngButton.onclick = () => {
             // Create flash effect
             const flash = document.createElement('div');
             flash.style.position = 'fixed';
@@ -878,38 +881,42 @@ function displayResults(resultData, isUrlView = false) {
                         backgroundColor: 'rgb(45, 70, 119)'
                     }).then(canvas => {
                         canvas.toBlob(blob => {
-                            const item = new ClipboardItem({ 'image/png': blob });
-                            navigator.clipboard.write([item]).then(() => {
-                                copyPngButton.textContent = '√ Copied';
+                            if (isMobileOrTablet) {
+                                // Download PNG on mobile/iPad
+                                const link = document.createElement('a');
+                                link.download = `Vocabulary_Results_${resultData.student}_${resultData.date}.png`;
+                                link.href = URL.createObjectURL(blob);
+                                link.click();
+                                URL.revokeObjectURL(link.href);
+
+                                pngButton.textContent = '√ Downloaded';
                                 setTimeout(() => {
-                                    copyPngButton.textContent = 'Copy Results PNG';
+                                    pngButton.textContent = 'Download Results PNG';
                                 }, 2000);
+                            } else {
+                                // Copy PNG to clipboard on desktop
+                                const item = new ClipboardItem({ 'image/png': blob });
+                                navigator.clipboard.write([item]).then(() => {
+                                    pngButton.textContent = '√ Copied';
+                                    setTimeout(() => {
+                                        pngButton.textContent = 'Copy Results PNG';
+                                    }, 2000);
+                                }).catch(err => {
+                                    console.error('Failed to copy PNG to clipboard: ', err);
+                                    alert('Failed to copy PNG to clipboard. Please try again.');
+                                });
+                            }
 
-                                // Restore hidden elements
-                                background.style.display = '';
-                                overlay.style.display = '';
-                                overlay2.style.display = '';
-                                hamburgerMenu.style.display = '';
-                                if (logo) logo.style.display = '';
-                                titleElement.style.display = '';
-                                subtitleElement.style.display = '';
-                                copyUrlBtn.style.display = '';
-                                copyPngBtn.style.display = '';
-                            }).catch(err => {
-                                console.error('Failed to copy PNG to clipboard: ', err);
-                                alert('Failed to copy PNG to clipboard. Please try again.');
-
-                                // Restore even on error
-                                background.style.display = '';
-                                overlay.style.display = '';
-                                overlay2.style.display = '';
-                                hamburgerMenu.style.display = '';
-                                if (logo) logo.style.display = '';
-                                titleElement.style.display = '';
-                                subtitleElement.style.display = '';
-                                copyUrlBtn.style.display = '';
-                                copyPngBtn.style.display = '';
-                            });
+                            // Restore hidden elements
+                            background.style.display = '';
+                            overlay.style.display = '';
+                            overlay2.style.display = '';
+                            hamburgerMenu.style.display = '';
+                            if (logo) logo.style.display = '';
+                            titleElement.style.display = '';
+                            subtitleElement.style.display = '';
+                            copyUrlBtn.style.display = '';
+                            copyPngBtn.style.display = '';
                         }, 'image/png');
                     }).catch(err => {
                         console.error('Failed to generate PNG: ', err);
@@ -929,7 +936,7 @@ function displayResults(resultData, isUrlView = false) {
                 }, 300); // Wait for fade-out to complete
             }, 100); // Brief flash duration
         };
-        resultsSection.appendChild(copyPngButton);
+        resultsSection.appendChild(pngButton);
     }
 }
 
