@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Detector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #deviceInfo {
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="deviceInfo">Detecting your device...</div>
+
+    <script>
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            let device = "Unknown device";
+            let browser = "Unknown browser";
+
+            // Device detection
+            if (/iPad/i.test(ua)) {
+                device = "iPad";
+            } else if (/iPhone/i.test(ua)) {
+                device = "iPhone";
+            } else if (/Android/i.test(ua)) {
+                device = "Android";
+            } else if (/Macintosh/i.test(ua)) {
+                device = "Mac";
+            } else if (/Windows/i.test(ua)) {
+                device = "PC";
+            }
+
+            // Browser detection
+            if (/Chrome/i.test(ua)) {
+                browser = "Chrome";
+            } else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) {
+                browser = "Safari";
+            } else if (/Firefox/i.test(ua)) {
+                browser = "Firefox";
+            } else if (/MSIE|Trident/i.test(ua)) {
+                browser = "Internet Explorer";
+            } else if (/Edge/i.test(ua)) {
+                browser = "Edge";
+            }
+
+            document.getElementById("deviceInfo").innerHTML = 
+                `${device} browser, ${browser}`;
+        }
+
+        // Run detection when page loads
+        window.onload = detectDevice;
+    </script>
+</body>
+</html>
