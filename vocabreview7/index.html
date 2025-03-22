@@ -550,7 +550,7 @@
 
     <script src="vocab.js"></script>
     <script src="names.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CSfk5pgT7LU68bW2qQhEd4jAtQnI NussXJgM5eHKqgKHVfYfZxxc0OuF2jacRwfXqSOmA+gnb263nMbHOFHr0Tg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -895,26 +895,26 @@ function displayResults(resultData, isUrlView = false) {
     if (!isUrlView) {
         const termsToReview = document.createElement('div');
         termsToReview.className = 'terms-to-review';
-        termsToReview.innerHTML = `
-            <h3>Terms to Review</h3>
+        const heading = document.createElement('h3');
+        heading.textContent = (percentage === 100 && resultData.termsToReview.length === 0) ? 'Great job!' : 'Terms to Review';
+        termsToReview.appendChild(heading);
+        termsToReview.innerHTML += `
             <ul>
                 ${resultData.termsToReview.map(item => `<li>${item.term}: ${item.definition}</li>`).join('')}
             </ul>
         `;
         resultsSection.appendChild(termsToReview);
 
-        const copyUrlButton = document.createElement('button');
-        copyUrlButton.className = 'copy-button';
-        copyUrlButton.id = 'copy-url-button';
-        copyUrlButton.textContent = 'Copy Results URL';
-        copyUrlButton.onclick = () => copyResults(resultData);
-        resultsSection.appendChild(copyUrlButton);
-
         const isMobileOrTablet = /iPad|iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const pngButton = document.createElement('button');
         pngButton.className = 'copy-button';
         pngButton.id = 'copy-png-button';
-        pngButton.textContent = isMobileOrTablet ? 'Download Results PNG' : 'Copy Results PNG';
+        pngButton.textContent = isMobileOrTablet ? 'Download Results' : 'Copy Results';
+        pngButton.style.display = 'block'; // Block-level for centering
+        pngButton.style.marginLeft = 'auto';
+        pngButton.style.marginRight = 'auto';
+        pngButton.style.marginTop = '20px';
+        pngButton.style.visibility = 'visible'; // Default visibility
         pngButton.onclick = () => {
             const flash = document.createElement('div');
             flash.style.position = 'fixed';
@@ -940,52 +940,16 @@ function displayResults(resultData, isUrlView = false) {
                     const logo = document.querySelector('.logo');
                     const titleElement = document.querySelector('h1.Title');
                     const subtitleElement = document.querySelector('h1.Subtitle');
-                    const copyUrlBtn = document.getElementById('copy-url-button');
                     const copyPngBtn = document.getElementById('copy-png-button');
 
                     background.style.display = 'none';
                     overlay.style.display = 'none';
                     overlay2.style.display = 'none';
                     hamburgerMenu.style.display = 'none';
-                    if (logo) logo.style.display = 'none';
+                    if (logo) logo.style.display = 'none'; // Hide logo during capture
                     titleElement.style.display = 'none';
                     subtitleElement.style.display = 'none';
-                    copyUrlBtn.style.display = 'none';
-                    copyPngBtn.style.display = 'none';
-
-                    // Generate Results URL
-                    const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
-                    const percentage = Math.round(correctCount / resultData.questionSet.answers.length * 100);
-                    const simplifiedResultData = {
-                        s: resultData.student,
-                        d: resultData.date,
-                        t: resultData.time,
-                        p: percentage
-                    };
-                    const jsonString = JSON.stringify(simplifiedResultData);
-                    const base64Data = btoa(jsonString);
-                    const baseUrl = window.location.origin + window.location.pathname;
-                    const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
-
-                    // Create QR code container
-                    const qrContainer = document.createElement('div');
-                    qrContainer.id = 'qr-code';
-                    qrContainer.style.position = 'absolute';
-                    qrContainer.style.bottom = '20px';
-                    qrContainer.style.right = '20px';
-                    qrContainer.style.width = '200px';
-                    qrContainer.style.height = '200px';
-                    qrContainer.style.zIndex = '1000';
-                    document.body.appendChild(qrContainer);
-
-                    // Generate QR code
-                    new QRCode(qrContainer, {
-                        text: resultUrl,
-                        width: 200,
-                        height: 200,
-                        colorDark: '#000000',
-                        colorLight: '#ffffff'
-                    });
+                    copyPngBtn.style.visibility = 'hidden'; // Hide button but keep space
 
                     html2canvas(document.body, {
                         scale: 2,
@@ -996,43 +960,83 @@ function displayResults(resultData, isUrlView = false) {
                         height: document.body.scrollHeight,
                         backgroundColor: 'rgb(45, 70, 119)'
                     }).then(canvas => {
-                        canvas.toBlob(blob => {
-                            if (isMobileOrTablet) {
-                                const link = document.createElement('a');
-                                link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
-                                link.href = URL.createObjectURL(blob);
-                                link.click();
-                                URL.revokeObjectURL(link.href);
+                        // Load logo image
+                        const logoImg = new Image();
+                        logoImg.crossOrigin = 'anonymous'; // For CORS if needed
+                        logoImg.src = '../icons/Full Logo White on Transparent.png';
 
-                                pngButton.textContent = '√ Downloaded';
-                                setTimeout(() => {
-                                    pngButton.textContent = 'Download Results PNG';
-                                }, 2000);
-                            } else {
-                                const item = new ClipboardItem({ 'image/png': blob });
-                                navigator.clipboard.write([item]).then(() => {
-                                    pngButton.textContent = '√ Copied';
+                        logoImg.onload = () => {
+                            const ctx = canvas.getContext('2d');
+                            const logoWidth = canvas.width * 0.25; // Match original 25vh, approximated
+                            const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
+                            const padding = 50 * 2; // 50px at scale 2
+                            const x = canvas.width - logoWidth - padding; // Right edge with padding
+                            const y = canvas.height - logoHeight - padding; // 50px from bottom
+
+                            // Draw logo onto canvas
+                            ctx.drawImage(logoImg, x, y, logoWidth, logoHeight);
+
+                            canvas.toBlob(blob => {
+                                if (isMobileOrTablet) {
+                                    const link = document.createElement('a');
+                                    link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
+                                    link.href = URL.createObjectURL(blob);
+                                    link.click();
+                                    URL.revokeObjectURL(link.href);
+
+                                    pngButton.textContent = '√ Downloaded';
                                     setTimeout(() => {
-                                        pngButton.textContent = 'Copy Results PNG';
+                                        pngButton.textContent = 'Download Results';
                                     }, 2000);
-                                }).catch(err => {
-                                    console.error('Failed to copy PNG to clipboard: ', err);
-                                    alert('Failed to copy PNG to clipboard.');
-                                });
-                            }
+                                } else {
+                                    const item = new ClipboardItem({ 'image/png': blob });
+                                    navigator.clipboard.write([item]).then(() => {
+                                        pngButton.textContent = '√ Copied';
+                                        setTimeout(() => {
+                                            pngButton.textContent = 'Copy Results';
+                                        }, 2000);
+                                    }).catch(err => {
+                                        console.error('Failed to copy PNG to clipboard: ', err);
+                                        alert('Failed to copy PNG to clipboard.');
+                                    });
+                                }
 
-                            // Clean up
-                            background.style.display = '';
-                            overlay.style.display = '';
-                            overlay2.style.display = '';
-                            hamburgerMenu.style.display = '';
-                            if (logo) logo.style.display = '';
-                            titleElement.style.display = '';
-                            subtitleElement.style.display = '';
-                            copyUrlBtn.style.display = '';
-                            copyPngBtn.style.display = '';
-                            document.body.removeChild(qrContainer);
-                        }, 'image/png');
+                                // Cleanup
+                                background.style.display = '';
+                                overlay.style.display = '';
+                                overlay2.style.display = '';
+                                hamburgerMenu.style.display = '';
+                                if (logo) logo.style.display = '';
+                                titleElement.style.display = '';
+                                subtitleElement.style.display = '';
+                                copyPngBtn.style.visibility = 'visible';
+                            }, 'image/png');
+                        };
+
+                        logoImg.onerror = () => {
+                            console.error('Failed to load logo image');
+                            alert('Failed to load logo for PNG capture.');
+                            canvas.toBlob(blob => {
+                                if (isMobileOrTablet) {
+                                    const link = document.createElement('a');
+                                    link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
+                                    link.href = URL.createObjectURL(blob);
+                                    link.click();
+                                    URL.revokeObjectURL(link.href);
+                                } else {
+                                    const item = new ClipboardItem({ 'image/png': blob });
+                                    navigator.clipboard.write([item]);
+                                }
+                                background.style.display = '';
+                                overlay.style.display = '';
+                                overlay2.style.display = '';
+                                hamburgerMenu.style.display = '';
+                                if (logo) logo.style.display = '';
+                                titleElement.style.display = '';
+                                subtitleElement.style.display = '';
+                                copyPngBtn.style.visibility = 'visible';
+                            }, 'image/png');
+                        };
                     }).catch(err => {
                         console.error('Failed to generate PNG: ', err);
                         alert('Failed to generate PNG.');
@@ -1043,16 +1047,54 @@ function displayResults(resultData, isUrlView = false) {
                         if (logo) logo.style.display = '';
                         titleElement.style.display = '';
                         subtitleElement.style.display = '';
-                        copyUrlBtn.style.display = '';
-                        copyPngBtn.style.display = '';
-                        if (document.getElementById('qr-code')) {
-                            document.body.removeChild(document.getElementById('qr-code'));
-                        }
+                        copyPngBtn.style.visibility = 'visible';
                     });
                 }, 300);
             }, 100);
         };
         resultsSection.appendChild(pngButton);
+
+        // Add QR code in initial view (under PNG button)
+        if (resultData.questionSet && resultData.answers) {
+            // Generate Results URL
+            const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
+            const percentageForUrl = Math.round(correctCount / resultData.questionSet.answers.length * 100);
+            const simplifiedResultData = {
+                s: resultData.student,
+                d: resultData.date,
+                t: resultData.time,
+                p: percentageForUrl
+            };
+            const jsonString = JSON.stringify(simplifiedResultData);
+            const base64Data = btoa(jsonString);
+            const baseUrl = window.location.origin + window.location.pathname;
+            const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
+
+            // Create QR code container
+            const qrContainer = document.createElement('div');
+            qrContainer.id = 'qr-code';
+            qrContainer.style.marginTop = '20px';
+            qrContainer.style.marginBottom = '-150px'; // Reduce gap to ~40px from bottom
+            qrContainer.style.width = '200px';
+            qrContainer.style.height = '200px';
+            qrContainer.style.marginLeft = 'auto'; // Center horizontally
+            qrContainer.style.marginRight = 'auto';
+            resultsSection.appendChild(qrContainer);
+
+            // Generate QR code if library is loaded
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrContainer, {
+                    text: resultUrl,
+                    width: 200,
+                    height: 200,
+                    colorDark: '#ffffff', // Black areas become white
+                    colorLight: 'rgba(128, 128, 128, 0.3)' // White areas become semi-transparent gray
+                });
+            } else {
+                qrContainer.innerHTML = '<p style="color: red;">QR Code unavailable: Library failed to load</p>';
+                console.error('QRCode library is not loaded');
+            }
+        }
     }
 }
 
@@ -1076,7 +1118,7 @@ function copyResults(resultData) {
         const copyButton = document.querySelector('#copy-url-button');
         copyButton.textContent = '√ URL Copied';
         setTimeout(() => {
-            copyButton.textContent = 'Copy Results URL';
+            copyButton.textContent = 'Copy Results';
         }, 2000);
     }).catch(err => {
         console.error('Failed to copy URL: ', err);
