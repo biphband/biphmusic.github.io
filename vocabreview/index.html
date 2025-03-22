@@ -550,7 +550,7 @@
 
     <script src="vocab.js"></script>
     <script src="names.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/kjua@0.9.0/dist/kjua.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -1056,44 +1056,42 @@ function displayResults(resultData, isUrlView = false) {
 
         // Add QR code in initial view (under PNG button)
         if (resultData.questionSet && resultData.answers) {
-            // Generate Results URL
-            const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
-            const percentageForUrl = Math.round(correctCount / resultData.questionSet.answers.length * 100);
-            const simplifiedResultData = {
-                s: resultData.student,
-                d: resultData.date,
-                t: resultData.time,
-                p: percentageForUrl
-            };
-            const jsonString = JSON.stringify(simplifiedResultData);
-            const base64Data = btoa(jsonString);
-            const baseUrl = window.location.origin + window.location.pathname;
-            const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
+            // Generate Results URL (unchanged)
+const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
+const percentageForUrl = Math.round(correctCount / resultData.questionSet.answers.length * 100);
+const simplifiedResultData = { s: resultData.student, d: resultData.date, t: resultData.time, p: percentageForUrl };
+const jsonString = JSON.stringify(simplifiedResultData);
+const base64Data = btoa(jsonString);
+const baseUrl = window.location.origin + window.location.pathname;
+const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
 
-            // Create QR code container
-            const qrContainer = document.createElement('div');
-            qrContainer.id = 'qr-code';
-            qrContainer.style.marginTop = '20px';
-            qrContainer.style.marginBottom = '-10px'; // Reduce gap to ~40px from bottom
-            qrContainer.style.width = '200px';
-            qrContainer.style.height = '200px';
-            qrContainer.style.marginLeft = 'auto'; // Center horizontally
-            qrContainer.style.marginRight = 'auto';
-            resultsSection.appendChild(qrContainer);
+// Create QR code container (unchanged)
+const qrContainer = document.createElement('div');
+qrContainer.id = 'qr-code';
+qrContainer.style.marginTop = '20px';
+qrContainer.style.marginBottom = '-100px';
+qrContainer.style.width = '200px';
+qrContainer.style.height = '200px';
+qrContainer.style.marginLeft = 'auto';
+qrContainer.style.marginRight = 'auto';
+resultsSection.appendChild(qrContainer);
 
-            // Generate QR code if library is loaded
-            if (typeof QRCode !== 'undefined') {
-                new QRCode(qrContainer, {
-                    text: resultUrl,
-                    width: 200,
-                    height: 200,
-                    colorDark: '#ffffff', // Black areas become white
-                    colorLight: 'rgba(128, 128, 128, 0.3)' // White areas become semi-transparent gray
-                });
-            } else {
-                qrContainer.innerHTML = '<p style="color: red;">QR Code unavailable: Library failed to load</p>';
-                console.error('QRCode library is not loaded');
-            }
+// Generate QR code with kjua
+if (typeof kjua !== 'undefined') {
+  const qr = kjua({
+    text: resultUrl,
+    size: 200, // Total canvas size
+    fill: '#303f6c', // Foreground color (dark blue)
+    back: '#FFFFFF', // Background color (white)
+    quiet: 0, // No quiet zone to maximize QR code size
+    ecLevel: 'M', // Medium error correction
+    render: 'canvas' // Use canvas for rendering
+  });
+  qrContainer.appendChild(qr);
+} else {
+  qrContainer.innerHTML = '<p style="color: red;">QR Code unavailable: Library failed to load</p>';
+  console.error('kjua library is not loaded');
+}
         }
     }
 }
