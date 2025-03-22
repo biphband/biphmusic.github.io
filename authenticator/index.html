@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Authenticator</title>
+    <title>Authenticator</title>
     <link rel="icon" href="../icons/BGicon.png">
     <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -184,37 +184,52 @@
             margin-top: 20px;
         }
 
-        input[type="file"] {
+        .drop-zone {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            padding: 10px;
-            color: white;
-            font-size: 1rem;
-            margin: 10px;
-        }
-
-        button2 {
-            padding: 10px 15px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            color: white;
-            font-size: 1rem;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
             cursor: pointer;
-            transition: background-color 0.3s;
-            text-transform: uppercase;
-            font-weight: bold;
-            margin: 10px;
+            transition: all 0.3s ease;
         }
 
-        button2:hover {
-            background: rgba(255, 255, 255, 0.3);
+        .drop-zone:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        input[type="file"] {
+            display: none;
         }
 
         #status {
-            margin-top: 10px;
+            margin-top: 20px;
             font-size: 1rem;
+        }
+
+        #error-box {
+    margin: 20px auto;  /* Changed from margin-top: 20px to center horizontally */
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    border-radius: 4px;
+    padding: 15px;
+    max-width: 600px;
+    display: none;
+    width: 90%;  /* Added to match container width */
+    text-align: left;  /* Keeps text left-aligned inside centered box */
+}
+
+        #error-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #error-list li {
+            margin: 5px 0;
         }
 
         .logocontainer {
@@ -263,10 +278,16 @@
     <h1 class="Subtitle">Authenticator</h1>
 
     <div class="container">
-        <p>Upload images with QR codes to open their links in new tabs.</p>
-        <input type="file" id="fileInput" accept="image/*" multiple />
-        <button2 onclick="processFiles()">Open QR Links</button2>
+        <p>Drop images with QR codes here or click to select files.<br>Links will open automatically in new tabs.</p>
+        <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" accept="image/*" multiple />
+            Drop files here or click to upload
+        </div>
         <div id="status"></div>
+        <div id="error-box">
+            <strong>Files with errors:</strong>
+            <ul id="error-list"></ul>
+        </div>
     </div>
 
     <div class="logocontainer">
@@ -281,57 +302,70 @@
             toggle.classList.toggle('open');
         }
 
-        async function processFiles() {
-            const files = document.getElementById('fileInput').files;
-            const status = document.getElementById('status');
+        async function processFiles(files) {
+    const status = document.getElementById('status');
+    const errorBox = document.getElementById('error-box');
+    const errorList = document.getElementById('error-list');
 
-            if (files.length === 0) {
-                status.textContent = "Please upload at least one image file.";
-                return;
+    if (files.length === 0) {
+        status.textContent = "Please upload an image file.";
+        return;
+    }
+
+    status.textContent = files.length === 1 ? 
+        "Processing 1 file..." : 
+        `Processing ${files.length} files...`;
+    
+    errorList.innerHTML = '';
+    errorBox.style.display = 'none';
+    let openedLinks = 0;
+    const errors = [];
+
+    for (let file of files) {
+        try {
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = () => reject(new Error(`Failed to load image: ${file.name}`));
+            });
+
+            let result;
+            try {
+                const codeReader = new ZXing.BrowserMultiFormatReader();
+                result = await codeReader.decodeFromImage(undefined, img.src);
+            } catch (zxingError) {
+                result = null;
             }
 
-            status.textContent = `Processing ${files.length} file(s)...`;
-            let openedLinks = 0;
-
-            for (let file of files) {
-                try {
-                    const img = new Image();
-                    img.src = URL.createObjectURL(file);
-                    await new Promise((resolve, reject) => {
-                        img.onload = resolve;
-                        img.onerror = () => reject(new Error(`Failed to load image: ${file.name}`));
-                    });
-
-                    let result;
-                    try {
-                        const codeReader = new ZXing.BrowserMultiFormatReader();
-                        result = await codeReader.decodeFromImage(undefined, img.src);
-                        console.log(`ZXing decoded ${file.name}: ${result.text}`);
-                    } catch (zxingError) {
-                        console.warn(`ZXing failed for ${file.name}: ${zxingError.message}`);
-                    }
-
-                    if (!result) {
-                        result = await decodeWithQRCodeJS(img);
-                        if (result) {
-                            console.log(`qrcodejs decoded ${file.name}: ${result}`);
-                        } else {
-                            console.warn(`No QR code found in ${file.name} by either library`);
-                        }
-                    }
-
-                    if (result && result.text || result) {
-                        window.open(result.text || result, '_blank');
-                        openedLinks++;
-                    }
-                } catch (error) {
-                    console.error(`Error processing ${file.name}:`, error.message);
-                    status.textContent = `Error with ${file.name}: ${error.message}`;
-                }
+            if (!result) {
+                result = await decodeWithQRCodeJS(img);
             }
 
-            status.textContent = `Opened ${openedLinks} link(s) from ${files.length} file(s).`;
+            if (result && (result.text || result)) {
+                window.open(result.text || result, '_blank');
+                openedLinks++;
+            } else {
+                errors.push(`${file.name}: No QR code found`);
+            }
+        } catch (error) {
+            errors.push(`${file.name}: ${error.message}`);
         }
+    }
+
+    status.textContent = files.length === 1 ?
+        `Opened ${openedLinks} link from 1 file.` :
+        `Opened ${openedLinks} links from ${files.length} files.`;
+    
+    if (errors.length > 0) {
+        errors.forEach(error => {
+            const li = document.createElement('li');
+            li.textContent = error;
+            errorList.appendChild(li);
+        });
+        errorBox.style.display = 'block';
+    }
+}
 
         function decodeWithQRCodeJS(img) {
             return new Promise((resolve) => {
@@ -351,6 +385,32 @@
                 });
             });
         }
+
+        // Setup drop zone functionality
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            processFiles(e.target.files);
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.background = 'rgba(255, 255, 255, 0.2)';
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.background = 'rgba(255, 255, 255, 0.1)';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.background = 'rgba(255, 255, 255, 0.1)';
+            processFiles(e.dataTransfer.files);
+        });
     </script>
 </body>
 </html>
