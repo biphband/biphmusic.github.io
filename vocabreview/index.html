@@ -199,6 +199,7 @@
 }
 
         .quiz-container {
+            margin-top: 40px;
             display: flex;
             gap: 20px;
         }
@@ -279,7 +280,7 @@
             display: flex;
             gap: 15px;
             margin-top: 20px;
-            justify-content: center;
+            justify-content: left;
         }
 
         .action-button {
@@ -433,6 +434,61 @@
         .hidden {
     display: none;
 }
+
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 40px;
+    padding: 20px;
+    margin-top: 20px;
+    width: fit-content;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.auth-check {
+    color: #16a34a; /* Green color */
+    font-size: 1.5rem;
+    margin-right: 10px;
+    opacity: 0;
+    transform: scale(0);
+    animation: checkFadeIn 0.5s ease-out forwards;
+    animation-delay: 0.2s;
+}
+
+.auth-text {
+    font-size: 1rem;
+    color: white;
+    opacity: 0;
+    animation: textFadeIn 0.5s ease-out forwards;
+    animation-delay: 0.4s;
+}
+
+@keyframes checkFadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes textFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
     </style>
 </head>
 <body>
@@ -493,17 +549,55 @@
     </div>
 
     <script src="vocab.js"></script>
+    <script src="names.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const resultsParam = urlParams.get('results');
+    if (resultsParam) {
+        try {
+            const decodedData = atob(decodeURIComponent(resultsParam));
+            const resultData = JSON.parse(decodedData);
 
+            // Handle old format with full questions array
+            if (resultData.questions) {
+                resultData.questionSet = {
+                    questions: resultData.questions.map(q => ({ Definition: q.definition })),
+                    answers: resultData.questions.map(q => q.correctAnswer)
+                };
+                resultData.answers = resultData.questions.map(q => q.studentAnswer);
+                resultData.student = resultData.student || "Unknown";
+                resultData.date = resultData.date || "N/A";
+                resultData.time = resultData.time || "N/A";
+            } 
+            // Handle new simplified format
+            else if (resultData.s) {
+                resultData.student = resultData.s;
+                resultData.date = resultData.d;
+                resultData.time = resultData.t;
+                resultData.p = resultData.p; // Percentage
+            }
 
-        const approvedNames = [
-            "ben chen", "howard ding", "terry he", "alice li", "vincent mu",
-            "tiger pan", "chris peng", "lucy sheng", "diego su", "hailey wang",
-            "eileen xu", "angelina yan", "serena zeng", "catherine zhang",
-            "andrew zhao", "jennifer zhou", "ben", "howard", "terry", "alice",
-            "vincent", "tiger", "chris", "lucy", "diego", "hailey", "eileen",
-            "angelina", "serena", "catherine", "andrew", "jennifer", "mr. tubbs"
-        ];
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('quiz-section').classList.remove('hidden');
+            document.querySelector('.quiz-actions').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+            displayResults(resultData, true);
+            window.scrollTo({ top: 0 });
+        } catch (err) {
+            console.error('Failed to decode results from URL:', err);
+            if (!resultData) {
+                alert('Invalid results URL');
+            }
+        }
+    }
+});
+
+        // const approvedNames = [
+        //     (contained in names.js)
+        // ];
 
         function unscrambleTerms(scrambledArray) {
             function unshiftString(str, shift) {
@@ -701,162 +795,334 @@
     }
 
     const resultData = prepareResultData();
-    displayResults(resultData);
+    displayResults(resultData, false); // Pass false for initial view
 
     document.querySelector('.quiz-container').classList.add('hidden');
-    document.querySelector('.quiz-actions').classList.add('hidden'); // Hide Submit button
+    document.querySelector('.quiz-actions').classList.add('hidden');
     document.getElementById('results-section').classList.remove('hidden');
 
-    // Smoothly scroll to the top of the page
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-        function displayResults(resultData) {
+function displayResults(resultData, isUrlView = false) {
     const resultsSection = document.getElementById('results-section');
     resultsSection.innerHTML = '';
 
     const title = document.createElement('h2');
-    title.textContent = `Results for ${resultData.student}`;
+    title.textContent = `Results for ${resultData.student || resultData.s}`;
     resultsSection.appendChild(title);
 
     const dateTime = document.createElement('p');
-    dateTime.textContent = `Date: ${resultData.date} | Time: ${resultData.time}`;
+    dateTime.textContent = `Date: ${resultData.date || resultData.d} | Time: ${resultData.time || resultData.t}`;
     resultsSection.appendChild(dateTime);
 
-    const table = document.createElement('table');
-    table.className = 'results-table';
-    table.innerHTML = `
-        <tr>
-            <th>#</th>
-            <th>Question</th>
-            <th>Your Answer</th>
-            <th>Correct Answer</th>
-        </tr>
-        ${resultData.questionSet.questions.map((question, index) => {
-            const studentAnswer = resultData.answers[index] || "";
-            const correctAnswer = resultData.questionSet.answers[index];
-            const isCorrect = studentAnswer.toLowerCase() === correctAnswer.toLowerCase();
-            return `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${question.Definition}</td>
-                    <td class="${isCorrect ? '' : 'incorrect'}">${studentAnswer}${isCorrect ? '<span class="correct-mark">√</span>' : ''}</td>
-                    <td>${correctAnswer}</td>
-                </tr>
-            `;
-        }).join('')}
-    `;
-    resultsSection.appendChild(table);
+    // Calculate or retrieve percentage
+    let percentage;
+    if (isUrlView && resultData.p !== undefined) {
+        percentage = resultData.p;
+    } else if (resultData.questionSet && resultData.answers) {
+        const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
+        percentage = Math.round(correctCount / resultData.questionSet.answers.length * 100);
+    } else {
+        percentage = 'N/A';
+    }
 
     const score = document.createElement('p');
-    const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
-    score.textContent = `Score: ${correctCount}/${resultData.questionSet.answers.length} (${(correctCount / resultData.questionSet.answers.length * 100).toFixed(1)}%)`;
+    if (!isUrlView && resultData.questionSet && resultData.answers) {
+        const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
+        score.textContent = `Score: ${correctCount}/${resultData.questionSet.answers.length} (${percentage}%)`;
+    } else {
+        score.textContent = `Score: ${percentage}%`;
+    }
     resultsSection.appendChild(score);
 
-    const termsToReview = document.createElement('div');
-    termsToReview.className = 'terms-to-review';
-    termsToReview.innerHTML = `
-        <h3>Terms to Review</h3>
-        <ul>
-            ${resultData.termsToReview.map(item => `<li>${item.term}: ${item.definition}</li>`).join('')}
-        </ul>
-    `;
-    resultsSection.appendChild(termsToReview);
+    // Show table only in initial view
+    if (!isUrlView && resultData.questionSet) {
+        const table = document.createElement('table');
+        table.className = 'results-table';
+        table.innerHTML = `
+            <tr>
+                <th>#</th>
+                <th>Question</th>
+                <th>Your Answer</th>
+                <th>Correct Answer</th>
+            </tr>
+            ${resultData.questionSet.questions.map((question, index) => {
+                const studentAnswer = resultData.answers[index] || "";
+                const correctAnswer = resultData.questionSet.answers[index];
+                const isCorrect = studentAnswer.toLowerCase() === correctAnswer.toLowerCase();
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${question.Definition}</td>
+                        <td class="${isCorrect ? '' : 'incorrect'}">${studentAnswer}${isCorrect ? '<span class="correct-mark">√</span>' : ''}</td>
+                        <td>${correctAnswer}</td>
+                    </tr>
+                `;
+            }).join('')}
+        `;
+        resultsSection.appendChild(table);
+    }
 
-    const copyButton = document.createElement('button');
-    copyButton.className = 'copy-button';
-    copyButton.textContent = 'Copy Results';
-    copyButton.onclick = () => copyResults(resultData);
-    resultsSection.appendChild(copyButton);
+    // Add mock security feature only in URL view
+    if (isUrlView) {
+        const authContainer = document.createElement('div');
+        authContainer.className = 'auth-container';
+        authContainer.innerHTML = `
+            <span class="auth-check">✔</span>
+            <span class="auth-text">Authentication successful</span>
+        `;
+        resultsSection.appendChild(authContainer);
+
+        const copyScoreButton = document.createElement('button');
+        copyScoreButton.className = 'copy-button';
+        copyScoreButton.textContent = 'Copy Score';
+        copyScoreButton.onclick = () => {
+            const percentageText = `${percentage}%`;
+            navigator.clipboard.writeText(percentageText).then(() => {
+                copyScoreButton.textContent = '√ Copied';
+                setTimeout(() => {
+                    copyScoreButton.textContent = 'Copy Score';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy score: ', err);
+                alert('Failed to copy score');
+            });
+        };
+        resultsSection.appendChild(copyScoreButton);
+    }
+
+    if (!isUrlView) {
+        const termsToReview = document.createElement('div');
+        termsToReview.className = 'terms-to-review';
+        const heading = document.createElement('h3');
+        heading.textContent = (percentage === 100 && resultData.termsToReview.length === 0) ? 'Great job!' : 'Terms to Review';
+        termsToReview.appendChild(heading);
+        termsToReview.innerHTML += `
+            <ul>
+                ${resultData.termsToReview.map(item => `<li>${item.term}: ${item.definition}</li>`).join('')}
+            </ul>
+        `;
+        resultsSection.appendChild(termsToReview);
+
+        const isMobileOrTablet = /iPad|iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const pngButton = document.createElement('button');
+        pngButton.className = 'copy-button';
+        pngButton.id = 'copy-png-button';
+        pngButton.textContent = isMobileOrTablet ? 'Download Results' : 'Copy Results';
+        pngButton.style.display = 'block'; // Block-level for centering
+        pngButton.style.marginLeft = 'auto';
+        pngButton.style.marginRight = 'auto';
+        pngButton.style.marginTop = '20px';
+        pngButton.style.visibility = 'visible'; // Default visibility
+        pngButton.onclick = () => {
+            const flash = document.createElement('div');
+            flash.style.position = 'fixed';
+            flash.style.top = '0';
+            flash.style.left = '0';
+            flash.style.width = '100%';
+            flash.style.height = '100%';
+            flash.style.backgroundColor = 'white';
+            flash.style.opacity = '1';
+            flash.style.zIndex = '9999';
+            flash.style.transition = 'opacity 0.3s ease-out';
+            document.body.appendChild(flash);
+
+            setTimeout(() => {
+                flash.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(flash);
+
+                    const background = document.querySelector('.background');
+                    const overlay = document.querySelector('.overlay');
+                    const overlay2 = document.querySelector('.overlay2');
+                    const hamburgerMenu = document.querySelector('.hamburger-menu');
+                    const logo = document.querySelector('.logo');
+                    const titleElement = document.querySelector('h1.Title');
+                    const subtitleElement = document.querySelector('h1.Subtitle');
+                    const copyPngBtn = document.getElementById('copy-png-button');
+
+                    background.style.display = 'none';
+                    overlay.style.display = 'none';
+                    overlay2.style.display = 'none';
+                    hamburgerMenu.style.display = 'none';
+                    if (logo) logo.style.display = 'none'; // Hide logo during capture
+                    titleElement.style.display = 'none';
+                    subtitleElement.style.display = 'none';
+                    copyPngBtn.style.visibility = 'hidden'; // Hide button but keep space
+
+                    html2canvas(document.body, {
+                        scale: 2,
+                        useCORS: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        width: document.body.scrollWidth,
+                        height: document.body.scrollHeight,
+                        backgroundColor: 'rgb(45, 70, 119)'
+                    }).then(canvas => {
+                        // Load logo image
+                        const logoImg = new Image();
+                        logoImg.crossOrigin = 'anonymous'; // For CORS if needed
+                        logoImg.src = '../icons/Full Logo White on Transparent.png';
+
+                        logoImg.onload = () => {
+                            const ctx = canvas.getContext('2d');
+                            const logoWidth = canvas.width * 0.25; // Match original 25vh, approximated
+                            const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
+                            const padding = 50 * 2; // 50px at scale 2
+                            const x = canvas.width - logoWidth - padding; // Right edge with padding
+                            const y = canvas.height - logoHeight - padding; // 50px from bottom
+
+                            // Draw logo onto canvas
+                            ctx.drawImage(logoImg, x, y, logoWidth, logoHeight);
+
+                            canvas.toBlob(blob => {
+                                if (isMobileOrTablet) {
+                                    const link = document.createElement('a');
+                                    link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
+                                    link.href = URL.createObjectURL(blob);
+                                    link.click();
+                                    URL.revokeObjectURL(link.href);
+
+                                    pngButton.textContent = '√ Downloaded';
+                                    setTimeout(() => {
+                                        pngButton.textContent = 'Download Results';
+                                    }, 2000);
+                                } else {
+                                    const item = new ClipboardItem({ 'image/png': blob });
+                                    navigator.clipboard.write([item]).then(() => {
+                                        pngButton.textContent = '√ Copied';
+                                        setTimeout(() => {
+                                            pngButton.textContent = 'Copy Results';
+                                        }, 2000);
+                                    }).catch(err => {
+                                        console.error('Failed to copy PNG to clipboard: ', err);
+                                        alert('Failed to copy PNG to clipboard.');
+                                    });
+                                }
+
+                                // Cleanup
+                                background.style.display = '';
+                                overlay.style.display = '';
+                                overlay2.style.display = '';
+                                hamburgerMenu.style.display = '';
+                                if (logo) logo.style.display = '';
+                                titleElement.style.display = '';
+                                subtitleElement.style.display = '';
+                                copyPngBtn.style.visibility = 'visible';
+                            }, 'image/png');
+                        };
+
+                        logoImg.onerror = () => {
+                            console.error('Failed to load logo image');
+                            alert('Failed to load logo for PNG capture.');
+                            canvas.toBlob(blob => {
+                                if (isMobileOrTablet) {
+                                    const link = document.createElement('a');
+                                    link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
+                                    link.href = URL.createObjectURL(blob);
+                                    link.click();
+                                    URL.revokeObjectURL(link.href);
+                                } else {
+                                    const item = new ClipboardItem({ 'image/png': blob });
+                                    navigator.clipboard.write([item]);
+                                }
+                                background.style.display = '';
+                                overlay.style.display = '';
+                                overlay2.style.display = '';
+                                hamburgerMenu.style.display = '';
+                                if (logo) logo.style.display = '';
+                                titleElement.style.display = '';
+                                subtitleElement.style.display = '';
+                                copyPngBtn.style.visibility = 'visible';
+                            }, 'image/png');
+                        };
+                    }).catch(err => {
+                        console.error('Failed to generate PNG: ', err);
+                        alert('Failed to generate PNG.');
+                        background.style.display = '';
+                        overlay.style.display = '';
+                        overlay2.style.display = '';
+                        hamburgerMenu.style.display = '';
+                        if (logo) logo.style.display = '';
+                        titleElement.style.display = '';
+                        subtitleElement.style.display = '';
+                        copyPngBtn.style.visibility = 'visible';
+                    });
+                }, 300);
+            }, 100);
+        };
+        resultsSection.appendChild(pngButton);
+
+        // Add QR code in initial view (under PNG button)
+        if (resultData.questionSet && resultData.answers) {
+            // Generate Results URL
+            const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
+            const percentageForUrl = Math.round(correctCount / resultData.questionSet.answers.length * 100);
+            const simplifiedResultData = {
+                s: resultData.student,
+                d: resultData.date,
+                t: resultData.time,
+                p: percentageForUrl
+            };
+            const jsonString = JSON.stringify(simplifiedResultData);
+            const base64Data = btoa(jsonString);
+            const baseUrl = window.location.origin + window.location.pathname;
+            const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
+
+            // Create QR code container
+            const qrContainer = document.createElement('div');
+            qrContainer.id = 'qr-code';
+            qrContainer.style.marginTop = '20px';
+            qrContainer.style.marginBottom = '-10px'; // Reduce gap to ~40px from bottom
+            qrContainer.style.width = '200px';
+            qrContainer.style.height = '200px';
+            qrContainer.style.marginLeft = 'auto'; // Center horizontally
+            qrContainer.style.marginRight = 'auto';
+            resultsSection.appendChild(qrContainer);
+
+            // Generate QR code if library is loaded
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrContainer, {
+                    text: resultUrl,
+                    width: 200,
+                    height: 200,
+                    colorDark: '#ffffff', // Black areas become white
+                    colorLight: 'rgba(128, 128, 128, 0.3)' // White areas become semi-transparent gray
+                });
+            } else {
+                qrContainer.innerHTML = '<p style="color: red;">QR Code unavailable: Library failed to load</p>';
+                console.error('QRCode library is not loaded');
+            }
+        }
+    }
 }
 
 function copyResults(resultData) {
     const correctCount = resultData.answers.filter((ans, idx) => ans.toLowerCase() === resultData.questionSet.answers[idx].toLowerCase()).length;
+    const percentage = Math.round(correctCount / resultData.questionSet.answers.length * 100);
 
-    // Create HTML content for the clipboard with Helvetica font and no page breaks
-    const htmlContent = `
-        <div style="font-family: Helvetica, Arial, sans-serif;">
-            <h2>Vocabulary Review - ${resultData.student}</h2>
-            <p>Date: ${resultData.date} | Time: ${resultData.time}</p>
-            <table border="1" style="border-collapse: collapse; page-break-inside: avoid; font-family: Helvetica, Arial, sans-serif;">
-                <thead>
-                    <tr>
-                        <th style="white-space: nowrap; padding: 8px; text-align: center; width: 50px;">#</th>
-                        <th style="white-space: nowrap; padding: 8px;">Question</th>
-                        <th style="white-space: nowrap; padding: 8px;">Your Answer</th>
-                        <th style="white-space: nowrap; padding: 8px;">Correct Answer</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${resultData.questionSet.questions.map((question, index) => {
-                        const studentAnswer = resultData.answers[index] || "";
-                        const correctAnswer = resultData.questionSet.answers[index];
-                        const isCorrect = studentAnswer.toLowerCase() === correctAnswer.toLowerCase();
-                        return `
-                            <tr>
-                                <td style="white-space: nowrap; padding: 8px; text-align: center;">${index + 1}</td>
-                                <td style="white-space: nowrap; padding: 8px;">${question.Definition}</td>
-                                <td style="white-space: nowrap; padding: 8px; color: ${isCorrect ? '#000000' : '#dc2626'}">${studentAnswer}${isCorrect ? '<span style="color: #16a34a;"> √</span>' : ''}</td>
-                                <td style="white-space: nowrap; padding: 8px;">${correctAnswer}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-            <p>Score: ${correctCount}/${resultData.questionSet.answers.length} (${(correctCount / resultData.questionSet.answers.length * 100).toFixed(1)}%)</p>
-            <h3>Terms to Review</h3>
-            <ul>
-                ${resultData.termsToReview.map(item => `<li>${item.term}: ${item.definition}</li>`).join('')}
-            </ul>
-        </div>
-    `;
+    const simplifiedResultData = {
+        s: resultData.student,
+        d: resultData.date,
+        t: resultData.time,
+        p: percentage
+    };
 
-    // Create a plain text fallback
-    const plainText = `
-Vocabulary Review - ${resultData.student}
-Date: ${resultData.date} | Time: ${resultData.time}
+    const jsonString = JSON.stringify(simplifiedResultData);
+    const base64Data = btoa(jsonString);
+    const baseUrl = window.location.origin + window.location.pathname;
+    const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
 
-# | Question | Your Answer | Correct Answer
-${resultData.questionSet.questions.map((question, index) => {
-    const studentAnswer = resultData.answers[index] || "";
-    const correctAnswer = resultData.questionSet.answers[index];
-    return `${index + 1} | ${question.Definition} | ${studentAnswer} | ${correctAnswer}`;
-}).join('\n')}
-
-Score: ${correctCount}/${resultData.questionSet.answers.length} (${(correctCount / resultData.questionSet.answers.length * 100).toFixed(1)}%)
-
-Terms to Review:
-${resultData.termsToReview.map(item => `- ${item.term}: ${item.definition}`).join('\n')}
-    `.trim();
-
-    // Use Clipboard API to write HTML content
-    const blobHtml = new Blob([htmlContent], { type: 'text/html' });
-    const blobText = new Blob([plainText], { type: 'text/plain' });
-    const clipboardItem = new ClipboardItem({
-        'text/html': blobHtml,
-        'text/plain': blobText
-    });
-
-    navigator.clipboard.write([clipboardItem]).then(() => {
-        const copyButton = document.querySelector('.copy-button');
-        copyButton.textContent = '√ Copied to clipboard';
-        // Optional: Reset text after a few seconds
+    navigator.clipboard.writeText(resultUrl).then(() => {
+        const copyButton = document.querySelector('#copy-url-button');
+        copyButton.textContent = '√ URL Copied';
         setTimeout(() => {
             copyButton.textContent = 'Copy Results';
         }, 2000);
     }).catch(err => {
-        console.error('Failed to copy: ', err);
-        // Fallback to plain text if HTML copy fails
-        navigator.clipboard.writeText(plainText).then(() => {
-            const copyButton = document.querySelector('.copy-button');
-            copyButton.textContent = 'Copied as Text';
-            setTimeout(() => {
-                copyButton.textContent = 'Copy Results';
-            }, 2000);
-        }).catch(fallbackErr => {
-            console.error('Fallback copy failed: ', fallbackErr);
-            alert('Failed to copy results. Please try again.');
-        });
+        console.error('Failed to copy URL: ', err);
+        alert('Failed to copy URL. Please try again.');
     });
 }
 
