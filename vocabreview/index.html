@@ -986,40 +986,42 @@ function displayResults(resultData, isUrlView = false) {
                             ctx.drawImage(logoImg, x, y, logoWidth, logoHeight);
 
                             canvas.toBlob(blob => {
-                                if (isMobileOrTablet) {
-                                    const link = document.createElement('a');
-                                    link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
-                                    link.href = URL.createObjectURL(blob);
-                                    link.click();
-                                    URL.revokeObjectURL(link.href);
-
-                                    pngButton.textContent = '√ Downloaded';
+                            if (isMobileOrTablet) {
+                                const link = document.createElement('a');
+                                link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
+                                link.href = URL.createObjectURL(blob);
+                                link.click();
+                                URL.revocObjectURL(link.href);
+                                // Success message for mobile
+                            } else {
+                                const item = new ClipboardItem({ 'image/png': blob });
+                                navigator.clipboard.write([item]).then(() => {
+                                    pngButton.textContent = '√ Copied';
                                     setTimeout(() => {
-                                        pngButton.textContent = 'Download Results';
+                                        pngButton.textContent = 'Copy Results';
                                     }, 2000);
-                                } else {
-                                    const item = new ClipboardItem({ 'image/png': blob });
-                                    navigator.clipboard.write([item]).then(() => {
-                                        pngButton.textContent = '√ Copied';
-                                        setTimeout(() => {
-                                            pngButton.textContent = 'Copy Results';
-                                        }, 2000);
-                                    }).catch(err => {
-                                        console.error('Failed to copy PNG to clipboard: ', err);
-                                        alert('Failed to copy PNG to clipboard.');
-                                    });
-                                }
-
-                                // Cleanup
-                                background.style.display = '';
-                                overlay.style.display = '';
-                                overlay2.style.display = '';
-                                hamburgerMenu.style.display = '';
-                                if (logo) logo.style.display = '';
-                                titleElement.style.display = '';
-                                subtitleElement.style.display = '';
-                                copyPngBtn.style.visibility = 'visible';
-                            }, 'image/png');
+                                }).catch(err => {
+                                    console.error('Failed to copy PNG to clipboard: ', err);
+                                    if (confirm('Failed to copy PNG to clipboard. Would you like to download it instead?')) {
+                                        const link = document.createElement('a');
+                                        link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
+                                        link.href = URL.createObjectURL(blob);
+                                        link.click();
+                                        URL.revocObjectURL(link.href);
+                                    }
+                                    // No additional action if user chooses not to download
+                                });
+                            }
+                            // Cleanup
+                            background.style.display = '';
+                            overlay.style.display = '';
+                            overlay2.style.display = '';
+                            hamburgerMenu.style.display = '';
+                            if (logo) logo.style.display = '';
+                            titleElement.style.display = '';
+                            subtitleElement.style.display = '';
+                            copyPngBtn.style.visibility = 'visible';
+                        }, 'image/png');
                         };
 
                         logoImg.onerror = () => {
