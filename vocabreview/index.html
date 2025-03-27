@@ -924,6 +924,8 @@ function displayResults(resultData, isUrlView = false) {
         pngButton.style.marginRight = 'auto';
         pngButton.style.marginTop = '20px';
         pngButton.style.visibility = 'visible'; // Default visibility
+        
+        
         pngButton.onclick = () => {
             const flash = document.createElement('div');
             flash.style.position = 'fixed';
@@ -947,18 +949,21 @@ function displayResults(resultData, isUrlView = false) {
                     const overlay2 = document.querySelector('.overlay2');
                     const hamburgerMenu = document.querySelector('.hamburger-menu');
                     const logo = document.querySelector('.logo');
-                    const titleElement = document.querySelector('h1.Title');
-                    const subtitleElement = document.querySelector('h1.Subtitle');
                     const copyPngBtn = document.getElementById('copy-png-button');
 
+                    // Hide elements we don’t want in the PNG, but keep title and subtitle
                     background.style.display = 'none';
                     overlay.style.display = 'none';
                     overlay2.style.display = 'none';
                     hamburgerMenu.style.display = 'none';
-                    if (logo) logo.style.display = 'none'; // Hide logo during capture
-                    titleElement.style.display = 'none';
-                    subtitleElement.style.display = 'none';
+                    if (logo) logo.style.display = 'none'; // Still hide logo during capture to re-add later
                     copyPngBtn.style.visibility = 'hidden'; // Hide button but keep space
+
+                    // Note: We’re not hiding titleElement and subtitleElement here anymore
+                    // const titleElement = document.querySelector('h1.Title');
+                    // const subtitleElement = document.querySelector('h1.Subtitle');
+                    // titleElement.style.display = 'none';
+                    // subtitleElement.style.display = 'none';
 
                     html2canvas(document.body, {
                         scale: 2,
@@ -969,59 +974,55 @@ function displayResults(resultData, isUrlView = false) {
                         height: document.body.scrollHeight,
                         backgroundColor: 'rgb(45, 70, 119)'
                     }).then(canvas => {
-                        // Load logo image
                         const logoImg = new Image();
-                        logoImg.crossOrigin = 'anonymous'; // For CORS if needed
+                        logoImg.crossOrigin = 'anonymous';
                         logoImg.src = '../icons/Full Logo White on Transparent.png';
 
                         logoImg.onload = () => {
                             const ctx = canvas.getContext('2d');
-                            const logoWidth = canvas.width * 0.25; // Match original 25vh, approximated
+                            const logoWidth = canvas.width * 0.25;
                             const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
                             const padding = 50 * 2; // 50px at scale 2
-                            const x = canvas.width - logoWidth - padding; // Right edge with padding
-                            const y = canvas.height - logoHeight - padding; // 50px from bottom
+                            const x = canvas.width - logoWidth - padding;
+                            const y = canvas.height - logoHeight - padding;
 
-                            // Draw logo onto canvas
                             ctx.drawImage(logoImg, x, y, logoWidth, logoHeight);
 
                             canvas.toBlob(blob => {
-                            if (isMobileOrTablet) {
-                                const link = document.createElement('a');
-                                link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
-                                link.href = URL.createObjectURL(blob);
-                                link.click();
-                                URL.revocObjectURL(link.href);
-                                // Success message for mobile
-                            } else {
-                                const item = new ClipboardItem({ 'image/png': blob });
-                                navigator.clipboard.write([item]).then(() => {
-                                    pngButton.textContent = '√ Copied';
-                                    setTimeout(() => {
-                                        pngButton.textContent = 'Copy Results';
-                                    }, 2000);
-                                }).catch(err => {
-                                    console.error('Failed to copy PNG to clipboard: ', err);
-                                    if (confirm('Failed to copy PNG to clipboard. Would you like to download it instead?')) {
-                                        const link = document.createElement('a');
-                                        link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
-                                        link.href = URL.createObjectURL(blob);
-                                        link.click();
-                                        URL.revocObjectURL(link.href);
-                                    }
-                                    // No additional action if user chooses not to download
-                                });
-                            }
-                            // Cleanup
-                            background.style.display = '';
-                            overlay.style.display = '';
-                            overlay2.style.display = '';
-                            hamburgerMenu.style.display = '';
-                            if (logo) logo.style.display = '';
-                            titleElement.style.display = '';
-                            subtitleElement.style.display = '';
-                            copyPngBtn.style.visibility = 'visible';
-                        }, 'image/png');
+                                if (isMobileOrTablet) {
+                                    const link = document.createElement('a');
+                                    link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
+                                    link.href = URL.createObjectURL(blob);
+                                    link.click();
+                                    URL.revokeObjectURL(link.href);
+                                } else {
+                                    const item = new ClipboardItem({ 'image/png': blob });
+                                    navigator.clipboard.write([item]).then(() => {
+                                        pngButton.textContent = '√ Copied';
+                                        setTimeout(() => {
+                                            pngButton.textContent = 'Copy Results';
+                                        }, 2000);
+                                    }).catch(err => {
+                                        console.error('Failed to copy PNG to clipboard: ', err);
+                                        if (confirm('Failed to copy PNG to clipboard. Would you like to download it instead?')) {
+                                            const link = document.createElement('a');
+                                            link.download = `Vocabulary_Results_${resultData.student || resultData.s}_${resultData.date || resultData.d}.png`;
+                                            link.href = URL.createObjectURL(blob);
+                                            link.click();
+                                            URL.revokeObjectURL(link.href);
+                                        }
+                                    });
+                                }
+                                // Restore hidden elements (no need to restore title/subtitle since they weren’t hidden)
+                                background.style.display = '';
+                                overlay.style.display = '';
+                                overlay2.style.display = '';
+                                hamburgerMenu.style.display = '';
+                                if (logo) logo.style.display = '';
+                                copyPngBtn.style.visibility = 'visible';
+                                // titleElement.style.display = ''; // Not needed
+                                // subtitleElement.style.display = ''; // Not needed
+                            }, 'image/png');
                         };
 
                         logoImg.onerror = () => {
@@ -1043,9 +1044,9 @@ function displayResults(resultData, isUrlView = false) {
                                 overlay2.style.display = '';
                                 hamburgerMenu.style.display = '';
                                 if (logo) logo.style.display = '';
-                                titleElement.style.display = '';
-                                subtitleElement.style.display = '';
                                 copyPngBtn.style.visibility = 'visible';
+                                // titleElement.style.display = ''; // Not needed
+                                // subtitleElement.style.display = ''; // Not needed
                             }, 'image/png');
                         };
                     }).catch(err => {
@@ -1056,9 +1057,9 @@ function displayResults(resultData, isUrlView = false) {
                         overlay2.style.display = '';
                         hamburgerMenu.style.display = '';
                         if (logo) logo.style.display = '';
-                        titleElement.style.display = '';
-                        subtitleElement.style.display = '';
                         copyPngBtn.style.visibility = 'visible';
+                        // titleElement.style.display = ''; // Not needed
+                        // subtitleElement.style.display = ''; // Not needed
                     });
                 }, 300);
             }, 100);
