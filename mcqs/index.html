@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCQs</title>
+    <link rel="icon" href="../icons/BGicon.png">
+    <style>
+        @font-face {
+            font-family: 'Zapfino';
+            src: url('../fonts/Zapfino.ttf') format('truetype');
+        }
+
+        body {
+            background-color: rgb(45, 70, 119);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(45, 70, 119), rgb(9, 32, 79));
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 70%, #303f6c 0%, transparent 50%),
+                        radial-gradient(circle at 70% 30%, #236693 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .overlay2 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 70%, #ffffff 0%, transparent 50%),
+                        radial-gradient(circle at 30% 30%, #b8b8b8 0%, transparent 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .hamburger-menu {
+            position: absolute;
+            margin-left: 7px;
+            top: 20px;
+            left: 13px;
+            z-index: 1000;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s linear;
+        }
+
+        .menu-toggle.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        .menu-items {
+            position: absolute;
+            top: 25px;
+            left: -250px;
+            background: linear-gradient(135deg, rgba(48, 67, 104, 0.8), rgba(20, 31, 53, 0.8));
+            width: 250px;
+            height: 90vh;
+            padding-top: 20px;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .menu-items.show {
+            left: 0;
+            opacity: 1;
+        }
+
+        .menu-items a {
+            display: block;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .menu-items.show a {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-items a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-title {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .menu-footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        h1.Title {
+            font-family: 'Arial', sans-serif;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h1.Subtitle {
+            font-family: 'Zapfino', sans-serif;
+            font-size: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            text-align: left;
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .login-section, .quiz-section {
+            width: 100%;
+        }
+
+        .login-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .quiz-container {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .question-number {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .option-button {
+            width: 150px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .option-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .confirmation-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .confirmation-check {
+            color: #16a34a;
+            font-size: 4rem;
+            opacity: 0;
+            transform: scale(0);
+            animation: checkFadeIn 0.5s ease-out forwards;
+        }
+
+        .confirmation-text {
+            font-size: 1.5rem;
+            text-align: center;
+            opacity: 0;
+            animation: textFadeIn 0.5s ease-out forwards;
+            animation-delay: 0.2s;
+        }
+
+        @keyframes checkFadeIn {
+            0% { opacity: 0; transform: scale(0); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes textFadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .proceed-button {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .proceed-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .results-section {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        .results-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .results-table th,
+        .results-table td {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px;
+            text-align: left;
+        }
+
+        .results-table th {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .incorrect {
+            color: #dc2626;
+        }
+
+        .correct-mark {
+            color: #16a34a;
+            margin-left: 4px;
+        }
+
+        .copy-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .copy-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .logocontainer {
+            min-height: 10vh;
+            padding-bottom: 50px;
+        }
+
+        .logo {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            width: 25vh;
+            height: auto;
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+
+    <div class="hamburger-menu">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="menu-items" id="menu-items">
+            <div class="menu-title">BIPH Music</div>
+            <a href="https://biphmusic.github.io/">Home</a>
+            <a href="https://biphmusic.github.io/dailysightsinging/">Daily Sight Singing</a>
+            <a href="https://biphmusic.github.io/wordwall/">Word Wall</a>
+            <a href="https://biphmusic.github.io/flashcards/">Flash Cards</a>
+            <a href="https://biphmusic.github.io/dice/">Dice Simulator</a>
+            <a href="https://biphmusic.github.io/chords/">Chord Quality</a>
+            <a href="https://biphmusic.github.io/progressions/">Chord Progressions</a>
+            <a href="https://biphmusic.github.io/piano/">Web Piano</a>
+            <a href="https://biphmusic.github.io/units/">AP Units</a>
+            <a href="mailto:garrison.tubbs-biph@basischina.com">Contact</a>
+            <div class="menu-footer">© Garrison Tubbs 2024</div>
+        </div>
+    </div>
+
+    <h1 class="Title">BIPH Music</h1>
+    <h1 class="Subtitle">MCQs</h1>
+
+    <div class="logincontainer">
+        <div id="login-section" class="login-section">
+            <h2>Enter your name to begin</h2>
+            <input type="text" id="name-input" placeholder="Your name" autofocus>
+            <button onclick="startQuiz()">Begin</button>
+            <div id="error-message" class="error"></div>
+        </div>
+
+        <div id="quiz-section" class="quiz-section hidden">
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="results-section" class="results-section hidden"></div>
+        </div>
+    </div>
+
+    <div class="logocontainer">        
+        <img src="../icons/Full Logo White on Transparent.png" alt="BASIS Logo" class="logo">
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/kjua@0.9.0/dist/kjua.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        let currentStudent = '';
+        let currentQuestion = 0;
+        let studentAnswers = [];
+        const totalQuestions = 10;
+
+        // Date-based question sets (year 2025)
+        const questionSets = {
+            '2025-03-27': { start: 81, end: 90 },
+            '2025-03-28': { start: 91, end: 100 },
+            '2025-03-31': { start: 101, end: 110 },
+            '2025-04-01': { start: 111, end: 120 },
+            '2025-04-02': { start: 121, end: 130 },
+            '2025-04-03': { start: 131, end: 140 },
+            '2025-04-07': { start: 141, end: 150 },
+            '2025-04-08': { start: 151, end: 160 },
+            '2025-04-09': { start: 161, end: 170 },
+            '2025-04-10': { start: 171, end: 180 },
+            '2025-04-11': { start: 181, end: 190 },
+            '2025-04-14': { start: 191, end: 200 },
+            '2025-04-15': { start: 201, end: 210 },
+            '2025-04-16': { start: 211, end: 220 },
+            '2025-04-17': { start: 221, end: 230 },
+            '2025-04-18': { start: 231, end: 240 },
+            '2025-04-21': { start: 241, end: 250 },
+            '2025-04-22': { start: 251, end: 260 },
+            '2025-04-23': { start: 261, end: 270 },
+            '2025-04-24': { start: 271, end: 280 },
+            '2025-04-25': { start: 281, end: 290 },
+            '2025-04-28': { start: 291, end: 300 },
+            '2025-04-29': { start: 301, end: 310 },
+            '2025-04-30': { start: 311, end: 320 },
+            '2025-05-05': { start: 321, end: 330 },
+            '2025-05-06': { start: 331, end: 340 },
+            '2025-05-07': { start: 341, end: 350 },
+            '2025-05-08': { start: 351, end: 360 },
+            '2025-05-09': { start: 361, end: 370 }
+        };
+
+        // Correct answers with question numbers (scrambled, default 'E')
+        const scrambledCorrectAnswers = [
+            {"question":81,"answer":"RA=="},
+            {"question":82,"answer":"Rg=="},
+            {"question":83,"answer":"RA=="},
+            {"question":84,"answer":"Rg=="},
+            {"question":85,"answer":"RQ=="},
+            {"question":86,"answer":"RQ=="},
+            {"question":87,"answer":"Rg=="},
+            {"question":88,"answer":"Rw=="},
+            {"question":89,"answer":"RA=="},
+            {"question":90,"answer":"RA=="},
+            {"question":91,"answer":"RQ=="},
+            {"question":92,"answer":"Rg=="},
+            {"question":93,"answer":"Rw=="},
+            {"question":94,"answer":"Rg=="},
+            {"question":95,"answer":"RQ=="},
+            {"question":96,"answer":"RA=="},
+            {"question":97,"answer":"Rg=="},
+            {"question":98,"answer":"RQ=="},
+            {"question":99,"answer":"RQ=="},
+            {"question":100,"answer":"Rg=="},
+            {"question":101,"answer":"RA=="},
+            {"question":102,"answer":"Rw=="},
+            {"question":103,"answer":"RQ=="},
+            {"question":104,"answer":"RQ=="},
+            {"question":105,"answer":"Rw=="},
+            {"question":106,"answer":"Rg=="},
+            {"question":107,"answer":"RA=="},
+            {"question":108,"answer":"RQ=="},
+            {"question":109,"answer":"RA=="},
+            {"question":110,"answer":"RQ=="},
+            {"question":111,"answer":"Rw=="},
+            {"question":112,"answer":"Rw=="},
+            {"question":113,"answer":"Rg=="},
+            {"question":114,"answer":"Rg=="},
+            {"question":115,"answer":"Rw=="},
+            {"question":116,"answer":"RA=="},
+            {"question":117,"answer":"Rw=="},
+            {"question":118,"answer":"RQ=="},
+            {"question":119,"answer":"Rw=="},
+            {"question":120,"answer":"RQ=="},
+            {"question":121,"answer":""},
+            {"question":122,"answer":""},
+            {"question":123,"answer":""},
+            {"question":124,"answer":""},
+            {"question":125,"answer":""},
+            {"question":126,"answer":""},
+            {"question":127,"answer":""},
+            {"question":128,"answer":""},
+            {"question":129,"answer":""},
+            {"question":130,"answer":""},
+            {"question":131,"answer":""},
+            {"question":132,"answer":""},
+            {"question":133,"answer":""},
+            {"question":134,"answer":""},
+            {"question":135,"answer":""},
+            {"question":136,"answer":""},
+            {"question":137,"answer":""},
+            {"question":138,"answer":""},
+            {"question":139,"answer":""},
+            {"question":140,"answer":""},
+            {"question":141,"answer":""},
+            {"question":142,"answer":""},
+            {"question":143,"answer":""},
+            {"question":144,"answer":""},
+            {"question":145,"answer":""},
+            {"question":146,"answer":""},
+            {"question":147,"answer":""},
+            {"question":148,"answer":""},
+            {"question":149,"answer":""},
+            {"question":150,"answer":""},
+            {"question":151,"answer":""},
+            {"question":152,"answer":""},
+            {"question":153,"answer":""},
+            {"question":154,"answer":""},
+            {"question":155,"answer":""},
+            {"question":156,"answer":""},
+            {"question":157,"answer":""},
+            {"question":158,"answer":""},
+            {"question":159,"answer":""},
+            {"question":160,"answer":""},
+            {"question":161,"answer":""},
+            {"question":162,"answer":""},
+            {"question":163,"answer":""},
+            {"question":164,"answer":""},
+            {"question":165,"answer":""},
+            {"question":166,"answer":""},
+            {"question":167,"answer":""},
+            {"question":168,"answer":""},
+            {"question":169,"answer":""},
+            {"question":170,"answer":""},
+            {"question":171,"answer":""},
+            {"question":172,"answer":""},
+            {"question":173,"answer":""},
+            {"question":174,"answer":""},
+            {"question":175,"answer":""},
+            {"question":176,"answer":""},
+            {"question":177,"answer":""},
+            {"question":178,"answer":""},
+            {"question":179,"answer":""},
+            {"question":180,"answer":""},
+            {"question":181,"answer":""},
+            {"question":182,"answer":""},
+            {"question":183,"answer":""},
+            {"question":184,"answer":""},
+            {"question":185,"answer":""},
+            {"question":186,"answer":""},
+            {"question":187,"answer":""},
+            {"question":188,"answer":""},
+            {"question":189,"answer":""},
+            {"question":190,"answer":""},
+            {"question":191,"answer":""},
+            {"question":192,"answer":""},
+            {"question":193,"answer":""},
+            {"question":194,"answer":""},
+            {"question":195,"answer":""},
+            {"question":196,"answer":""},
+            {"question":197,"answer":""},
+            {"question":198,"answer":""},
+            {"question":199,"answer":""},
+            {"question":200,"answer":""},
+            {"question":201,"answer":""},
+            {"question":202,"answer":""},
+            {"question":203,"answer":""},
+            {"question":204,"answer":""},
+            {"question":205,"answer":""},
+            {"question":206,"answer":""},
+            {"question":207,"answer":""},
+            {"question":208,"answer":""},
+            {"question":209,"answer":""},
+            {"question":210,"answer":""},
+            {"question":211,"answer":""},
+            {"question":212,"answer":""},
+            {"question":213,"answer":""},
+            {"question":214,"answer":""},
+            {"question":215,"answer":""},
+            {"question":216,"answer":""},
+            {"question":217,"answer":""},
+            {"question":218,"answer":""},
+            {"question":219,"answer":""},
+            {"question":220,"answer":""},
+            {"question":221,"answer":""},
+            {"question":222,"answer":""},
+            {"question":223,"answer":""},
+            {"question":224,"answer":""},
+            {"question":225,"answer":""},
+            {"question":226,"answer":""},
+            {"question":227,"answer":""},
+            {"question":228,"answer":""},
+            {"question":229,"answer":""},
+            {"question":230,"answer":""},
+            {"question":231,"answer":""},
+            {"question":232,"answer":""},
+            {"question":233,"answer":""},
+            {"question":234,"answer":""},
+            {"question":235,"answer":""},
+            {"question":236,"answer":""},
+            {"question":237,"answer":""},
+            {"question":238,"answer":""},
+            {"question":239,"answer":""},
+            {"question":240,"answer":""},
+            {"question":241,"answer":""},
+            {"question":242,"answer":""},
+            {"question":243,"answer":""},
+            {"question":244,"answer":""},
+            {"question":245,"answer":""},
+            {"question":246,"answer":""},
+            {"question":247,"answer":""},
+            {"question":248,"answer":""},
+            {"question":249,"answer":""},
+            {"question":250,"answer":""},
+            {"question":251,"answer":""},
+            {"question":252,"answer":""},
+            {"question":253,"answer":""},
+            {"question":254,"answer":""},
+            {"question":255,"answer":""},
+            {"question":256,"answer":""},
+            {"question":257,"answer":""},
+            {"question":258,"answer":""},
+            {"question":259,"answer":""},
+            {"question":260,"answer":""},
+            {"question":261,"answer":""},
+            {"question":262,"answer":""},
+            {"question":263,"answer":""},
+            {"question":264,"answer":""},
+            {"question":265,"answer":""},
+            {"question":266,"answer":""},
+            {"question":267,"answer":""},
+            {"question":268,"answer":""},
+            {"question":269,"answer":""},
+            {"question":270,"answer":""},
+            {"question":271,"answer":""},
+            {"question":272,"answer":""},
+            {"question":273,"answer":""},
+            {"question":274,"answer":""},
+            {"question":275,"answer":""},
+            {"question":276,"answer":""},
+            {"question":277,"answer":""},
+            {"question":278,"answer":""},
+            {"question":279,"answer":""},
+            {"question":280,"answer":""},
+            {"question":281,"answer":""},
+            {"question":282,"answer":""},
+            {"question":283,"answer":""},
+            {"question":284,"answer":""},
+            {"question":285,"answer":""},
+            {"question":286,"answer":""},
+            {"question":287,"answer":""},
+            {"question":288,"answer":""},
+            {"question":289,"answer":""},
+            {"question":290,"answer":""},
+            {"question":291,"answer":""},
+            {"question":292,"answer":""},
+            {"question":293,"answer":""},
+            {"question":294,"answer":""},
+            {"question":295,"answer":""},
+            {"question":296,"answer":""},
+            {"question":297,"answer":""},
+            {"question":298,"answer":""},
+            {"question":299,"answer":""},
+            {"question":300,"answer":""},
+            {"question":301,"answer":""},
+            {"question":302,"answer":""},
+            {"question":303,"answer":""},
+            {"question":304,"answer":""},
+            {"question":305,"answer":""},
+            {"question":306,"answer":""},
+            {"question":307,"answer":""},
+            {"question":308,"answer":""},
+            {"question":309,"answer":""},
+            {"question":310,"answer":""},
+            {"question":311,"answer":""},
+            {"question":312,"answer":""},
+            {"question":313,"answer":""},
+            {"question":314,"answer":""},
+            {"question":315,"answer":""},
+            {"question":316,"answer":""},
+            {"question":317,"answer":""},
+            {"question":318,"answer":""},
+            {"question":319,"answer":""},
+            {"question":320,"answer":""},
+            {"question":321,"answer":""},
+            {"question":322,"answer":""},
+            {"question":323,"answer":""},
+            {"question":324,"answer":""},
+            {"question":325,"answer":""},
+            {"question":326,"answer":""},
+            {"question":327,"answer":""},
+            {"question":328,"answer":""},
+            {"question":329,"answer":""},
+            {"question":330,"answer":""},
+            {"question":331,"answer":""},
+            {"question":332,"answer":""},
+            {"question":333,"answer":""},
+            {"question":334,"answer":""},
+            {"question":335,"answer":""},
+            {"question":336,"answer":""},
+            {"question":337,"answer":""},
+            {"question":338,"answer":""},
+            {"question":339,"answer":""},
+            {"question":340,"answer":""},
+            {"question":341,"answer":""},
+            {"question":342,"answer":""},
+            {"question":343,"answer":""},
+            {"question":344,"answer":""},
+            {"question":345,"answer":""},
+            {"question":346,"answer":""},
+            {"question":347,"answer":""},
+            {"question":348,"answer":""},
+            {"question":349,"answer":""},
+            {"question":350,"answer":""},
+            {"question":351,"answer":""},
+            {"question":352,"answer":""},
+            {"question":353,"answer":""},
+            {"question":354,"answer":""},
+            {"question":355,"answer":""},
+            {"question":356,"answer":""},
+            {"question":357,"answer":""},
+            {"question":358,"answer":""},
+            {"question":359,"answer":""},
+            {"question":360,"answer":""},
+            {"question":361,"answer":""},
+            {"question":362,"answer":""},
+            {"question":363,"answer":""},
+            {"question":364,"answer":""},
+            {"question":365,"answer":""},
+            {"question":366,"answer":""},
+            {"question":367,"answer":""},
+            {"question":368,"answer":""},
+            {"question":369,"answer":""},
+            {"question":370,"answer":""}
+            ];
+
+        // Decryption functions
+        function unshiftString(str, shift) {
+            return str.split('').map(char => {
+                if (char.match(/[a-zA-Z]/)) {
+                    const code = char.charCodeAt(0);
+                    const base = char >= 'a' ? 97 : 65;
+                    return String.fromCharCode((code - base - shift + 26) % 26 + base);
+                }
+                return char;
+            }).join('');
+        }
+
+        function unscrambleAnswers(scrambledArray) {
+            return scrambledArray.map(item => ({
+                question: item.question,
+                answer: unshiftString(atob(item.answer), 3)
+            }));
+        }
+
+        // Get current date and question set
+        const today = new Date().toISOString().split('T')[0];
+        const currentSet = questionSets[today] || { start: 81, end: 90 }; // Default to 81-90 if date not found
+        const currentQuestions = scrambledCorrectAnswers.filter(item => 
+            item.question >= currentSet.start && item.question <= currentSet.end
+        );
+        const correctAnswers = unscrambleAnswers(currentQuestions);
+
+        function startQuiz() {
+            const nameInput = document.getElementById('name-input').value.trim();
+            if (nameInput) {
+                currentStudent = nameInput;
+                studentAnswers = [];
+                currentQuestion = 0;
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('quiz-section').classList.remove('hidden');
+                displayQuestion();
+            } else {
+                document.getElementById('error-message').textContent = 'Please enter your name';
+            }
+        }
+
+        function displayQuestion() {
+            const quizContainer = document.getElementById('quiz-container');
+            const questionNum = correctAnswers[currentQuestion].question;
+            quizContainer.innerHTML = `
+                <div class="question-number">Question ${questionNum}</div>
+                <div class="options-container">
+                    <button class="option-button" onclick="selectAnswer('A')">A</button>
+                    <button class="option-button" onclick="selectAnswer('B')">B</button>
+                    <button class="option-button" onclick="selectAnswer('C')">C</button>
+                    <button class="option-button" onclick="selectAnswer('D')">D</button>
+                </div>
+            `;
+        }
+
+        function selectAnswer(answer) {
+            studentAnswers[currentQuestion] = answer;
+            showConfirmation();
+        }
+
+        function showConfirmation() {
+            const quizContainer = document.getElementById('quiz-container');
+            const nextQuestionNum = currentQuestion + 1 < totalQuestions ? correctAnswers[currentQuestion + 1].question : 'results';
+            quizContainer.innerHTML = `
+                <div class="confirmation-container">
+                    <span class="confirmation-check">✔</span>
+                    <div class="confirmation-text">Answer submitted for question ${correctAnswers[currentQuestion].question}</div>
+                    <button class="proceed-button" onclick="proceedToNextQuestion()">
+                        Proceed to ${nextQuestionNum === 'results' ? 'results' : 'question ' + nextQuestionNum} →
+                    </button>
+                </div>
+            `;
+        }
+
+        function proceedToNextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < totalQuestions) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            const resultsSection = document.getElementById('results-section');
+            resultsSection.classList.remove('hidden');
+
+            const resultData = {
+                student: capitalizeFirstLetter(currentStudent),
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+                answers: studentAnswers,
+                correctAnswers: correctAnswers.map(item => item.answer)
+            };
+
+            displayResults(resultData);
+        }
+
+        function displayResults(resultData) {
+            const resultsSection = document.getElementById('results-section');
+            resultsSection.innerHTML = '';
+
+            const title = document.createElement('h2');
+            title.textContent = `Results for ${resultData.student}`;
+            resultsSection.appendChild(title);
+
+            const dateTime = document.createElement('p');
+            dateTime.textContent = `Date: ${resultData.date} | Time: ${resultData.time}`;
+            resultsSection.appendChild(dateTime);
+
+            const correctCount = resultData.answers.filter((ans, idx) => ans === resultData.correctAnswers[idx]).length;
+            const percentage = Math.round((correctCount / totalQuestions) * 100);
+            const score = document.createElement('p');
+            score.textContent = `Score: ${correctCount}/${totalQuestions} (${percentage}%)`;
+            resultsSection.appendChild(score);
+
+            const table = document.createElement('table');
+            table.className = 'results-table';
+            table.innerHTML = `
+                <tr>
+                    <th>#</th>
+                    <th>Your Answer</th>
+                    <th>Correct Answer</th>
+                </tr>
+                ${resultData.answers.map((answer, index) => {
+                    const isCorrect = answer === resultData.correctAnswers[index];
+                    return `
+                        <tr>
+                            <td>${correctAnswers[index].question}</td>
+                            <td class="${isCorrect ? '' : 'incorrect'}">${answer}${isCorrect ? '<span class="correct-mark">√</span>' : ''}</td>
+                            <td>${resultData.correctAnswers[index]}</td>
+                        </tr>
+                    `;
+                }).join('')}
+            `;
+            resultsSection.appendChild(table);
+
+            const pngButton = document.createElement('button');
+            pngButton.className = 'copy-button';
+            pngButton.id = 'copy-png-button';
+            pngButton.textContent = /iPad|iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Download Results' : 'Copy Results';
+            pngButton.style.display = 'block';
+            pngButton.style.marginLeft = 'auto';
+            pngButton.style.marginRight = 'auto';
+            pngButton.style.marginTop = '20px';
+            pngButton.onclick = () => generatePng(resultData);
+            resultsSection.appendChild(pngButton);
+
+            const qrContainer = document.createElement('div');
+            qrContainer.id = 'qr-code';
+            qrContainer.style.marginTop = '20px';
+            qrContainer.style.width = '200px';
+            qrContainer.style.height = '200px';
+            qrContainer.style.marginLeft = 'auto';
+            qrContainer.style.marginRight = 'auto';
+            resultsSection.appendChild(qrContainer);
+
+            const simplifiedResultData = { s: resultData.student, d: resultData.date, t: resultData.time, p: percentage };
+            const jsonString = JSON.stringify(simplifiedResultData);
+            const base64Data = btoa(jsonString);
+            const baseUrl = window.location.origin + window.location.pathname;
+            const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
+
+            if (typeof kjua !== 'undefined') {
+                const qr = kjua({
+                    text: resultUrl,
+                    size: 200,
+                    fill: '#303f6c',
+                    back: '#FFFFFF',
+                    quiet: 0,
+                    ecLevel: 'M',
+                    render: 'canvas'
+                });
+                qrContainer.appendChild(qr);
+            }
+        }
+
+        function generatePng(resultData) {
+            const background = document.querySelector('.background');
+            const overlay = document.querySelector('.overlay');
+            const overlay2 = document.querySelector('.overlay2');
+            const hamburgerMenu = document.querySelector('.hamburger-menu');
+            const logo = document.querySelector('.logo');
+            const titleElement = document.querySelector('h1.Title');
+            const subtitleElement = document.querySelector('h1.Subtitle');
+            const copyPngBtn = document.getElementById('copy-png-button');
+
+            background.style.display = 'none';
+            overlay.style.display = 'none';
+            overlay2.style.display = 'none';
+            hamburgerMenu.style.display = 'none';
+            if (logo) logo.style.display = 'none';
+            titleElement.style.display = 'none';
+            subtitleElement.style.display = 'none';
+            copyPngBtn.style.visibility = 'hidden';
+
+            html2canvas(document.body, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: 'rgb(45, 70, 119)'
+            }).then(canvas => {
+                const logoImg = new Image();
+                logoImg.crossOrigin = 'anonymous';
+                logoImg.src = '../icons/Full Logo White on Transparent.png';
+
+                logoImg.onload = () => {
+                    const ctx = canvas.getContext('2d');
+                    const logoWidth = canvas.width * 0.25;
+                    const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
+                    const padding = 50 * 2;
+                    ctx.drawImage(logoImg, canvas.width - logoWidth - padding, canvas.height - logoHeight - padding, logoWidth, logoHeight);
+
+                    canvas.toBlob(blob => {
+                        if (/iPad|iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                            const link = document.createElement('a');
+                            link.download = `Quiz_Results_${resultData.student}_${resultData.date}.png`;
+                            link.href = URL.createObjectURL(blob);
+                            link.click();
+                            URL.revokeObjectURL(link.href);
+                        } else {
+                            const item = new ClipboardItem({ 'image/png': blob });
+                            navigator.clipboard.write([item]).then(() => {
+                                copyPngBtn.textContent = '√ Copied';
+                                setTimeout(() => copyPngBtn.textContent = 'Copy Results', 2000);
+                            });
+                        }
+                        resetDisplay();
+                    });
+                };
+            }).catch(err => {
+                console.error('Failed to generate PNG:', err);
+                resetDisplay();
+            });
+
+            function resetDisplay() {
+                background.style.display = '';
+                overlay.style.display = '';
+                overlay2.style.display = '';
+                hamburgerMenu.style.display = '';
+                if (logo) logo.style.display = '';
+                titleElement.style.display = '';
+                subtitleElement.style.display = '';
+                copyPngBtn.style.visibility = 'visible';
+            }
+        }
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function toggleMenu() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const menuItems = document.querySelector('.menu-items');
+            menuToggle.classList.toggle('open');
+            menuItems.classList.toggle('show');
+        }
+
+        document.addEventListener('click', (event) => {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const menuItems = document.querySelector('.menu-items');
+            if (!menuToggle.contains(event.target) && !menuItems.contains(event.target)) {
+                menuToggle.classList.remove('open');
+                menuItems.classList.remove('show');
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && document.activeElement.id === 'name-input') {
+                startQuiz();
+            }
+        });
+    </script>
+</body>
+</html>
