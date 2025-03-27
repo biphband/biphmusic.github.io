@@ -384,6 +384,7 @@
 
     <h1 class="Title">BIPH Music</h1>
     <h1 class="Subtitle">MCQ Review</h1>
+    <div id="date-display" style="font-size: 1rem; text-align: center; margin-top: -30px; margin-bottom: 15px;"></div>
 
     <div class="logincontainer">
         <div id="login-section" class="login-section">
@@ -413,7 +414,7 @@
         let currentQuestion = 0;
         let studentAnswers = [];
         const totalQuestions = 10;
-
+    
         // Date-based question sets (year 2025)
         const questionSets = {
             '2025-03-27': { start: 81, end: 90 },
@@ -446,8 +447,7 @@
             '2025-05-08': { start: 351, end: 360 },
             '2025-05-09': { start: 361, end: 370 }
         };
-
-
+    
         // Decryption functions
         function unshiftString(str, shift) {
             return str.split('').map(char => {
@@ -459,43 +459,82 @@
                 return char;
             }).join('');
         }
-
+    
         function unscrambleAnswers(scrambledArray) {
             return scrambledArray.map(item => ({
                 question: item.question,
                 answer: unshiftString(atob(item.answer), 3)
             }));
         }
-
+    
+        // Get current local date
+        const systemDate = new Date();
+    
+        // Format date as YYYY-MM-DD using local time
+        const year = systemDate.getFullYear();
+        const month = String(systemDate.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const day = String(systemDate.getDate()).padStart(2, '0');
+        const today = `${year}-${month}-${day}`;
+    
         // Get current date and question set
-        const today = new Date().toISOString().split('T')[0];
         const currentSet = questionSets[today] || { start: 81, end: 90 }; // Default to 81-90 if date not found
         const currentQuestions = scrambledCorrectAnswers.filter(item => 
             item.question >= currentSet.start && item.question <= currentSet.end
         );
         const correctAnswers = unscrambleAnswers(currentQuestions);
-
+    
+        // Load student progress from localStorage
+        function loadStudentProgress(name) {
+            const key = `quiz_${name}_${today}`;
+            const savedData = localStorage.getItem(key);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                studentAnswers = data.answers || [];
+                currentQuestion = studentAnswers.length < totalQuestions ? studentAnswers.length : totalQuestions;
+                return true;
+            }
+            return false;
+        }
+    
+        // Save student progress to localStorage
+        function saveStudentProgress() {
+            const key = `quiz_${currentStudent}_${today}`;
+            const data = {
+                answers: studentAnswers
+            };
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+    
         function checkName() {
             const nameInput = document.getElementById('name-input').value.toLowerCase().trim();
             const errorElement = document.getElementById('error-message');
-
+    
             if (!nameInput) {
                 errorElement.textContent = 'Please enter your name';
                 return;
             }
-
+    
             if (approvedNames.includes(nameInput)) {
                 currentStudent = nameInput;
-                studentAnswers = [];
-                currentQuestion = 0;
+                const hasProgress = loadStudentProgress(currentStudent);
+    
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('quiz-section').classList.remove('hidden');
-                displayQuestion();
+    
+                if (hasProgress && currentQuestion >= totalQuestions) {
+                    showResults();
+                } else {
+                    if (!hasProgress) {
+                        studentAnswers = []; // Fresh start for new student or new day
+                        currentQuestion = 0; // Start at the first question of the day's set
+                    }
+                    displayQuestion();
+                }
             } else {
                 errorElement.textContent = 'Name not found in approved list';
             }
         }
-
+    
         function displayQuestion() {
             const quizContainer = document.getElementById('quiz-container');
             const questionNum = correctAnswers[currentQuestion].question;
@@ -509,31 +548,31 @@
                 </div>
             `;
         }
-
-        function selectAnswer(answer) {
-    studentAnswers[currentQuestion] = answer;
-    showConfirmation(answer === correctAnswers[currentQuestion].answer);
-}
-
-function showConfirmation(isCorrect) {
-    const quizContainer = document.getElementById('quiz-container');
-    const nextQuestionNum = currentQuestion + 1 < totalQuestions ? correctAnswers[currentQuestion + 1].question : 'results';
     
-    // Determine the symbol and color based on correctness
-    const symbol = isCorrect ? '✅' : '❌';
-    const symbolClass = isCorrect ? 'confirmation-check' : 'confirmation-x';
-
-    quizContainer.innerHTML = `
-        <div class="confirmation-container">
-            <span class="${symbolClass}">${symbol}</span>
-            <div class="confirmation-text">Answer submitted for question ${correctAnswers[currentQuestion].question}</div>
-            <button class="proceed-button" onclick="proceedToNextQuestion()">
-                Proceed to ${nextQuestionNum === 'results' ? 'results' : 'question ' + nextQuestionNum} →
-            </button>
-        </div>
-    `;
-}
-
+        function selectAnswer(answer) {
+            studentAnswers[currentQuestion] = answer;
+            saveStudentProgress();
+            showConfirmation(answer === correctAnswers[currentQuestion].answer);
+        }
+    
+        function showConfirmation(isCorrect) {
+            const quizContainer = document.getElementById('quiz-container');
+            const nextQuestionNum = currentQuestion + 1 < totalQuestions ? correctAnswers[currentQuestion + 1].question : 'results';
+            
+            const symbol = isCorrect ? '✅' : '❌';
+            const symbolClass = isCorrect ? 'confirmation-check' : 'confirmation-x';
+    
+            quizContainer.innerHTML = `
+                <div class="confirmation-container">
+                    <span class="${symbolClass}">${symbol}</span>
+                    <div class="confirmation-text">Answer submitted for question ${correctAnswers[currentQuestion].question}</div>
+                    <button class="proceed-button" onclick="proceedToNextQuestion()">
+                        Proceed to ${nextQuestionNum === 'results' ? 'results' : 'question ' + nextQuestionNum} →
+                    </button>
+                </div>
+            `;
+        }
+    
         function proceedToNextQuestion() {
             currentQuestion++;
             if (currentQuestion < totalQuestions) {
@@ -542,41 +581,41 @@ function showConfirmation(isCorrect) {
                 showResults();
             }
         }
-
+    
         function showResults() {
             document.getElementById('quiz-container').classList.add('hidden');
             const resultsSection = document.getElementById('results-section');
             resultsSection.classList.remove('hidden');
-
+    
             const resultData = {
                 student: capitalizeFirstLetter(currentStudent),
-                date: new Date().toISOString().split('T')[0],
+                date: today, // Use local date
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
                 answers: studentAnswers,
                 correctAnswers: correctAnswers.map(item => item.answer)
             };
-
+    
             displayResults(resultData);
         }
-
+    
         function displayResults(resultData) {
             const resultsSection = document.getElementById('results-section');
             resultsSection.innerHTML = '';
-
+    
             const title = document.createElement('h2');
             title.textContent = `Results for ${resultData.student}`;
             resultsSection.appendChild(title);
-
+    
             const dateTime = document.createElement('p');
             dateTime.textContent = `Date: ${resultData.date} | Time: ${resultData.time}`;
             resultsSection.appendChild(dateTime);
-
+    
             const correctCount = resultData.answers.filter((ans, idx) => ans === resultData.correctAnswers[idx]).length;
             const percentage = Math.round((correctCount / totalQuestions) * 100);
             const score = document.createElement('p');
             score.textContent = `Score: ${correctCount}/${totalQuestions} (${percentage}%)`;
             resultsSection.appendChild(score);
-
+    
             const table = document.createElement('table');
             table.className = 'results-table';
             table.innerHTML = `
@@ -597,7 +636,7 @@ function showConfirmation(isCorrect) {
                 }).join('')}
             `;
             resultsSection.appendChild(table);
-
+    
             const pngButton = document.createElement('button');
             pngButton.className = 'copy-button';
             pngButton.id = 'copy-png-button';
@@ -608,7 +647,7 @@ function showConfirmation(isCorrect) {
             pngButton.style.marginTop = '20px';
             pngButton.onclick = () => generatePng(resultData);
             resultsSection.appendChild(pngButton);
-
+    
             const qrContainer = document.createElement('div');
             qrContainer.id = 'qr-code';
             qrContainer.style.marginTop = '20px';
@@ -617,13 +656,13 @@ function showConfirmation(isCorrect) {
             qrContainer.style.marginLeft = 'auto';
             qrContainer.style.marginRight = 'auto';
             resultsSection.appendChild(qrContainer);
-
+    
             const simplifiedResultData = { s: resultData.student, d: resultData.date, t: resultData.time, p: percentage };
             const jsonString = JSON.stringify(simplifiedResultData);
             const base64Data = btoa(jsonString);
             const baseUrl = window.location.origin + window.location.pathname;
             const resultUrl = `${baseUrl}?results=${encodeURIComponent(base64Data)}`;
-
+    
             if (typeof kjua !== 'undefined') {
                 const qr = kjua({
                     text: resultUrl,
@@ -637,7 +676,7 @@ function showConfirmation(isCorrect) {
                 qrContainer.appendChild(qr);
             }
         }
-
+    
         function generatePng(resultData) {
             const background = document.querySelector('.background');
             const overlay = document.querySelector('.overlay');
@@ -645,17 +684,14 @@ function showConfirmation(isCorrect) {
             const hamburgerMenu = document.querySelector('.hamburger-menu');
             const logo = document.querySelector('.logo');
             const copyPngBtn = document.getElementById('copy-png-button');
-
-            // Hide elements except title and subtitle
+    
             background.style.display = 'none';
             overlay.style.display = 'none';
             overlay2.style.display = 'none';
             hamburgerMenu.style.display = 'none';
             if (logo) logo.style.display = 'none';
             copyPngBtn.style.visibility = 'hidden';
-
-            // Title and subtitle remain visible (no hiding here)
-
+    
             html2canvas(document.body, {
                 scale: 2,
                 useCORS: true,
@@ -664,14 +700,14 @@ function showConfirmation(isCorrect) {
                 const logoImg = new Image();
                 logoImg.crossOrigin = 'anonymous';
                 logoImg.src = '../icons/Full Logo White on Transparent.png';
-
+    
                 logoImg.onload = () => {
                     const ctx = canvas.getContext('2d');
                     const logoWidth = canvas.width * 0.25;
                     const logoHeight = (logoImg.height / logoImg.width) * logoWidth;
                     const padding = 50 * 2;
                     ctx.drawImage(logoImg, canvas.width - logoWidth - padding, canvas.height - logoHeight - padding, logoWidth, logoHeight);
-
+    
                     canvas.toBlob(blob => {
                         if (/iPad|iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
                             const link = document.createElement('a');
@@ -689,7 +725,7 @@ function showConfirmation(isCorrect) {
                         resetDisplay();
                     });
                 };
-
+    
                 logoImg.onerror = () => {
                     console.error('Failed to load logo image');
                     canvas.toBlob(blob => {
@@ -710,7 +746,7 @@ function showConfirmation(isCorrect) {
                 console.error('Failed to generate PNG:', err);
                 resetDisplay();
             });
-
+    
             function resetDisplay() {
                 background.style.display = '';
                 overlay.style.display = '';
@@ -718,21 +754,27 @@ function showConfirmation(isCorrect) {
                 hamburgerMenu.style.display = '';
                 if (logo) logo.style.display = '';
                 copyPngBtn.style.visibility = 'visible';
-                // Title and subtitle were not hidden, so no restoration needed
             }
         }
-
+    
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
-
+    
         function toggleMenu() {
             const menuToggle = document.querySelector('.menu-toggle');
             const menuItems = document.querySelector('.menu-items');
             menuToggle.classList.toggle('open');
             menuItems.classList.toggle('show');
         }
-
+    
+        // Display formatted date after DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+            const formattedDate = systemDate.toLocaleDateString('en-US', dateOptions);
+            document.getElementById('date-display').textContent = formattedDate;
+        });
+    
         document.addEventListener('click', (event) => {
             const menuToggle = document.querySelector('.menu-toggle');
             const menuItems = document.querySelector('.menu-items');
@@ -741,7 +783,7 @@ function showConfirmation(isCorrect) {
                 menuItems.classList.remove('show');
             }
         });
-
+    
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && document.activeElement.id === 'name-input') {
                 checkName();
