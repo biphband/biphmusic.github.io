@@ -345,6 +345,14 @@
         .hidden {
             display: none;
         }
+
+        .confirmation-x {
+    color: #dc2626; /* Red color for incorrect */
+    font-size: 4rem;
+    opacity: 0;
+    transform: scale(0);
+    animation: checkFadeIn 0.5s ease-out forwards;
+}
     </style>
 </head>
 <body>
@@ -503,23 +511,28 @@
         }
 
         function selectAnswer(answer) {
-            studentAnswers[currentQuestion] = answer;
-            showConfirmation();
-        }
+    studentAnswers[currentQuestion] = answer;
+    showConfirmation(answer === correctAnswers[currentQuestion].answer);
+}
 
-        function showConfirmation() {
-            const quizContainer = document.getElementById('quiz-container');
-            const nextQuestionNum = currentQuestion + 1 < totalQuestions ? correctAnswers[currentQuestion + 1].question : 'results';
-            quizContainer.innerHTML = `
-                <div class="confirmation-container">
-                    <span class="confirmation-check">✔</span>
-                    <div class="confirmation-text">Answer submitted for question ${correctAnswers[currentQuestion].question}</div>
-                    <button class="proceed-button" onclick="proceedToNextQuestion()">
-                        Proceed to ${nextQuestionNum === 'results' ? 'results' : 'question ' + nextQuestionNum} →
-                    </button>
-                </div>
-            `;
-        }
+function showConfirmation(isCorrect) {
+    const quizContainer = document.getElementById('quiz-container');
+    const nextQuestionNum = currentQuestion + 1 < totalQuestions ? correctAnswers[currentQuestion + 1].question : 'results';
+    
+    // Determine the symbol and color based on correctness
+    const symbol = isCorrect ? '✅' : '❌';
+    const symbolClass = isCorrect ? 'confirmation-check' : 'confirmation-x';
+
+    quizContainer.innerHTML = `
+        <div class="confirmation-container">
+            <span class="${symbolClass}">${symbol}</span>
+            <div class="confirmation-text">Answer submitted for question ${correctAnswers[currentQuestion].question}</div>
+            <button class="proceed-button" onclick="proceedToNextQuestion()">
+                Proceed to ${nextQuestionNum === 'results' ? 'results' : 'question ' + nextQuestionNum} →
+            </button>
+        </div>
+    `;
+}
 
         function proceedToNextQuestion() {
             currentQuestion++;
